@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.reconstruct.view.HomeController">
+  <children>
+    <SplitPane fx:id="homeSplitPane" focusTraversable="true" VBox.vgrow="ALWAYS">
+      <ScrollPane minWidth="150.0">
+        <AnchorPane>
+          <children>
+          </children>
+        </AnchorPane>
+      </ScrollPane>
+      <ScrollPane minWidth="350.0">
+        <AnchorPane id="Content">
+          <children>
+          </children>
+        </AnchorPane>
+      </ScrollPane>
+    </SplitPane>
+  </children>
+</VBox>
