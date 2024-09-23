@@ -12,6 +12,8 @@ public class ReConstructApp extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(ReConstructApp.class.getResource("home-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
+        stage.minHeightProperty().setValue(400);
+        stage.minWidthProperty().setValue(400);
         stage.setMaximized(true);
         stage.setTitle("ReConstruct");
         stage.setScene(scene);
