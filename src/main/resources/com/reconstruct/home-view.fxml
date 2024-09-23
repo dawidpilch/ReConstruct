@@ -3,13 +3,16 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.reconstruct.view.HomeController">
+<VBox xmlns="http://javafx.com/javafx/17.0.2-ea"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.reconstruct.view.HomeController"
+      prefHeight="600.0" prefWidth="900.0">
     <children>
       <MenuBar>
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem mnemonicParsing="false" text="New" />
+              <MenuItem mnemonicParsing="false" onAction="#onFileNew" text="New" />
                   <MenuItem mnemonicParsing="false" text="Open..." />
                   <MenuItem mnemonicParsing="false" text="Save" />
                   <MenuItem mnemonicParsing="false" text="Save As..." />
@@ -32,5 +35,7 @@
           </Menu>
         </menus>
       </MenuBar>
+      <TabPane fx:id="tabPane" tabClosingPolicy="ALL_TABS" />
+      <ScrollPane fx:id="scrollPane" />
    </children>
 </VBox>
