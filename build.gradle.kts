@@ -19,7 +19,7 @@ repositories {
 
 javafx {
     version = "23"
-    modules = listOf("javafx.controls", "javafx.fxml")
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.web")
 }
 
 dependencies {
