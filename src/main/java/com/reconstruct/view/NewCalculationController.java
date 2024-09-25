@@ -5,8 +5,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 
 public class NewCalculationController {
-    @FXML
-    public TreeView<String> calculationsTreeView;
+    @FXML public TreeView<String> calculationsTreeView;
 
     @FXML public void initialize() {
         initializeCalculationsTreeView();
