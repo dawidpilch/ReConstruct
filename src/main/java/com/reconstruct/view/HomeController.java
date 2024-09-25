@@ -20,10 +20,10 @@ public class HomeController {
 
     @FXML public void onFileNew() throws IOException {
         Stage stage = new Stage();
-        FXMLLoader fxmlLoader = new FXMLLoader(ReConstructApp.class.getResource("new-calculation-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(ReConstructApp.class.getResource("fxml/new-calculation-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
-        stage.minHeightProperty().setValue(400);
-        stage.minWidthProperty().setValue(400);
+        stage.minHeightProperty().setValue(480);
+        stage.minWidthProperty().setValue(720);
         stage.setTitle("Select Calculation");
         stage.setScene(scene);
         stage.initModality(Modality.APPLICATION_MODAL);
