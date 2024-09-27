@@ -9,14 +9,19 @@
       <SplitPane dividerPositions="0.25" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER" SplitPane.resizableWithParent="false">
         <items>
             <TreeView fx:id="calculationsTreeView" minHeight="0.0" minWidth="200.0" prefHeight="200.0" prefWidth="200.0" SplitPane.resizableWithParent="false" />
-            <WebView fx:id="exampleWebView" prefHeight="200.0" prefWidth="200.0" />
+            <WebView fx:id="exampleWebView" minHeight="200.0" minWidth="200.0" prefHeight="200.0" prefWidth="200.0" />
         </items>
       </SplitPane>
    </center>
    <bottom>
       <AnchorPane prefHeight="35.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
-            <Button mnemonicParsing="false" text="Calculate" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0" />
+            <ButtonBar prefHeight="40.0" prefWidth="200.0" AnchorPane.rightAnchor="5.0">
+              <buttons>
+                <Button fx:id="calculateButton" defaultButton="true" mnemonicParsing="false" onAction="#onCalculateButtonAction" text="Calculate" />
+                  <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#onCancelButtonAction" text="Cancel" />
+              </buttons>
+            </ButtonBar>
          </children>
       </AnchorPane>
    </bottom>
