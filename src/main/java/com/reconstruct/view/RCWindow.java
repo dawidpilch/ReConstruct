@@ -1,14 +1,10 @@
 package com.reconstruct.view;
 
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-
-import java.io.IOException;
-import java.net.URL;
 
 /**
  * Standardized popup application modal window for ReConstruct app
