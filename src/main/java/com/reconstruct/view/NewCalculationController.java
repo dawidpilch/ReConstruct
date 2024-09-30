@@ -3,6 +3,8 @@ package com.reconstruct.view;
 import com.reconstruct.ReConstructApp;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -91,7 +93,7 @@ public class NewCalculationController {
 
         this.close();
         new RCWindow(
-                ReConstructApp.class.getResource(fxml),
+                new Scene(new FXMLLoader(ReConstructApp.class.getResource(fxml)).load()),
                 title
         ).show();
     }

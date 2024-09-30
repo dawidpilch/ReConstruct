@@ -2,6 +2,8 @@ package com.reconstruct.view;
 
 import com.reconstruct.ReConstructApp;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 
 import java.io.IOException;
@@ -16,7 +18,7 @@ public class HomeController {
 
     @FXML public void onFileNew() throws IOException {
         new RCWindow(
-                ReConstructApp.class.getResource("fxml/new-calculation-view.fxml"),
+                new Scene(new FXMLLoader(ReConstructApp.class.getResource("fxml/new-calculation-view.fxml")).load()),
                 "Select Calculation"
         ).show();
     }

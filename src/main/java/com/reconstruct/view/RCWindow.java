@@ -14,23 +14,23 @@ import java.net.URL;
  * Standardized popup application modal window for ReConstruct app
  */
 public class RCWindow {
-    private final URL url;
+    private final Scene scene;
     private final String title;
     private final Modality modality;
 
-    public RCWindow(URL fxml, String title) {
-        this(fxml, title, Modality.APPLICATION_MODAL);
+    public RCWindow(Scene scene, String title) {
+        this(scene, title, Modality.APPLICATION_MODAL);
     }
 
-    public RCWindow(URL fxml, String title, Modality modality) {
-        this.url = fxml;
+    public RCWindow(Scene scene, String title, Modality modality) {
+        this.scene = scene;
         this.title = title;
         this.modality = modality;
     }
 
-    public void show() throws IOException {
+    public void show() {
         Stage stage = new Stage();
-        stage.setScene(new Scene(new FXMLLoader(url).load()));
+        stage.setScene(scene);
         stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.2);
         stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.2);
         stage.minHeightProperty().setValue(480);
