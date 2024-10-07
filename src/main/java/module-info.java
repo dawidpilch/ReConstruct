@@ -3,6 +3,7 @@ module org.example {
     requires javafx.fxml;
     requires com.dlsc.formsfx;
     requires javafx.web;
+    requires commons.math3;
 
     opens com.reconstruct to javafx.fxml;
     opens com.reconstruct.view to javafx.fxml;

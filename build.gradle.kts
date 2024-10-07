@@ -27,6 +27,8 @@ dependencies {
         exclude("org.openjfx")
     }
 
+    implementation("org.apache.commons:commons-math3:3.6.1")
+
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
