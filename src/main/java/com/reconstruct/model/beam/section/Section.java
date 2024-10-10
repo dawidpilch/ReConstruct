@@ -1,8 +1,8 @@
 package com.reconstruct.model.beam.section;
 
-import com.reconstruct.model.value.PositiveNumber;
+import com.reconstruct.model.value.PositiveDouble;
 
 public sealed interface Section permits Rectangular {
-    PositiveNumber area();
+    PositiveDouble area();
     String name();
 }

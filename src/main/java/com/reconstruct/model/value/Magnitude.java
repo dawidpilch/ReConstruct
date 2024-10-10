@@ -15,4 +15,8 @@ public record Magnitude(double value) {
     {
         return new Magnitude(Math.abs(value));
     }
+
+    public static Magnitude zero() {
+        return new Magnitude(0);
+    }
 }

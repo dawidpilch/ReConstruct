@@ -9,26 +9,22 @@ public abstract sealed class VerticalPointLoad extends PointLoad
         super(position, negative);
     }
 
-    public static VerticalPointLoad DirectedUpwards(Position position, Magnitude magnitude)
+    public static VerticalPointLoad directedUpwards(Position position, Magnitude magnitude)
     {
-        return (magnitude.value() == 0)
-                ? new NullVerticalPointLoad(position)
-                : new VerticalPointLoadDirectedUpwards(position, magnitude);
+        return new VerticalPointLoadDirectedUpwards(position, magnitude);
     }
 
-    public static VerticalPointLoad DirectedDownwards(Position position, Magnitude magnitude)
+    public static VerticalPointLoad directedDownwards(Position position, Magnitude magnitude)
     {
-        return (magnitude.value() == 0)
-                ? new NullVerticalPointLoad(position)
-                : new VerticalPointLoadDirectedDownwards(position, magnitude);
+        return new VerticalPointLoadDirectedDownwards(position, magnitude);
     }
 
-    public static VerticalPointLoad Null(Position position)
+    public static VerticalPointLoad zero(Position position)
     {
-        return new NullVerticalPointLoad(position);
+        return new ZeroVerticalPointLoad(position);
     }
 
-    public abstract Magnitude Magnitude(Position pointOfRotation);
+    public abstract Magnitude magnitude(Position pointOfRotation);
 
     private static final class VerticalPointLoadDirectedDownwards extends VerticalPointLoad
     {
@@ -36,13 +32,13 @@ public abstract sealed class VerticalPointLoad extends PointLoad
             super(position, magnitude.negative());
         }
 
-        public Magnitude Magnitude(Position pointOfRotation)
+        public Magnitude magnitude(Position pointOfRotation)
         {
-            if (pointOfRotation == Position())
+            if (pointOfRotation == position())
                 return new Magnitude(0);
-            if (Position().asDouble() < pointOfRotation.asDouble())
-                return Magnitude().negated();
-            return Magnitude();
+            if (position().asDouble() < pointOfRotation.asDouble())
+                return this.magnitude().negated();
+            return this.magnitude();
         }
     }
 
@@ -52,30 +48,30 @@ public abstract sealed class VerticalPointLoad extends PointLoad
         }
 
         @Override
-        public Magnitude Magnitude(Position pointOfRotation)
+        public Magnitude magnitude(Position pointOfRotation)
         {
-            if (pointOfRotation == Position())
+            if (pointOfRotation == position())
                 return new Magnitude(0);
-            if (Position().asDouble() > pointOfRotation.asDouble())
-                return Magnitude();
-            return Magnitude().negated();
+            if (position().asDouble() > pointOfRotation.asDouble())
+                return this.magnitude();
+            return this.magnitude().negated();
         }
     }
 
-    private final static class NullVerticalPointLoad extends VerticalPointLoad
+    private final static class ZeroVerticalPointLoad extends VerticalPointLoad
     {
-        public NullVerticalPointLoad(Position position) {
+        public ZeroVerticalPointLoad(Position position) {
             this(position, new Magnitude(0));
         }
 
-        private NullVerticalPointLoad(Position position, Magnitude magnitude) {
+        private ZeroVerticalPointLoad(Position position, Magnitude magnitude) {
             super(position, magnitude);
         }
 
         @Override
-        public Magnitude Magnitude(Position pointOfRotation)
+        public Magnitude magnitude(Position pointOfRotation)
         {
-            return Magnitude();
+            return this.magnitude();
         }
     }
 }
