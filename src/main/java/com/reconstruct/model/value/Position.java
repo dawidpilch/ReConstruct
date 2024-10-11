@@ -1,13 +1,8 @@
 package com.reconstruct.model.value;
 
-import java.util.Objects;
-
-public record Position(PositiveDouble value) {
+public record Position(double value) {
     public Position {
-        Objects.requireNonNull(value);
-    }
-
-    public double asDouble() {
-        return value.value();
+        if (value < 0)
+            throw new IllegalArgumentException("The number must be >= 0");
     }
 }

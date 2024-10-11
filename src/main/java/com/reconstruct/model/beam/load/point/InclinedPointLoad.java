@@ -7,9 +7,7 @@ import com.reconstruct.model.value.Radian;
 
 import java.util.Objects;
 
-public abstract sealed class InclinedPointLoad extends PointLoad permits
-        InclinedPointLoad.InclinedPointLoadDirectedUpwards,
-        InclinedPointLoad.InclinedPointLoadDirectedDownwards
+public abstract sealed class InclinedPointLoad extends PointLoad
 {
     private final Degree degree;
 
@@ -40,14 +38,14 @@ public abstract sealed class InclinedPointLoad extends PointLoad permits
 
     public VerticalPointLoad verticalComponent()
     {
-        Radian radian = new Radian(componentsCalculationDegree().value());
+        Radian radian = Radian.from(componentsCalculationDegree());
         Magnitude vMagnitude = new Magnitude(magnitude().value() * Math.sin(radian.value()));
         return verticalDirectedComponent(position(), vMagnitude);
     }
 
     public HorizontalPointLoad horizontalComponent()
     {
-        Radian radian = new Radian(componentsCalculationDegree().value());
+        Radian radian = Radian.from(componentsCalculationDegree());
         Magnitude hMagnitude = new Magnitude(magnitude().value() * Math.cos(radian.value()));
         return degree.value() <= 90
                 ? HorizontalPointLoad.directedRightwards(position(), hMagnitude)

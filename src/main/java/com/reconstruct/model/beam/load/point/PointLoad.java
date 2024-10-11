@@ -7,22 +7,22 @@ import java.util.Objects;
 
 public abstract sealed class PointLoad permits HorizontalPointLoad, InclinedPointLoad, VerticalPointLoad
 {
-    private final Position _position;
-    private final Magnitude _magnitude;
+    private final Position position;
+    private final Magnitude magnitude;
 
     protected PointLoad(Position position, Magnitude magnitude)
     {
-        _position = Objects.requireNonNull(position);
-        _magnitude = Objects.requireNonNull(magnitude);
+        this.position = Objects.requireNonNull(position);
+        this.magnitude = Objects.requireNonNull(magnitude);
     }
 
     public Position position()
     {
-        return _position;
+        return position;
     }
 
     public Magnitude magnitude()
     {
-        return _magnitude;
+        return magnitude;
     }
 }
