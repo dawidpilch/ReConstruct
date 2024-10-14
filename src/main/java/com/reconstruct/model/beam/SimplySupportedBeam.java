@@ -23,6 +23,10 @@ public class SimplySupportedBeam implements Beam {
         return new SimplySupportedBeam(length, section, Position.of(0), Position.of(length.doubleValue()));
     }
 
+    protected static SimplySupportedBeam custom(Length length, Section section, Position pinnedPosition, Position rollerPosition) {
+        return new SimplySupportedBeam(length, section, pinnedPosition, rollerPosition);
+    }
+
     private final Length length;
     private final Section section;
     private final Position pinnedPosition;
@@ -66,7 +70,7 @@ public class SimplySupportedBeam implements Beam {
 
     private VerticalPointLoad verticalReaction(SummationOfMoments summationOfMoments, Position pointOfRotation, Position positionOfSupportWithUnknownReaction) {
         double magnitude = summationOfMoments.valueAtPosition(pointOfRotation) / Math.abs(pointOfRotation.doubleValue() - positionOfSupportWithUnknownReaction.doubleValue());
-        if (positionOfSupportWithUnknownReaction.isToTheLeftOf(pointOfRotation))
+        if (positionOfSupportWithUnknownReaction.isToTheRightOf(pointOfRotation))
             magnitude *= -1;
         return VerticalPointLoad.of(positionOfSupportWithUnknownReaction, Magnitude.of(magnitude));
     }

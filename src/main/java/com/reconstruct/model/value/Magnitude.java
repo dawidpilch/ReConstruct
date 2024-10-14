@@ -33,4 +33,17 @@ public class Magnitude implements DoubleValue {
     public double doubleValue() {
         return value;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Magnitude magnitude = (Magnitude) o;
+        return Double.compare(value, magnitude.value) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(value);
+    }
 }
