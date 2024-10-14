@@ -1,9 +1,20 @@
 package com.reconstruct.model.value;
 
-import java.util.Objects;
+public class Length implements DoubleValue {
+    public static Length of(double doubleValue) {
+        if (doubleValue <= 0)
+            throw new IllegalArgumentException("Value must be > 0");
+        return new Length(doubleValue);
+    }
 
-public record Length(PositiveDouble value) {
-    public Length {
-        Objects.requireNonNull(value);
+    private final double doubleValue;
+
+    private Length(double doubleValue) {
+        this.doubleValue = doubleValue;
+    }
+
+    @Override
+    public double doubleValue() {
+        return doubleValue;
     }
 }

@@ -29,22 +29,22 @@ class InclinedPointLoadTest {
     public Stream<Arguments> testSource() {
         return Stream.of(
                 Arguments.of(   // down-right
-                        InclinedPointLoad.directedDownwards(Position.of(5), Magnitude.of(5), new Degree(45)),
+                        InclinedPointLoad.directedDownwards(Position.of(5), Magnitude.of(5), Degree.of(45)),
                         Magnitude.of(-3.535),
                         Magnitude.of(3.535)
                 ),
                 Arguments.of(   // down-left
-                        InclinedPointLoad.directedDownwards(Position.of(5), Magnitude.of(5), new Degree(135)),
+                        InclinedPointLoad.directedDownwards(Position.of(5), Magnitude.of(5), Degree.of(135)),
                         Magnitude.of(-3.535),
                         Magnitude.of(-3.535)
                 ),
                 Arguments.of(   // up-left
-                        InclinedPointLoad.directedUpwards(Position.of(5), Magnitude.of(5), new Degree(135)),
+                        InclinedPointLoad.directedUpwards(Position.of(5), Magnitude.of(5), Degree.of(135)),
                         Magnitude.of(3.535),
                         Magnitude.of(-3.535)
                 ),
                 Arguments.of(   // up-right
-                        InclinedPointLoad.directedUpwards(Position.of(5), Magnitude.of(5), new Degree(45)),
+                        InclinedPointLoad.directedUpwards(Position.of(5), Magnitude.of(5), Degree.of(45)),
                         Magnitude.of(3.535),
                         Magnitude.of(3.535)
                 )

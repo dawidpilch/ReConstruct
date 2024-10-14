@@ -5,13 +5,13 @@ import com.reconstruct.model.value.DoubleValue;
 import java.util.Objects;
 
 public class Position implements DoubleValue {
-    private final double value;
-
     public static Position of(double value) {
         if (value < 0)
             throw new IllegalArgumentException("The number must be >= 0");
         return new Position(value);
     }
+
+    private final double value;
 
     public Position (double value) {
         this.value = value;

@@ -15,18 +15,18 @@ import java.util.List;
 import java.util.Map;
 
 public class SimplySupportedBeam implements Beam {
+    public static SimplySupportedBeam withRollerOnStart(Length length, Section section) {
+        return new SimplySupportedBeam(length, section, Position.of(length.doubleValue()), Position.of(0));
+    }
+
+    public static SimplySupportedBeam withRollerOnEnd(Length length, Section section) {
+        return new SimplySupportedBeam(length, section, Position.of(0), Position.of(length.doubleValue()));
+    }
+
     private final Length length;
     private final Section section;
     private final Position pinnedPosition;
     private final Position rollerPosition;
-
-    public static SimplySupportedBeam withRollerOnStart(Length length, Section section) {
-        return new SimplySupportedBeam(length, section, Position.of(length.value().value()), Position.of(0));
-    }
-
-    public static SimplySupportedBeam withRollerOnEnd(Length length, Section section) {
-        return new SimplySupportedBeam(length, section, Position.of(0), Position.of(length.value().value()));
-    }
 
     private SimplySupportedBeam(Length length, Section section, Position pinnedPosition, Position rollerPosition) {
         this.length = length;

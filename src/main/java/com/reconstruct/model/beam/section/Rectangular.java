@@ -12,7 +12,7 @@ public record Rectangular(PositiveDouble depth, PositiveDouble width) implements
 
     @Override
     public PositiveDouble area() {
-        return new PositiveDouble(depth.value() * width.value());
+        return new PositiveDouble(depth.doubleValue() * width.doubleValue());
     }
 
     @Override
