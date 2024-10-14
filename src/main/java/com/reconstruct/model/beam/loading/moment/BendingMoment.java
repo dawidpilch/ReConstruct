@@ -1,7 +1,7 @@
-package com.reconstruct.model.beam.load.moment;
+package com.reconstruct.model.beam.loading.moment;
 
 import com.reconstruct.model.value.Magnitude;
-import com.reconstruct.model.value.Position;
+import com.reconstruct.model.beam.value.Position;
 
 public class BendingMoment {
     private final Position position;

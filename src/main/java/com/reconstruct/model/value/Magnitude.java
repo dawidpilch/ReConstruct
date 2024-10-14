@@ -2,24 +2,36 @@ package com.reconstruct.model.value;
 
 import java.util.Objects;
 
-public record Magnitude(double value) {
-    public Magnitude negated()
-    {
-        return new Magnitude(-value);
-    }
+public class Magnitude implements DoubleValue {
+    private final double value;
 
-    public Magnitude negative()
-    {
-        return new Magnitude(-Math.abs(value));
-    }
-
-    public Magnitude positive()
-    {
-        return new Magnitude(Math.abs(value));
+    public static Magnitude of(double value) {
+        return new Magnitude(value);
     }
 
     public static Magnitude zero() {
-        return new Magnitude(0);
+        return Magnitude.of(0);
+    }
+
+    private Magnitude(double value) {
+        this.value = value;
+    }
+
+    public Magnitude negated() {
+        return new Magnitude(-value);
+    }
+
+    public Magnitude negative() {
+        return new Magnitude(-Math.abs(value));
+    }
+
+    public Magnitude positive() {
+        return new Magnitude(Math.abs(value));
+    }
+
+    @Override
+    public double doubleValue() {
+        return value;
     }
 
     @Override

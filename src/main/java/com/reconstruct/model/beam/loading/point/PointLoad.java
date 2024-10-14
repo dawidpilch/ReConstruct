@@ -1,28 +1,24 @@
-package com.reconstruct.model.beam.load.point;
+package com.reconstruct.model.beam.loading.point;
 
 import com.reconstruct.model.value.Magnitude;
-import com.reconstruct.model.value.Position;
+import com.reconstruct.model.beam.value.Position;
 
 import java.util.Objects;
 
-public abstract sealed class PointLoad permits HorizontalPointLoad, InclinedPointLoad, VerticalPointLoad
-{
+public abstract sealed class PointLoad permits HorizontalPointLoad, InclinedPointLoad, VerticalPointLoad {
     private final Position position;
     private final Magnitude magnitude;
 
-    protected PointLoad(Position position, Magnitude magnitude)
-    {
+    protected PointLoad(Position position, Magnitude magnitude) {
         this.position = Objects.requireNonNull(position);
         this.magnitude = Objects.requireNonNull(magnitude);
     }
 
-    public Position position()
-    {
+    public Position position() {
         return position;
     }
 
-    public Magnitude magnitude()
-    {
+    public Magnitude magnitude() {
         return magnitude;
     }
 }
