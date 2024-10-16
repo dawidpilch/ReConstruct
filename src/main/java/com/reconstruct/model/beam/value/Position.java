@@ -1,5 +1,6 @@
 package com.reconstruct.model.beam.value;
 
+import com.reconstruct.model.beam.span.Span;
 import com.reconstruct.model.value.DoubleValue;
 
 import java.util.Objects;
@@ -23,6 +24,10 @@ public class Position implements DoubleValue {
 
     public boolean isToTheRightOf(Position other) {
         return value > other.doubleValue();
+    }
+
+    public boolean inRangeOf(Span span) {
+        return span.length().doubleValue() >= this.doubleValue();
     }
 
     @Override
