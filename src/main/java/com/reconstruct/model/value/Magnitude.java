@@ -7,12 +7,12 @@ public class Magnitude implements DoubleValue {
         return new Magnitude(value);
     }
 
+    private static final Magnitude zero = Magnitude.of(0);
     public static Magnitude zero() {
-        return Magnitude.of(0);
+        return zero;
     }
 
     private final double value;
-
     private Magnitude(double value) {
         this.value = value;
     }
