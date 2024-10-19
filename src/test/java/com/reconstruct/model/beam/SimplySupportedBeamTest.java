@@ -1,6 +1,7 @@
 package com.reconstruct.model.beam;
 
 import com.reconstruct.model.beam.loading.Loading;
+import com.reconstruct.model.beam.loading.moment.BendingMoment;
 import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
 import com.reconstruct.model.beam.section.Rectangular;
 import com.reconstruct.model.beam.span.Span;
@@ -29,11 +30,12 @@ class SimplySupportedBeamTest {
 
     @ParameterizedTest
     @MethodSource("verticalPointLoadsOnlyTestSource")
-    public void verticalPointLoadsOnlyTest(Loading loading,
-                                           Position pinnedPosition,
-                                           Position rollerPosition,
-                                           Magnitude expectedVerticalPinned,
-                                           Magnitude expectedVerticalRoller) {
+    public void test(Loading loading,
+                     Position pinnedPosition,
+                     Position rollerPosition,
+                     Magnitude expectedVerticalPinned,
+                     Magnitude expectedHorizontalPinned,
+                     Magnitude expectedVerticalRoller) {
         var simplySupportedBeam = SimplySupportedBeam.withCustomSupportPositions(COMMON_SPAN, pinnedPosition, rollerPosition);
         var verticalReactions = simplySupportedBeam.supportVerticalReactions(loading);
         var horizontalReactions = simplySupportedBeam.supportHorizontalReactions(loading);
@@ -60,21 +62,22 @@ class SimplySupportedBeamTest {
         var horizontalPinned = horizontalReactions.getOrDefault(pinnedPosition, List.of());
         var b2 = horizontalPinned.stream().anyMatch(load -> {
             logComparison(load.magnitude(), Magnitude.zero());
-            return Precision.equals(load.magnitude().doubleValue(), 0, TOLERANCE);
+            return Precision.equals(load.magnitude().doubleValue(), expectedHorizontalPinned.doubleValue(), TOLERANCE);
         });
         Assertions.assertTrue(horizontalPinned.size() == 1 && b2 );
 
+
+        // simply supported beam should not return any other support reactions
         var horizontalRoller = horizontalReactions.getOrDefault(rollerPosition, List.of());
         Assertions.assertTrue(horizontalRoller.size() == 0);
 
-
-        // bending moment
         var momentPinned = bendingMomentReactions.getOrDefault(pinnedPosition, List.of());
         Assertions.assertTrue(momentPinned.size() == 0);
 
         var momentRoller = bendingMomentReactions.getOrDefault(rollerPosition, List.of());
         Assertions.assertTrue(momentRoller.size() == 0);
     }
+
 
     private Stream<Arguments> verticalPointLoadsOnlyTestSource() {
         return Stream.of(
@@ -88,8 +91,9 @@ class SimplySupportedBeamTest {
                         ),
                         Position.of(6.5),           // pinned
                         Position.of(1.5),           // roller
-                        Magnitude.of(4.5),    // pinned expected
-                        Magnitude.of(0.5)     // roller expected
+                        Magnitude.of(4.5),    // pinned vertical expected
+                        Magnitude.zero(),           // pinned horizontal expected
+                        Magnitude.of(0.5)     // roller vertical expected
                 ),
                 Arguments.of(
                         new Loading(
@@ -102,14 +106,30 @@ class SimplySupportedBeamTest {
                         ),
                         Position.of(10),            // pinned
                         Position.of(7),             // roller
-                        Magnitude.of(8.667),  // pinned expected
-                        Magnitude.of(-11.667) // roller expected
+                        Magnitude.of(8.667),  // pinned vertical expected
+                        Magnitude.zero(),           // pinned horizontal expected
+                        Magnitude.of(-11.667) // roller vertical expected
+                ),
+                Arguments.of(
+                        new Loading(
+                                List.of(),
+                                List.of(),
+                                List.of(
+                                        BendingMoment.clockwise(Position.of(5), Magnitude.of(5)),
+                                        BendingMoment.counterClockwise(Position.of(2), Magnitude.of(7))
+                                )
+                        ),
+                        Position.of(2),             // pinned
+                        Position.of(7),             // roller
+                        Magnitude.of(0.4),    // pinned vertical expected
+                        Magnitude.zero(),           // pinned horizontal expected
+                        Magnitude.of(-0.4)    // roller vertical expected
                 )
         );
     }
 
     private static void logComparison(Magnitude real, Magnitude expected) {
-        System.out.println("Real: " + real.doubleValue());
+        System.out.println("Actual: " + real.doubleValue());
         System.out.println("Expected: " + expected.doubleValue());
     }
 }
