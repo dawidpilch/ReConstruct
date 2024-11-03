@@ -8,7 +8,9 @@ plugins {
 }
 
 extraJavaModuleInfo {
-    module("commons-math3-3.6.1.jar", "commons.math3", "3.6.1")
+    module("commons-math3-3.6.1.jar", "commons.math3", "3.6.1") {
+        exports("org.apache.commons.math3.util")
+    }
 }
 
 java {

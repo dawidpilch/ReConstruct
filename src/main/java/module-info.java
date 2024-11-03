@@ -1,4 +1,4 @@
-module org.example {
+module com.reconstruct {
     requires javafx.controls;
     requires javafx.fxml;
     requires com.dlsc.formsfx;
