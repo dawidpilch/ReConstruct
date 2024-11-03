@@ -29,18 +29,17 @@ class SimplySupportedBeamTest {
     );
 
     @ParameterizedTest
-    @MethodSource("verticalPointLoadsOnlyTestSource")
-    public void test(Loading loading,
-                     Position pinnedPosition,
-                     Position rollerPosition,
-                     Magnitude expectedVerticalPinned,
-                     Magnitude expectedHorizontalPinned,
-                     Magnitude expectedVerticalRoller) {
+    @MethodSource("simplySupportedBeamTestSource")
+    public void simplySupportedBeamTest(Loading loading,
+                                        Position pinnedPosition,
+                                        Position rollerPosition,
+                                        Magnitude expectedVerticalPinned,
+                                        Magnitude expectedHorizontalPinned,
+                                        Magnitude expectedVerticalRoller) {
         var simplySupportedBeam = SimplySupportedBeam.withCustomSupportPositions(COMMON_SPAN, pinnedPosition, rollerPosition);
         var verticalReactions = simplySupportedBeam.supportVerticalReactions(loading);
         var horizontalReactions = simplySupportedBeam.supportHorizontalReactions(loading);
         var bendingMomentReactions = simplySupportedBeam.supportBendingMomentReactions(loading);
-
 
         // vertical
         var verticalPinned = verticalReactions.getOrDefault(pinnedPosition, List.of());
@@ -79,7 +78,7 @@ class SimplySupportedBeamTest {
     }
 
 
-    private Stream<Arguments> verticalPointLoadsOnlyTestSource() {
+    private Stream<Arguments> simplySupportedBeamTestSource() {
         return Stream.of(
                 Arguments.of(
                         new Loading(
