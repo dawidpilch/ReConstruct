@@ -9,9 +9,10 @@ import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
 import com.reconstruct.model.beam.span.Span;
 import com.reconstruct.model.value.Magnitude;
 import com.reconstruct.model.beam.value.Position;
+import com.reconstruct.model.value.range.EvenlyDistributedDoubleRange;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.DoubleStream;
 
 public class SimplySupportedBeam implements Beam {
 
@@ -82,6 +83,43 @@ public class SimplySupportedBeam implements Beam {
     @Override
     public Map<Position, List<BendingMoment>> supportBendingMomentReactions(Loading loading) {
         return Map.of();
+    }
+
+    public void sheerForcesDiagrams(Loading loading) {
+        var supportVerticalReactions = supportVerticalReactions(loading);
+        List<VerticalPointLoad> verticalPointLoads = new ArrayList<>(loading.verticalPointLoads());
+        verticalPointLoads.addAll(supportVerticalReactions.values().stream().flatMap(Collection::stream).toList());
+        verticalPointLoads.sort(Comparator.comparingDouble(value -> value.position().doubleValue()));
+        if (verticalPointLoads.size() < 2)
+            throw new RuntimeException("At least two Vertical Loads expected (Support reactions missing)");
+
+        Map<Position, Magnitude> results = new HashMap<>();
+
+        int size = verticalPointLoads.size();
+        for (int i = 1; i < size; i++) {
+            VerticalPointLoad endSegmentReaction = verticalPointLoads.get(i);
+            VerticalPointLoad previousEndReaction = verticalPointLoads.get(i - 1);
+            List<VerticalPointLoad> loadsInSegment = new ArrayList<>(verticalPointLoads.stream()
+                    .filter(verticalPointLoad -> verticalPointLoad.position().isToTheLeftOf(endSegmentReaction.position()))
+                    .sorted(Comparator.comparingDouble(value -> value.position().doubleValue()))
+                    .toList());
+
+            List<Double> positionsPerSpan = new EvenlyDistributedDoubleRange(previousEndReaction.position().doubleValue(), endSegmentReaction.position().doubleValue(), 10).values();
+            for (double doublePosition : positionsPerSpan) {
+                Position position = Position.of(doublePosition);
+                if (results.containsKey(position)) {
+                    continue;
+                }
+
+                double result = 0;
+                for (VerticalPointLoad verticalPointLoad : loadsInSegment) {
+                    result += verticalPointLoad.magnitude().doubleValue() * doublePosition - verticalPointLoad.position().doubleValue();
+                }
+                results.put(Position.of(doublePosition), Magnitude.of(result));
+            }
+        }
+
+        return;
     }
 
     private HorizontalPointLoad horizontalReaction(SummationOfHorizontalForces summationOfHorizontalForces, Position positionOfSupportWithUnknownReaction) {
