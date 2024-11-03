@@ -4,6 +4,11 @@ plugins {
     id("org.javamodularity.moduleplugin") version "1.8.12"
     id("org.openjfx.javafxplugin") version "0.0.13"
     id("org.beryx.jlink") version "2.25.0"
+    id("org.gradlex.extra-java-module-info") version "1.0"
+}
+
+extraJavaModuleInfo {
+    module("commons-math3-3.6.1.jar", "commons.math3", "3.6.1")
 }
 
 java {
