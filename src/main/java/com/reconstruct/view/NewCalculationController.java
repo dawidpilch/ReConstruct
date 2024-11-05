@@ -1,6 +1,7 @@
 package com.reconstruct.view;
 
 import com.reconstruct.ReConstructApp;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -92,10 +93,18 @@ public class NewCalculationController {
         String title = selectedItem.getValue();
 
         this.close();
-        new RCWindow(
-                new Scene(new FXMLLoader(ReConstructApp.class.getResource(fxml)).load()),
-                title
-        ).show();
+
+        Platform.runLater(() -> {
+            try {
+                new RCWindow(
+                        new Scene(new FXMLLoader(ReConstructApp.class.getResource(fxml)).load()),
+                        title
+                ).show();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
     }
 
     public void onCancelButtonAction(ActionEvent actionEvent) {
