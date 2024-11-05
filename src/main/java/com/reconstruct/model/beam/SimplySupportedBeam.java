@@ -12,7 +12,6 @@ import com.reconstruct.model.beam.value.Position;
 import com.reconstruct.model.value.range.EvenlyDistributedDoubleRange;
 
 import java.util.*;
-import java.util.stream.DoubleStream;
 
 public class SimplySupportedBeam implements Beam {
 
@@ -85,7 +84,7 @@ public class SimplySupportedBeam implements Beam {
         return Map.of();
     }
 
-    public void sheerForcesDiagrams(Loading loading) {
+    public Map<Position, Magnitude> bendingMomentDiagram(Loading loading) {
         var supportVerticalReactions = supportVerticalReactions(loading);
         List<VerticalPointLoad> verticalPointLoads = new ArrayList<>(loading.verticalPointLoads());
         verticalPointLoads.addAll(supportVerticalReactions.values().stream().flatMap(Collection::stream).toList());
@@ -113,13 +112,22 @@ public class SimplySupportedBeam implements Beam {
 
                 double result = 0;
                 for (VerticalPointLoad verticalPointLoad : loadsInSegment) {
-                    result += verticalPointLoad.magnitude().doubleValue() * doublePosition - verticalPointLoad.position().doubleValue();
+                    result += verticalPointLoad.magnitude().doubleValue() * (doublePosition - verticalPointLoad.position().doubleValue());
                 }
                 results.put(Position.of(doublePosition), Magnitude.of(result));
             }
         }
 
-        return;
+        Position firstLoadPosition = verticalPointLoads.getFirst().position();
+        if (firstLoadPosition.doubleValue() != 0) {
+            results.put(Position.of(0), Magnitude.zero());
+        }
+        Position lastLoadPosition = verticalPointLoads.getLast().position();
+        if (lastLoadPosition.doubleValue() != span.length().doubleValue()) {
+            results.put(Position.of(span.length().doubleValue()), Magnitude.zero());
+        }
+
+        return results;
     }
 
     private HorizontalPointLoad horizontalReaction(SummationOfHorizontalForces summationOfHorizontalForces, Position positionOfSupportWithUnknownReaction) {
