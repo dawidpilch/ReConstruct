@@ -86,7 +86,7 @@ public class NewCalculationController {
         root.getChildren().add(beams);
     }
 
-    public void onCalculateButtonAction(ActionEvent actionEvent) throws IOException {
+    public void onCalculateButtonAction(ActionEvent actionEvent) {
         TreeItem<String> selectedItem = calculationsTreeView.getSelectionModel().getSelectedItem();
         ItemResources resources = registry.get(selectedItem);
         String fxml = resources.fxmlLayout();
