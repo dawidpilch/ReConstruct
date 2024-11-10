@@ -122,20 +122,6 @@ public class SimplySupportedBeam implements Beam {
             }
         }
 
-        Position firstLoadPosition = verticalPointLoads.getFirst().position();
-        if (firstLoadPosition.doubleValue() != 0) {
-            bendingMomentDiagram.put(Position.of(0), Magnitude.zero());
-            sheerForceDiagram.put(Position.of(0), Magnitude.zero());
-            sheerForceDiagram.put(firstLoadPosition, Magnitude.zero());
-        }
-        Position lastLoadPosition = verticalPointLoads.getLast().position();
-        if (lastLoadPosition.doubleValue() != span.length().doubleValue()) {
-            bendingMomentDiagram.put(Position.of(span.length().doubleValue()), Magnitude.zero());
-
-            sheerForceDiagram.put(lastLoadPosition, Magnitude.zero());
-            sheerForceDiagram.put(Position.of(span.length().doubleValue()), Magnitude.zero());
-        }
-
         return new LoadingAnalysis(
                 new BendingMomentDiagram(bendingMomentDiagram),
                 new SheerForceDiagram(sheerForceDiagram)
