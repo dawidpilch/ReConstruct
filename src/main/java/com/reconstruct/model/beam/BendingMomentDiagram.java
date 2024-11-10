@@ -5,12 +5,17 @@ import com.reconstruct.model.value.Magnitude;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class BendingMomentDiagram implements Iterable<Map.Entry<Position, Magnitude>> {
     private final Map<Position, Magnitude> positionMagnitudeMap;
 
     public BendingMomentDiagram(Map<Position, Magnitude> positionMagnitudeMap) {
         this.positionMagnitudeMap = Map.copyOf(positionMagnitudeMap);
+    }
+
+    public Stream<Map.Entry<Position, Magnitude>> stream() {
+        return positionMagnitudeMap.entrySet().stream();
     }
 
     @Override
