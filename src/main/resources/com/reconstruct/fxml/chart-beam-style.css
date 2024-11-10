@@ -1,0 +1,5 @@
+.chart-vertical-zero-line {
+    -fx-stroke: e5e5e5;
+    -fx-stroke-dash-array: 4 4;
+    -fx-stroke-width: 1;
+}
