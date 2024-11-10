@@ -2,7 +2,7 @@ package com.reconstruct.model.value;
 
 import java.util.Objects;
 
-public class Magnitude implements DoubleValue {
+public class Magnitude implements DoubleValue, Comparable<Magnitude> {
     public static Magnitude of(double value) {
         return new Magnitude(value);
     }
@@ -45,5 +45,16 @@ public class Magnitude implements DoubleValue {
     @Override
     public int hashCode() {
         return Objects.hashCode(value);
+    }
+
+    @Override
+    public int compareTo(Magnitude o) {
+        if (this.equals(o)) {
+            return 0;
+        } else if (this.doubleValue() > o.doubleValue()) {
+            return 1;
+        } else {
+            return -1;
+        }
     }
 }
