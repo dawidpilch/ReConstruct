@@ -19,10 +19,10 @@ public class EvenlyDistributedDoubleRange implements Range<List<Double>> {
     @Override
     public List<Double> values() {
         if (numbersInRange <= 0) {
-            throw new IllegalArgumentException("Count must be positive.");
+            return List.of();
         }
         if (min >= max) {
-            throw new IllegalArgumentException("Minimum bound must be less than maximum bound.");
+            return List.of();
         }
 
         double step = Precision.round((max - min) / (numbersInRange - 1), 6);
