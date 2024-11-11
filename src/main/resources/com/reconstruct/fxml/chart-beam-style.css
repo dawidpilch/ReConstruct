@@ -3,3 +3,8 @@
     -fx-stroke-dash-array: 4 4;
     -fx-stroke-width: 1;
 }
+
+.chart-horizontal-zero-line {
+    fx-stroke: black;
+    -fx-stroke-width: 2;
+}
