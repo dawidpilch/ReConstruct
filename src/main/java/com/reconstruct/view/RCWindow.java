@@ -29,7 +29,7 @@ public class RCWindow {
         stage.setScene(scene);
         stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.2);
         stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.2);
-        stage.minHeightProperty().setValue(480);
+        stage.minHeightProperty().setValue(580);
         stage.minWidthProperty().setValue(720);
         stage.setTitle(title);
         stage.initModality(modality);
