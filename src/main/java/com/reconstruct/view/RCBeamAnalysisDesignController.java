@@ -18,6 +18,7 @@ import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Polygon;
 
@@ -30,7 +31,10 @@ public class RCBeamAnalysisDesignController {
     @FXML public NumberAxis yAxis;
     @FXML public StackPane elementsStackPane;
     @FXML public Polygon pinnedPolygon;
-    public Polygon rollerPolygon;
+    @FXML public Polygon rollerPolygon;
+    @FXML public TextField beamLengthTextField;
+    @FXML public TextField pinnedSupportPositionTextField;
+    @FXML public TextField rollerSupportPositionTextField;
 
     @FXML public void initialize() {
         double length = 14;

@@ -73,7 +73,52 @@
         <tabs>
           <Tab text="Geometry">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <VBox>
+                     <children>
+                        <HBox>
+                           <children>
+                              <TextField fx:id="beamLengthTextField" promptText="Beam length" />
+                              <Label alignment="CENTER" text="Beam Length" textAlignment="CENTER" wrapText="true">
+                                 <HBox.margin>
+                                    <Insets left="10.0" top="4.0" />
+                                 </HBox.margin>
+                              </Label>
+                           </children>
+                           <VBox.margin>
+                              <Insets bottom="5.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <HBox layoutX="15.0" layoutY="45.0">
+                           <children>
+                              <TextField fx:id="pinnedSupportPositionTextField" promptText="Pinned Support position" />
+                              <Label alignment="CENTER" text="Pinned Support position" textAlignment="CENTER" wrapText="true">
+                                 <HBox.margin>
+                                    <Insets left="10.0" top="4.0" />
+                                 </HBox.margin>
+                              </Label>
+                           </children>
+                           <VBox.margin>
+                              <Insets bottom="5.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <HBox layoutX="15.0" layoutY="15.0">
+                           <children>
+                              <TextField fx:id="rollerSupportPositionTextField" promptText="Roller Support position" />
+                              <Label alignment="CENTER" text="Roller Support position" textAlignment="CENTER" wrapText="true">
+                                 <HBox.margin>
+                                    <Insets left="10.0" top="4.0" />
+                                 </HBox.margin>
+                              </Label>
+                           </children>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                        </HBox>
+                     </children>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </VBox>
             </content>
           </Tab>
           <Tab text="Loading">
