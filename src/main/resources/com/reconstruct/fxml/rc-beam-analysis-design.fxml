@@ -1,26 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.reconstruct.view.RCBeamAnalysisDesignController">
    <center>
-      <AreaChart fx:id="areaChart" animated="false" createSymbols="false" legendSide="TOP" style="-fx-border-color: black; -fx-padding: 30;" stylesheets="@chart-beam-style.css">
-        <xAxis>
-          <NumberAxis side="BOTTOM" style="-fx-translate-y: 30;" fx:id="xAxis" />
-        </xAxis>
-        <yAxis>
-          <NumberAxis fx:id="yAxis" side="LEFT" style="-fx-translate-x: -30;" stylesheets="@chart-beam-style.css">
-               <opaqueInsets>
-                  <Insets left="77.0" />
-               </opaqueInsets></NumberAxis>
-        </yAxis>
+      <StackPane>
          <BorderPane.margin>
             <Insets bottom="2.5" left="5.0" right="2.5" top="5.0" />
          </BorderPane.margin>
-      </AreaChart>
+         <children>
+            <AreaChart fx:id="areaChart" animated="false" createSymbols="false" legendSide="TOP" style="-fx-border-color: black; -fx-padding: 30;" stylesheets="@chart-beam-style.css">
+              <xAxis>
+                <NumberAxis side="BOTTOM" style="-fx-translate-y: 30;" fx:id="xAxis" />
+              </xAxis>
+              <yAxis>
+                <NumberAxis fx:id="yAxis" side="LEFT" style="-fx-translate-x: -30;" stylesheets="@chart-beam-style.css">
+                     <opaqueInsets>
+                        <Insets left="77.0" />
+                     </opaqueInsets>
+                  </NumberAxis>
+              </yAxis>
+            </AreaChart>
+            <StackPane fx:id="elementsStackPane" StackPane.alignment="CENTER">
+               <StackPane.margin>
+                  <Insets bottom="65.0" left="36.0" right="40.0" top="40.0" />
+               </StackPane.margin>
+               <children>
+                  <Polygon fx:id="pinnedPolygon" fill="#ffffff00" stroke="BLACK" strokeType="INSIDE" strokeWidth="6.0" style="-fx-scale-x: 0.2; -fx-scale-y: 0.2;" StackPane.alignment="CENTER_LEFT">
+                    <points>
+                      <Double fx:value="-50.0" />
+                      <Double fx:value="40.0" />
+                      <Double fx:value="50.0" />
+                      <Double fx:value="40.0" />
+                      <Double fx:value="0.0" />
+                      <Double fx:value="-60.0" />
+                    </points>
+                     <StackPane.margin>
+                        <Insets top="50.0" />
+                     </StackPane.margin>
+                  </Polygon>
+                  <Polygon fx:id="rollerPolygon" fill="#ffffff00" stroke="BLACK" strokeType="INSIDE" strokeWidth="6.0" style="-fx-scale-x: 0.2; -fx-scale-y: 0.2;" StackPane.alignment="CENTER_LEFT">
+                     <points>
+                        <Double fx:value="-50.0" />
+                        <Double fx:value="40.0" />
+                        <Double fx:value="50.0" />
+                        <Double fx:value="40.0" />
+                        <Double fx:value="0.0" />
+                        <Double fx:value="-60.0" />
+                     </points>
+                     <StackPane.margin>
+                        <Insets top="50.0" />
+                     </StackPane.margin>
+                  </Polygon>
+               </children>
+            </StackPane>
+         </children>
+      </StackPane>
    </center>
    <right>
       <Pane maxWidth="200.0" minWidth="200.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: gray;" BorderPane.alignment="CENTER">
@@ -29,7 +69,7 @@
          </BorderPane.margin></Pane>
    </right>
    <bottom>
-      <TabPane prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: gray;" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <TabPane minHeight="250.0" prefHeight="250.0" prefWidth="200.0" style="-fx-border-color: gray;" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
           <Tab text="Geometry">
             <content>

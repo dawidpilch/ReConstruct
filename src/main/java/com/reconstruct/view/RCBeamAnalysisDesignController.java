@@ -12,16 +12,14 @@ import com.reconstruct.model.beam.value.Position;
 import com.reconstruct.model.value.Length;
 import com.reconstruct.model.value.Magnitude;
 import com.reconstruct.model.value.PositiveDouble;
+
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-
-import javafx.scene.layout.BorderPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
+import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Polygon;
-import org.apache.commons.math3.util.MathUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -30,9 +28,15 @@ public class RCBeamAnalysisDesignController {
     @FXML public AreaChart<Double, Double> areaChart;
     @FXML public NumberAxis xAxis;
     @FXML public NumberAxis yAxis;
+    @FXML public StackPane elementsStackPane;
+    @FXML public Polygon pinnedPolygon;
+    public Polygon rollerPolygon;
 
     @FXML public void initialize() {
         double length = 14;
+        Position pinnedPosition = Position.of(0);
+        Position rollerPosition = Position.of(14);
+        
         SimplySupportedBeam simplySupportedBeam = SimplySupportedBeam.withCustomSupportPositions(
                 new Span(
                         Length.of(length),
@@ -40,7 +44,7 @@ public class RCBeamAnalysisDesignController {
                                 PositiveDouble.of(10),
                                 PositiveDouble.of(10)
                         )
-                ), Position.of(3), Position.of(14)
+                ), pinnedPosition, rollerPosition
         );
 
         Loading loading = new Loading(
@@ -83,5 +87,20 @@ public class RCBeamAnalysisDesignController {
 
         areaChart.getData().add(bendingMomentSeries);
         areaChart.getData().add(sheerForceSeries);
+
+        areaChart.widthProperty().addListener((observable, oldWidth, newWidth) -> updatePolygonPoints(pinnedPolygon, pinnedPosition));
+        areaChart.widthProperty().addListener((observable, oldWidth, newWidth) -> updatePolygonPoints(rollerPolygon, rollerPosition));
+    }
+
+    private void updatePolygonPoints(Node node, Position positionOnBeam) {
+        // A *magic* number, due to some translations of other components in the layout
+        double maxOffset = 125;
+        double positionAsDouble = positionOnBeam.doubleValue();
+        double chartWidth = areaChart.getWidth();
+        double chartMinX = xAxis.getLowerBound();
+        double chartMaxX = xAxis.getUpperBound();
+        double chartRangeX = chartMaxX - chartMinX;
+        double xPixel = (positionAsDouble - chartMinX) / chartRangeX * chartWidth;
+        node.setTranslateX(xPixel - ((maxOffset * positionAsDouble) / chartRangeX));
     }
 }
