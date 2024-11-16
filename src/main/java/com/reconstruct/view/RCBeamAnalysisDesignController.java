@@ -20,7 +20,6 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Polygon;
 
 import java.util.List;
 import java.util.Map;
@@ -30,13 +29,14 @@ public class RCBeamAnalysisDesignController {
     @FXML public NumberAxis xAxis;
     @FXML public NumberAxis yAxis;
     @FXML public StackPane elementsStackPane;
-    @FXML public Polygon pinnedPolygon;
-    @FXML public Polygon rollerPolygon;
     @FXML public TextField beamLengthTextField;
     @FXML public TextField pinnedSupportPositionTextField;
     @FXML public TextField rollerSupportPositionTextField;
+    @FXML public StackPane rollerPane;
+    @FXML public StackPane pinnedPane;
 
     @FXML public void initialize() {
+
         double length = 14;
         Position pinnedPosition = Position.of(0);
         Position rollerPosition = Position.of(14);
@@ -92,8 +92,8 @@ public class RCBeamAnalysisDesignController {
         areaChart.getData().add(bendingMomentSeries);
         areaChart.getData().add(sheerForceSeries);
 
-        areaChart.widthProperty().addListener((observable, oldWidth, newWidth) -> updatePolygonPoints(pinnedPolygon, pinnedPosition));
-        areaChart.widthProperty().addListener((observable, oldWidth, newWidth) -> updatePolygonPoints(rollerPolygon, rollerPosition));
+        areaChart.widthProperty().addListener((observable, oldWidth, newWidth) -> updatePolygonPoints(rollerPane, rollerPosition));
+        areaChart.widthProperty().addListener((observable, oldWidth, newWidth) -> updatePolygonPoints(pinnedPane, pinnedPosition));
     }
 
     private void updatePolygonPoints(Node node, Position positionOnBeam) {
