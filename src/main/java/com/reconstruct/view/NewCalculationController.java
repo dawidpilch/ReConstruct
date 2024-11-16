@@ -48,14 +48,17 @@ public class NewCalculationController {
             """;
 
     @FXML public void initialize() {
+        calculateButton.setDisable(true);
         populateCalculationsTreeViewItems();
 
         exampleWebView.getEngine().setJavaScriptEnabled(false);
         calculationsTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.isLeaf()) {
+                calculateButton.setDisable(true);
                 return;
             }
 
+            calculateButton.setDisable(false);
             String content = exampleNotAvailable;
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(
@@ -106,6 +109,7 @@ public class NewCalculationController {
         });
 
     }
+
 
     public void onCancelButtonAction(ActionEvent actionEvent) {
         this.close();
