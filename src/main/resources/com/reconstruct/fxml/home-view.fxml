@@ -5,7 +5,7 @@
 
 <VBox xmlns="http://javafx.com/javafx/17.0.2-ea"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.reconstruct.view.HomeController"
+      fx:controller="com.reconstruct.view.controller.HomeController"
       prefHeight="600.0" prefWidth="900.0">
     <children>
       <MenuBar>

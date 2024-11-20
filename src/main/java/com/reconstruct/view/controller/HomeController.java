@@ -1,6 +1,7 @@
-package com.reconstruct.view;
+package com.reconstruct.view.controller;
 
 import com.reconstruct.ReConstructApp;
+import com.reconstruct.view.component.RCWindow;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

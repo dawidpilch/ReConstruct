@@ -1,4 +1,4 @@
-package com.reconstruct.view;
+package com.reconstruct.view.component;
 
 import javafx.scene.Scene;
 import javafx.stage.Modality;

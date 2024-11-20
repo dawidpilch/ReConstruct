@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.chart.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
+<?import java.lang.Double?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.AreaChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Polygon?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.reconstruct.view.RCBeamAnalysisDesignController">
+<BorderPane xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.reconstruct.view.controller.RCBeamAnalysisDesignController">
    <center>
       <StackPane>
          <BorderPane.margin>
@@ -72,45 +87,107 @@
         <tabs>
           <Tab text="Geometry">
             <content>
-                  <VBox>
-                     <children>
-                        <VBox>
-                           <VBox.margin>
-                              <Insets bottom="5.0" />
-                           </VBox.margin>
+                  <ScrollPane>
+                     <content>
+                        <HBox>
                            <children>
-                              <Label alignment="CENTER" text="Beam Length" textAlignment="CENTER" wrapText="true" />
-                              <TextField fx:id="beamLengthTextField" promptText="Beam length" text="10" />
+                            <VBox alignment="TOP_CENTER">
+                               <children>
+                                  <VBox>
+                                     <VBox.margin>
+                                        <Insets bottom="5.0" />
+                                     </VBox.margin>
+                                     <children>
+                                        <Label alignment="CENTER" text="Beam Length" textAlignment="CENTER" wrapText="true" />
+                                        <TextField fx:id="beamLengthTextField" promptText="Beam length" text="10" />
+                                     </children>
+                                  </VBox>
+                                  <VBox>
+                                     <VBox.margin>
+                                        <Insets />
+                                     </VBox.margin>
+                                     <children>
+                                        <Label alignment="CENTER" text="Pinned Support position" textAlignment="CENTER" wrapText="true">
+                                             <VBox.margin>
+                                                <Insets top="5.0" />
+                                             </VBox.margin>
+                                          </Label>
+                                        <TextField fx:id="pinnedSupportPositionTextField" promptText="Pinned Support position" text="0" />
+                                     </children>
+                                  </VBox>
+                                  <VBox>
+                                     <VBox.margin>
+                                        <Insets top="5.0" />
+                                     </VBox.margin>
+                                     <children>
+                                        <Label alignment="CENTER" text="Roller Support position" textAlignment="CENTER" wrapText="true" />
+                                        <TextField fx:id="rollerSupportPositionTextField" promptText="Roller Support position" text="10" />
+                                     </children>
+                                  </VBox>
+                               </children>
+                                 <HBox.margin>
+                                    <Insets right="10.0" />
+                                 </HBox.margin>
+                            </VBox>
+                              <Separator orientation="VERTICAL" prefHeight="200.0">
+                                 <HBox.margin>
+                                    <Insets right="10.0" />
+                                 </HBox.margin>
+                              </Separator>
+                              <VBox alignment="TOP_CENTER">
+                                 <children>
+                                  <VBox>
+                                     <children>
+                                        <Label alignment="CENTER" text="Length Unit" textAlignment="CENTER" wrapText="true" />
+                                          <ComboBox prefWidth="150.0" promptText="Meter (m)" />
+                                     </children>
+                                       <VBox.margin>
+                                          <Insets bottom="5.0" />
+                                       </VBox.margin>
+                                  </VBox>
+                                  <VBox>
+                                     <children>
+                                        <Label alignment="CENTER" text="Force Unit" textAlignment="CENTER" wrapText="true" />
+                                          <ComboBox prefWidth="150.0" promptText="Kilonewton (kN)" />
+                                     </children>
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin>
+                                  </VBox>
+                                 </children>
+                              </VBox>
                            </children>
-                        </VBox>
-                        <VBox>
-                           <VBox.margin>
-                              <Insets bottom="5.0" />
-                           </VBox.margin>
-                           <children>
-                              <Label alignment="CENTER" text="Pinned Support position" textAlignment="CENTER" wrapText="true" />
-                              <TextField fx:id="pinnedSupportPositionTextField" promptText="Pinned Support position" />
-                           </children>
-                        </VBox>
-                        <VBox>
-                           <VBox.margin>
-                              <Insets />
-                           </VBox.margin>
-                           <children>
-                              <Label alignment="CENTER" text="Roller Support position" textAlignment="CENTER" wrapText="true" />
-                              <TextField fx:id="rollerSupportPositionTextField" promptText="Roller Support position" />
-                           </children>
-                        </VBox>
-                     </children>
+                        </HBox>
+                     </content>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
-                  </VBox>
+                  </ScrollPane>
             </content>
           </Tab>
           <Tab text="Loading">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <BorderPane>
+                     <center>
+                        <TableView prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                          <columns>
+                            <TableColumn prefWidth="75.0" sortable="false" text="C1" />
+                            <TableColumn prefWidth="75.0" sortable="false" text="C2" />
+                          </columns>
+                        </TableView>
+                     </center>
+                     <top>
+                        <HBox prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button alignment="CENTER" mnemonicParsing="false" text="+ Add Load">
+                                 <HBox.margin>
+                                    <Insets left="5.0" top="8.0" />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </top>
+                  </BorderPane>
             </content>
           </Tab>
         </tabs>

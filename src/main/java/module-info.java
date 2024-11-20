@@ -6,8 +6,10 @@ module com.reconstruct {
     requires commons.math3;
 
     opens com.reconstruct to javafx.fxml;
-    opens com.reconstruct.view to javafx.fxml;
+    opens com.reconstruct.view.controller to javafx.fxml;
+    opens com.reconstruct.view.component to javafx.fxml;
 
     exports com.reconstruct;
-    exports com.reconstruct.view;
+    exports com.reconstruct.view.controller;
+    exports com.reconstruct.view.component;
 }

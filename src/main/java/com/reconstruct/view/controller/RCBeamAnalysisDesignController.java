@@ -1,4 +1,4 @@
-package com.reconstruct.view;
+package com.reconstruct.view.controller;
 
 import com.reconstruct.model.beam.BendingMomentDiagram;
 import com.reconstruct.model.beam.LoadingAnalysis;
