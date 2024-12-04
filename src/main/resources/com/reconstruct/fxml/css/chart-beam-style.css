@@ -5,6 +5,10 @@
 }
 
 .chart-horizontal-zero-line {
-    fx-stroke: black;
+    -fx-stroke: black;
     -fx-stroke-width: 2;
+}
+
+.chart-plot-background {
+    -fx-background-color: white;
 }

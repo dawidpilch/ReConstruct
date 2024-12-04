@@ -10,6 +10,9 @@ module com.reconstruct {
     opens com.reconstruct.view.component to javafx.fxml;
 
     exports com.reconstruct;
+    exports com.reconstruct.model.beam.loading.point;
+    exports com.reconstruct.model.beam.loading.moment;
     exports com.reconstruct.view.controller;
     exports com.reconstruct.view.component;
+    exports com.reconstruct.view.viewmodel;
 }

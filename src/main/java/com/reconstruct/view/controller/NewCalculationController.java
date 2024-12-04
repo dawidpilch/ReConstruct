@@ -31,7 +31,7 @@ public class NewCalculationController {
     private final static Map<TreeItem<String>, ItemResources> beamElements = Map.ofEntries(
             Map.entry(
                     new TreeItem<>("RC simply supported beam analysis & design"),
-                    new ItemResources("examples/rc-beam-analysis-design.html", "fxml/rc-beam-analysis-design.fxml")
+                    new ItemResources("examples/rc-beam-analysis-design.html", "fxml/beam-analysis-design-view.fxml")
             ),
             Map.entry(
                     new TreeItem<>("Empty example"),

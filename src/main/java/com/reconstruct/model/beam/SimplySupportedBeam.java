@@ -128,6 +128,10 @@ public class SimplySupportedBeam implements Beam {
         );
     }
 
+    public Span span() {
+        return span;
+    }
+
     private HorizontalPointLoad horizontalReaction(SummationOfHorizontalForces summationOfHorizontalForces, Position positionOfSupportWithUnknownReaction) {
         double magnitude = summationOfHorizontalForces.value().doubleValue() * -1;
         return HorizontalPointLoad.of(positionOfSupportWithUnknownReaction, Magnitude.of(magnitude));
