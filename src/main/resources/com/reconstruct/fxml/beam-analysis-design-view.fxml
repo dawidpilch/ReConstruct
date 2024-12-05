@@ -90,7 +90,7 @@
                </VBox.margin>
                <children>
                 <Button fx:id="generateButton" mnemonicParsing="false" prefWidth="75.0" text="Generate" />
-                  <Button fx:id="generateButton1" cancelButton="true" layoutX="595.0" layoutY="10.0" mnemonicParsing="false" prefWidth="75.0" text="Cancel" />
+                <Button fx:id="cancelButton" cancelButton="true" layoutX="595.0" layoutY="10.0" mnemonicParsing="false" prefWidth="75.0" text="Cancel" />
                </children>
             </HBox>
          </children>

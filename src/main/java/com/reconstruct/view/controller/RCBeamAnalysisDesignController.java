@@ -38,8 +38,10 @@ public class RCBeamAnalysisDesignController {
     @FXML public StackPane elementsStackPane;
     @FXML public StackPane rollerPane;
     @FXML public StackPane pinnedPane;
-    @FXML public Button generateButton;
     @FXML public ScrollPane scrollPaneWorkSpace;
+
+    @FXML public Button generateButton;
+    @FXML public Button cancelButton;
 
     private final SimplySupportedBeamViewModel beamViewModel = new SimplySupportedBeamViewModel();
     private final Map<Node, AppendableValue<Double>> singlePositionObjects = new HashMap<>();
@@ -157,7 +159,18 @@ public class RCBeamAnalysisDesignController {
         VBox vBox = new VBox(15, beamLengthTF.node(), pinnedSupportPositionTF.node(), rollerSupportPositionTF.node());
         vBox.setMaxWidth(150);
 
-        showWorkSpace(vBox, this::previewResults, () -> { });
+        Double length = beamViewModel.beamLengthValue.value();
+        Double pinned = beamViewModel.pinnedSupportPositionValue.value();
+        Double roller = beamViewModel.rollerSupportPositionValue.value();
+        Runnable restorePreviousValues = () -> {
+            beamViewModel.beamLengthValue.tryAppend(length);
+            beamViewModel.pinnedSupportPositionValue.tryAppend(pinned);
+            beamViewModel.rollerSupportPositionValue.tryAppend(roller);
+            areaChart.getData().forEach(doubleDoubleSeries -> doubleDoubleSeries.getNode().setVisible(true));
+        };
+
+        areaChart.getData().forEach(doubleDoubleSeries -> doubleDoubleSeries.getNode().setVisible(false));
+        showWorkSpace(vBox, this::previewResults, restorePreviousValues);
     }
 
     public void onLoadingButtonAction(ActionEvent actionEvent) {
@@ -167,22 +180,22 @@ public class RCBeamAnalysisDesignController {
     private void showWorkSpace(Node workSpaceNode, Runnable onSave, Runnable onCancel) {
         double prefButtonWidth = 75d;
 
-        Button saveButton = new Button("Save");
-        saveButton.setPrefWidth(prefButtonWidth);
-        saveButton.setOnAction(actionEvent -> {
+        Button localSave = new Button("Save");
+        localSave.setPrefWidth(prefButtonWidth);
+        localSave.setOnAction(actionEvent -> {
             hideWorkSpace();
             onSave.run();
         });
 
-        Button cancelButton = new Button("Cancel");
-        cancelButton.setPrefWidth(prefButtonWidth);
-        cancelButton.setOnAction(actionEvent -> {
+        Button localCancel = new Button("Cancel");
+        localCancel.setPrefWidth(prefButtonWidth);
+        localCancel.setOnAction(actionEvent -> {
             hideWorkSpace();
             onCancel.run();
         });
 
 
-        HBox hBoxButtons = new HBox(15, saveButton, cancelButton);
+        HBox hBoxButtons = new HBox(15, localSave, localCancel);
         VBox vBox = new VBox(15, hBoxButtons, new Separator(Orientation.HORIZONTAL), workSpaceNode);
         vBox.setFillWidth(true);
         vBox.setPrefWidth(Region.USE_COMPUTED_SIZE);
@@ -191,8 +204,9 @@ public class RCBeamAnalysisDesignController {
         scrollPaneWorkSpace.setManaged(true);
         scrollPaneWorkSpace.setContent(vBox);
         generateButton.setDisable(true);
+        cancelButton.setDisable(true);
         mainPane.getRight().setDisable(true);
-        Platform.runLater(saveButton::requestFocus);
+        Platform.runLater(localSave::requestFocus);
     }
 
     private void hideWorkSpace() {
@@ -201,5 +215,6 @@ public class RCBeamAnalysisDesignController {
         scrollPaneWorkSpace.setContent(null);
         mainPane.getRight().setDisable(false);
         generateButton.setDisable(false);
+        cancelButton.setDisable(true);
     }
 }
