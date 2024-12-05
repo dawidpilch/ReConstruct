@@ -24,7 +24,7 @@ public class SimplySupportedBeamViewModel {
                 List<String> errors = new ArrayList<>();
                 if (newValue <= 0) {
                     errors.add("The length must be greater than 0");
-                } else if (!allPositionableObjectsInRange()) {
+                } else if (!allPositionableObjectsInRange(newValue)) {
                     errors.add("The length cannot be changed because there are supports defined outside of the beam");
                 }
                 return new ValueErrors(errors);
@@ -87,9 +87,9 @@ public class SimplySupportedBeamViewModel {
         this.singlePositionsForRangeCheck = singlePositionsForRangeCheck;
     }
 
-    private boolean allPositionableObjectsInRange() {
+    private boolean allPositionableObjectsInRange(double range) {
         for (var property : singlePositionsForRangeCheck) {
-            if (property.value() > beamLengthValue.value()) {
+            if (property.value() > range) {
                 return false;
             }
         } return true;
