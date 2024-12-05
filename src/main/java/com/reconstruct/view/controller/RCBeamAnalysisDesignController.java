@@ -15,6 +15,7 @@ import com.reconstruct.model.value.PositiveDouble;
 import com.reconstruct.view.component.ErrorDoubleTextField;
 import com.reconstruct.view.viewmodel.AppendableValue;
 import com.reconstruct.view.viewmodel.SimplySupportedBeamViewModel;
+import com.reconstruct.view.viewmodel.ValueNotAppendedListener;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -59,7 +60,7 @@ public class RCBeamAnalysisDesignController {
                 rollerPane, beamViewModel.rollerSupportPositionValue
         ));
 
-        beamViewModel.beamLengthValue.addOnValueChangedListener((oldValue, newValue, errors) -> {
+        beamViewModel.beamLengthValue.addOnValueAppendedListener((oldValue, newValue, errors) -> {
             xAxis.setTickUnit(1d);
             xAxis.setUpperBound(beamViewModel.beamLengthValue.value());
             for (var entry : singlePositionObjects.entrySet()) {
@@ -67,8 +68,8 @@ public class RCBeamAnalysisDesignController {
             }
         });
         
-        beamViewModel.pinnedSupportPositionValue.addOnValueChangedListener((oldValue, newValue, errors) -> updatePolygonPoints(pinnedPane, beamViewModel.pinnedSupportPositionValue.value()));
-        beamViewModel.rollerSupportPositionValue.addOnValueChangedListener((oldValue, newValue, errors) -> updatePolygonPoints(rollerPane, beamViewModel.rollerSupportPositionValue.value()));
+        beamViewModel.pinnedSupportPositionValue.addOnValueAppendedListener((oldValue, newValue, errors) -> updatePolygonPoints(pinnedPane, beamViewModel.pinnedSupportPositionValue.value()));
+        beamViewModel.rollerSupportPositionValue.addOnValueAppendedListener((oldValue, newValue, errors) -> updatePolygonPoints(rollerPane, beamViewModel.rollerSupportPositionValue.value()));
 
         xAxis.setAutoRanging(false);
         xAxis.setLowerBound(0d);
@@ -151,62 +152,87 @@ public class RCBeamAnalysisDesignController {
         node.setTranslateX(xPixel - ((maxOffset * doubleValue) / chartRangeX));
     }
 
-    public void onGeometryButtonAction(ActionEvent actionEvent) {
-        var beamLengthTF = new ErrorDoubleTextField(beamViewModel.beamLengthValue);
-        var pinnedSupportPositionTF = new ErrorDoubleTextField(beamViewModel.pinnedSupportPositionValue);
-        var rollerSupportPositionTF = new ErrorDoubleTextField(beamViewModel.rollerSupportPositionValue);
+    public void onGeometryButtonAction(ActionEvent ignore) {
+        AppendableValue<Double> beamLengthValue = beamViewModel.beamLengthValue;
+        AppendableValue<Double> pinnedSupportPositionValue = beamViewModel.pinnedSupportPositionValue;
+        AppendableValue<Double> rollerSupportPositionValue = beamViewModel.rollerSupportPositionValue;
 
-        VBox vBox = new VBox(15, beamLengthTF.node(), pinnedSupportPositionTF.node(), rollerSupportPositionTF.node());
-        vBox.setMaxWidth(150);
+        ErrorDoubleTextField beamLengthTF = new ErrorDoubleTextField(beamLengthValue);
+        ErrorDoubleTextField pinnedSuppTF = new ErrorDoubleTextField(pinnedSupportPositionValue);
+        ErrorDoubleTextField rollerSuppTF = new ErrorDoubleTextField(rollerSupportPositionValue);
 
-        Double length = beamViewModel.beamLengthValue.value();
-        Double pinned = beamViewModel.pinnedSupportPositionValue.value();
-        Double roller = beamViewModel.rollerSupportPositionValue.value();
-        Runnable restorePreviousValues = () -> {
-            beamViewModel.beamLengthValue.tryAppend(length);
-            beamViewModel.pinnedSupportPositionValue.tryAppend(pinned);
-            beamViewModel.rollerSupportPositionValue.tryAppend(roller);
-            areaChart.getData().forEach(doubleDoubleSeries -> doubleDoubleSeries.getNode().setVisible(true));
+        // values to restore if action canceled
+        Double previousLength = beamLengthValue.value();
+        Double previousPinnedPosition = pinnedSupportPositionValue.value();
+        Double previousRollerPosition = rollerSupportPositionValue.value();
+
+        double prefButtonWidth = 75d;
+        Button localSave = new Button("Save");
+        Button localCancel = new Button("Cancel");
+        localSave.setPrefWidth(prefButtonWidth);
+        localCancel.setPrefWidth(prefButtonWidth);
+
+
+        ValueNotAppendedListener<Double> listener = (oldValue, newValue, valueErrors) -> {
+            if (valueErrors.isEmpty()) {
+                localSave.setDisable(false);
+            }
+            localSave.setDisable(true);
         };
 
+        beamLengthValue.addOnValueNotAppendedListener(listener);
+        pinnedSupportPositionValue.addOnValueNotAppendedListener(listener);
+        rollerSupportPositionValue.addOnValueNotAppendedListener(listener);
+
+        localSave.setOnAction(actionEvent -> {
+            hideWorkSpace();
+            previewResults();
+            beamLengthValue.removeOnValueNotChangedListener(listener);
+            pinnedSupportPositionValue.removeOnValueNotChangedListener(listener);
+            rollerSupportPositionValue.removeOnValueNotChangedListener(listener);
+        });
+
+        localCancel.setOnAction(actionEvent -> {
+            hideWorkSpace();
+            beamLengthValue.tryAppend(previousLength);
+            pinnedSupportPositionValue.tryAppend(previousPinnedPosition);
+            rollerSupportPositionValue.tryAppend(previousRollerPosition);
+            areaChart.getData().forEach(doubleDoubleSeries -> doubleDoubleSeries.getNode().setVisible(true));
+            beamLengthValue.removeOnValueNotChangedListener(listener);
+            pinnedSupportPositionValue.removeOnValueNotChangedListener(listener);
+            rollerSupportPositionValue.removeOnValueNotChangedListener(listener);
+        });
+
+        VBox propertiesVBox = new VBox(15, beamLengthTF.node(), pinnedSuppTF.node(), rollerSuppTF.node());
+        propertiesVBox.setMaxWidth(300);
+
+        VBox content = new VBox(
+                15,
+                new HBox(15, localSave, localCancel),
+                new Separator(Orientation.HORIZONTAL),
+                propertiesVBox
+        );
+
+        content.setFillWidth(true);
+        content.setPrefWidth(Region.USE_COMPUTED_SIZE);
         areaChart.getData().forEach(doubleDoubleSeries -> doubleDoubleSeries.getNode().setVisible(false));
-        showWorkSpace(vBox, this::previewResults, restorePreviousValues);
+        showWorkSpace(content);
     }
 
     public void onLoadingButtonAction(ActionEvent actionEvent) {
 
     }
 
-    private void showWorkSpace(Node workSpaceNode, Runnable onSave, Runnable onCancel) {
-        double prefButtonWidth = 75d;
-
-        Button localSave = new Button("Save");
-        localSave.setPrefWidth(prefButtonWidth);
-        localSave.setOnAction(actionEvent -> {
-            hideWorkSpace();
-            onSave.run();
-        });
-
-        Button localCancel = new Button("Cancel");
-        localCancel.setPrefWidth(prefButtonWidth);
-        localCancel.setOnAction(actionEvent -> {
-            hideWorkSpace();
-            onCancel.run();
-        });
-
-
-        HBox hBoxButtons = new HBox(15, localSave, localCancel);
-        VBox vBox = new VBox(15, hBoxButtons, new Separator(Orientation.HORIZONTAL), workSpaceNode);
-        vBox.setFillWidth(true);
-        vBox.setPrefWidth(Region.USE_COMPUTED_SIZE);
-
+    private void showWorkSpace(Node workSpaceNode) {
+//        VBox vBox = new VBox(15, workSpaceNode, new Separator(Orientation.HORIZONTAL), workSpaceNode);
+//        vBox.setFillWidth(true);
+//        vBox.setPrefWidth(Region.USE_COMPUTED_SIZE);
         scrollPaneWorkSpace.setVisible(true);
         scrollPaneWorkSpace.setManaged(true);
-        scrollPaneWorkSpace.setContent(vBox);
+        scrollPaneWorkSpace.setContent(workSpaceNode);
         generateButton.setDisable(true);
         cancelButton.setDisable(true);
         mainPane.getRight().setDisable(true);
-        Platform.runLater(localSave::requestFocus);
     }
 
     private void hideWorkSpace() {

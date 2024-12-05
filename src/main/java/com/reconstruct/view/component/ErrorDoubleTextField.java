@@ -15,15 +15,11 @@ public class ErrorDoubleTextField {
     private final Label errorMessage;
 
     public ErrorDoubleTextField(AppendableValue<Double> appendableValue) {
-        this(appendableValue, new Insets(0));
-    }
-
-    public ErrorDoubleTextField(AppendableValue<Double> appendableValue, Insets insets) {
         this.appendableValue = appendableValue;
         this.textField = new TextField(this.appendableValue.value().toString());
         this.errorMessage = new Label();
-        VBox.setMargin(node, insets);
 
+        errorMessage.setWrapText(true);
         errorMessage.setStyle("-fx-text-fill: red;");
         node.getChildren().add(new Label(this.appendableValue.name()));
         node.getChildren().add(textField);
