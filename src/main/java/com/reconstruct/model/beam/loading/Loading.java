@@ -4,6 +4,7 @@ import com.reconstruct.model.beam.loading.moment.BendingMoment;
 import com.reconstruct.model.beam.loading.point.HorizontalPointLoad;
 import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,9 +18,9 @@ public final class Loading {
     }
 
     public Loading(
-            List<VerticalPointLoad> verticalPointLoads,
-            List<HorizontalPointLoad> horizontalPointLoads,
-            List<BendingMoment> bendingMoments) {
+            Collection<VerticalPointLoad> verticalPointLoads,
+            Collection<HorizontalPointLoad> horizontalPointLoads,
+            Collection<BendingMoment> bendingMoments) {
         this.verticalPointLoads = List.copyOf(Objects.requireNonNull(verticalPointLoads));
         this.horizontalPointLoads = List.copyOf(Objects.requireNonNull(horizontalPointLoads));
         this.bendingMoments = List.copyOf(Objects.requireNonNull(bendingMoments));

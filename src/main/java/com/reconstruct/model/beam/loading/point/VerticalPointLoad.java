@@ -38,7 +38,7 @@ public abstract sealed class VerticalPointLoad extends PointLoad {
         }
 
         public Magnitude magnitude(Position pointOfRotation) {
-            if (pointOfRotation == position())
+            if (pointOfRotation.equals(position()))
                 return Magnitude.zero();
             if (position().doubleValue() < pointOfRotation.doubleValue())
                 return this.magnitude().negated();
@@ -53,7 +53,7 @@ public abstract sealed class VerticalPointLoad extends PointLoad {
 
         @Override
         public Magnitude magnitude(Position pointOfRotation) {
-            if (pointOfRotation == position())
+            if (pointOfRotation.equals(position()))
                 return Magnitude.zero();
             if (position().doubleValue() > pointOfRotation.doubleValue())
                 return this.magnitude();

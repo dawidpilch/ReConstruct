@@ -10,9 +10,9 @@ public class SimplySupportedBeamViewModel {
     public final AppendableValue<Double> beamLengthValue;
     public final AppendableValue<Double> pinnedSupportPositionValue;
     public final AppendableValue<Double> rollerSupportPositionValue;
-    public final AppendableValue<Collection<VerticalPointLoad>> verticalPointLoadAppendableValues;
-    public final AppendableValue<Collection<HorizontalPointLoad>> horizontalPointLoadAppendableValues;
-    public final AppendableValue<Collection<BendingMoment>> bendingMomentAppendableValues;
+    public final AppendableValue<Collection<VerticalPointLoad>> verticalPointLoadValue;
+    public final AppendableValue<Collection<HorizontalPointLoad>> horizontalPointLoadValue;
+    public final AppendableValue<Collection<BendingMoment>> bendingMomentValue;
 
     private final Set<AppendableValue<Double>> singlePositionsForRangeCheck;
 
@@ -47,21 +47,21 @@ public class SimplySupportedBeamViewModel {
             } return ValueErrors.empty();
         };
 
-        this.verticalPointLoadAppendableValues = new AppendableValue<>(Collections.emptyList(),"Vertical point loads") {
+        this.verticalPointLoadValue = new AppendableValue<>(Collections.emptyList(),"Vertical point loads") {
             @Override
             protected ValueErrors validateNewValue(Collection<VerticalPointLoad> newValue) {
                 return positionValueErrorsFuncForCollection.apply(newValue.stream().map(verticalPointLoad -> verticalPointLoad.position().doubleValue()).toList());
             }
         };
 
-        this.horizontalPointLoadAppendableValues = new AppendableValue<>(Collections.emptyList(),"Horizontal point loads") {
+        this.horizontalPointLoadValue = new AppendableValue<>(Collections.emptyList(),"Horizontal point loads") {
             @Override
             protected ValueErrors validateNewValue(Collection<HorizontalPointLoad> newValue) {
                 return positionValueErrorsFuncForCollection.apply(newValue.stream().map(horizontalPointLoad -> horizontalPointLoad.position().doubleValue()).toList());
             }
         };
 
-        this.bendingMomentAppendableValues = new AppendableValue<>(Collections.emptyList(),"Horizontal point loads") {
+        this.bendingMomentValue = new AppendableValue<>(Collections.emptyList(),"Horizontal point loads") {
             @Override
             protected ValueErrors validateNewValue(Collection<BendingMoment> newValue) {
                 return positionValueErrorsFuncForCollection.apply(newValue.stream().map(moment -> moment.position().doubleValue()).toList());

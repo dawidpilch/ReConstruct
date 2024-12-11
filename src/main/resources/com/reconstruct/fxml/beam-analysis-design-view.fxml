@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 
-<BorderPane fx:id="mainPane" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.reconstruct.view.controller.RCBeamAnalysisDesignController">
+<BorderPane fx:id="mainPane" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.reconstruct.view.controller.RCBeamAnalysisDesignController">
    <center>
       <StackPane style="-fx-background-color: white; -fx-border-color: lightGray;">
          <BorderPane.margin>
@@ -28,7 +28,7 @@
             </AreaChart>
             <StackPane fx:id="elementsStackPane" StackPane.alignment="CENTER">
                <StackPane.margin>
-                  <Insets bottom="65.0" left="36.0" right="40.0" top="40.0" />
+                  <Insets bottom="65.0" left="35.0" right="40.0" top="40.0" />
                </StackPane.margin>
                <children>
                   <StackPane fx:id="rollerPane" maxHeight="40.0" maxWidth="40.0" minHeight="40.0" minWidth="40.0" prefHeight="40.0" prefWidth="40.0" StackPane.alignment="CENTER_LEFT">
@@ -71,13 +71,6 @@
                <padding>
                   <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                </padding>
-               <content>
-                  <VBox>
-                     <children>
-                        <TextField />
-                     </children>
-                  </VBox>
-               </content>
             </ScrollPane>
             <Separator prefHeight="0.0" prefWidth="200.0">
                <VBox.margin>

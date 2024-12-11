@@ -5,7 +5,7 @@ import com.reconstruct.model.beam.LoadingAnalysis;
 import com.reconstruct.model.beam.SheerForceDiagram;
 import com.reconstruct.model.beam.SimplySupportedBeam;
 import com.reconstruct.model.beam.loading.Loading;
-import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
+import com.reconstruct.model.beam.loading.point.PointLoad;
 import com.reconstruct.model.beam.section.Rectangular;
 import com.reconstruct.model.beam.span.Span;
 import com.reconstruct.model.beam.value.Position;
@@ -24,9 +24,7 @@ import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Separator;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
 import java.util.*;
@@ -102,12 +100,9 @@ public class RCBeamAnalysisDesignController {
         );
 
         Loading loading = new Loading(
-                List.of(
-                        VerticalPointLoad.directedDownwards(Position.of(3), Magnitude.of(-8)),
-                        VerticalPointLoad.directedUpwards(Position.of(7), Magnitude.of(5.64))
-                ),
-                List.of(),
-                List.of()
+                beamViewModel.verticalPointLoadValue.value(),
+                beamViewModel.horizontalPointLoadValue.value(),
+                beamViewModel.bendingMomentValue.value()
         );
 
         LoadingAnalysis loadingAnalysis = simplySupportedBeam.loadingAnalysis(loading);
@@ -153,22 +148,22 @@ public class RCBeamAnalysisDesignController {
     }
 
     public void onGeometryButtonAction(ActionEvent ignore) {
-        AppendableValue<Double> beamLengthValue = beamViewModel.beamLengthValue;
-        AppendableValue<Double> pinnedSupportPositionValue = beamViewModel.pinnedSupportPositionValue;
-        AppendableValue<Double> rollerSupportPositionValue = beamViewModel.rollerSupportPositionValue;
+        var beamLengthValue = beamViewModel.beamLengthValue;
+        var pinnedSupportPositionValue = beamViewModel.pinnedSupportPositionValue;
+        var rollerSupportPositionValue = beamViewModel.rollerSupportPositionValue;
 
-        ErrorDoubleTextField beamLengthTF = new ErrorDoubleTextField(beamLengthValue);
-        ErrorDoubleTextField pinnedSuppTF = new ErrorDoubleTextField(pinnedSupportPositionValue);
-        ErrorDoubleTextField rollerSuppTF = new ErrorDoubleTextField(rollerSupportPositionValue);
+        var beamLengthTF = new ErrorDoubleTextField(beamLengthValue);
+        var pinnedSuppTF = new ErrorDoubleTextField(pinnedSupportPositionValue);
+        var rollerSuppTF = new ErrorDoubleTextField(rollerSupportPositionValue);
 
         // values to restore if action canceled
-        Double previousLength = beamLengthValue.value();
-        Double previousPinnedPosition = pinnedSupportPositionValue.value();
-        Double previousRollerPosition = rollerSupportPositionValue.value();
+        var lengthMemento = beamLengthValue.value();
+        var pinnedPositionMemento = pinnedSupportPositionValue.value();
+        var rollerPositionMemento = rollerSupportPositionValue.value();
 
         double prefButtonWidth = 75d;
-        Button localSave = new Button("Save");
-        Button localCancel = new Button("Cancel");
+        var localSave = new Button("Save");
+        var localCancel = new Button("Cancel");
         localSave.setPrefWidth(prefButtonWidth);
         localCancel.setPrefWidth(prefButtonWidth);
 
@@ -194,19 +189,19 @@ public class RCBeamAnalysisDesignController {
 
         localCancel.setOnAction(actionEvent -> {
             hideWorkSpace();
-            beamLengthValue.tryAppend(previousLength);
-            pinnedSupportPositionValue.tryAppend(previousPinnedPosition);
-            rollerSupportPositionValue.tryAppend(previousRollerPosition);
+            beamLengthValue.tryAppend(lengthMemento);
+            pinnedSupportPositionValue.tryAppend(pinnedPositionMemento);
+            rollerSupportPositionValue.tryAppend(rollerPositionMemento);
             areaChart.getData().forEach(doubleDoubleSeries -> doubleDoubleSeries.getNode().setVisible(true));
             beamLengthValue.removeOnValueNotChangedListener(listener);
             pinnedSupportPositionValue.removeOnValueNotChangedListener(listener);
             rollerSupportPositionValue.removeOnValueNotChangedListener(listener);
         });
 
-        VBox propertiesVBox = new VBox(15, beamLengthTF.node(), pinnedSuppTF.node(), rollerSuppTF.node());
+        var propertiesVBox = new VBox(15, beamLengthTF.node(), pinnedSuppTF.node(), rollerSuppTF.node());
         propertiesVBox.setMaxWidth(300);
 
-        VBox content = new VBox(
+        var content = new VBox(
                 15,
                 new HBox(15, localSave, localCancel),
                 new Separator(Orientation.HORIZONTAL),
@@ -220,13 +215,39 @@ public class RCBeamAnalysisDesignController {
     }
 
     public void onLoadingButtonAction(ActionEvent actionEvent) {
+        double prefButtonWidth = 75d;
+        var localSave = new Button("Save");
+        var localCancel = new Button("Cancel");
+        localSave.setPrefWidth(prefButtonWidth);
+        localCancel.setPrefWidth(prefButtonWidth);
 
+//        var horizontalPointLoadsMemento = beamViewModel.horizontalPointLoadValue.value();
+//        var bendingMomentMemento = beamViewModel.bendingMomentValue.value();
+
+        Tab pointLoadsTab = new Tab("Point Loads");
+        var verticalPointLoadsMemento = beamViewModel.verticalPointLoadValue.value();
+        TableView<PointLoad> tableView = new TableView<>();
+        tableView.setEditable(false);
+
+        TableColumn<PointLoad, String> nameColumn = new TableColumn<>("Name");
+
+
+
+
+        TabPane loadingTabPane = new TabPane(pointLoadsTab);
+
+        var content = new VBox(
+                15,
+                new HBox(15, localSave, localCancel),
+                new Separator(Orientation.HORIZONTAL),
+                loadingTabPane
+        );
+
+        content.setFillWidth(true);
+        content.setPrefWidth(Region.USE_COMPUTED_SIZE);
     }
 
     private void showWorkSpace(Node workSpaceNode) {
-//        VBox vBox = new VBox(15, workSpaceNode, new Separator(Orientation.HORIZONTAL), workSpaceNode);
-//        vBox.setFillWidth(true);
-//        vBox.setPrefWidth(Region.USE_COMPUTED_SIZE);
         scrollPaneWorkSpace.setVisible(true);
         scrollPaneWorkSpace.setManaged(true);
         scrollPaneWorkSpace.setContent(workSpaceNode);
@@ -239,8 +260,8 @@ public class RCBeamAnalysisDesignController {
         scrollPaneWorkSpace.setVisible(false);
         scrollPaneWorkSpace.setManaged(false);
         scrollPaneWorkSpace.setContent(null);
-        mainPane.getRight().setDisable(false);
         generateButton.setDisable(false);
-        cancelButton.setDisable(true);
+        cancelButton.setDisable(false);
+        mainPane.getRight().setDisable(false);
     }
 }
