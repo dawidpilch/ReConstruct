@@ -62,7 +62,7 @@ public class SimplySupportedBeam implements Beam {
 
     @Override
     public Map<Position, List<VerticalPointLoad>> supportVerticalReactions(Loading loading) {
-        SummationOfMoments summationOfMoments = new SummationOfMoments(loading.verticalPointLoads(), loading.bendingMoments());
+        SummationOfMoments summationOfMoments = new SummationOfMoments(loading);
         VerticalPointLoad vPinned = verticalReaction(summationOfMoments, rollerPosition, pinnedPosition);
         VerticalPointLoad vRoller = verticalReaction(summationOfMoments, pinnedPosition, rollerPosition);
 
@@ -88,37 +88,66 @@ public class SimplySupportedBeam implements Beam {
         var supportVerticalReactions = supportVerticalReactions(loading);
         List<VerticalPointLoad> verticalPointLoads = new ArrayList<>(loading.verticalPointLoads());
         verticalPointLoads.addAll(supportVerticalReactions.values().stream().flatMap(Collection::stream).toList());
-        verticalPointLoads.sort(Comparator.comparingDouble(value -> value.position().doubleValue()));
         if (verticalPointLoads.size() < 2)
             throw new RuntimeException("At least two Vertical Loads expected (Support reactions missing)");
 
-        Map<Position, Magnitude> bendingMomentDiagram = new HashMap<>();
-        Map<Position, Magnitude> sheerForceDiagram = new HashMap<>();
+        Map<Position, Magnitude> bendingMomentDiagram = new LinkedHashMap<>();
+        Map<Position, Magnitude> sheerForceDiagram = new LinkedHashMap<>();
 
-        int size = verticalPointLoads.size();
+        Set<Position> positionsSet = new TreeSet<>(Comparator.comparingDouble(Position::doubleValue));
+        verticalPointLoads.forEach(verticalPointLoad -> positionsSet.add(verticalPointLoad.position()));
+        loading.bendingMoments().forEach(bendingMoment -> positionsSet.add(bendingMoment.position()));
+        loading.uniformlyDistributedLoads().forEach(uniformlyDistributedLoad -> {
+            positionsSet.add(uniformlyDistributedLoad.startPosition());
+            positionsSet.add(uniformlyDistributedLoad.endPosition());
+        });
+
+        Position[] positions = positionsSet.toArray(Position[]::new);
+
+        int size = positions.length;
         for (int i = 1; i < size; i++) {
-            VerticalPointLoad endSegmentReaction = verticalPointLoads.get(i);
-            VerticalPointLoad previousEndReaction = verticalPointLoads.get(i - 1);
-            List<VerticalPointLoad> loadsInSegment = new ArrayList<>(verticalPointLoads.stream()
-                    .filter(verticalPointLoad -> verticalPointLoad.position().isToTheLeftOf(endSegmentReaction.position()))
-                    .sorted(Comparator.comparingDouble(value -> value.position().doubleValue()))
-                    .toList());
+            Position endSegmentPosition = positions[i];
+            Position previousEndPosition = positions[i - 1];
 
-            List<Double> positionsPerSpan = new EvenlyDistributedDoubleRange(previousEndReaction.position().doubleValue(), endSegmentReaction.position().doubleValue(), 10).values();
+            List<VerticalPointLoad> verticalLoadsInSegment = new ArrayList<>(verticalPointLoads.stream()
+                    .filter(verticalPointLoad -> verticalPointLoad.position().isToTheLeftOf(endSegmentPosition))
+                    .sorted(Comparator.comparingDouble(value -> value.position().doubleValue()))
+                    .toList()
+            );
+
+            List<BendingMoment> bendingMomentsInSegment = new ArrayList<>(loading.bendingMoments().stream()
+                    .filter(bendingMoment -> bendingMoment.position().isToTheLeftOf(endSegmentPosition))
+                    .sorted(Comparator.comparingDouble(value -> value.position().doubleValue()))
+                    .toList()
+            );
+
+            double segmentOffset = 0.00001;
+            List<Double> positionsPerSpan = new EvenlyDistributedDoubleRange(
+                    previousEndPosition.doubleValue() + segmentOffset,
+                    endSegmentPosition.doubleValue() - segmentOffset,
+                    10
+            ).values();
+
             for (double doublePosition : positionsPerSpan) {
                 Position position = Position.of(doublePosition);
                 if (bendingMomentDiagram.containsKey(position)) {
                     continue;
                 }
 
-                double bendingMoment = 0;
-                double sheerForce = 0;
-                for (VerticalPointLoad verticalPointLoad : loadsInSegment) {
-                    bendingMoment += verticalPointLoad.magnitude().doubleValue() * (doublePosition - verticalPointLoad.position().doubleValue());
-                    sheerForce += verticalPointLoad.magnitude().doubleValue();
+                double bendingMomentSum = 0;
+                double sheerForceSum = 0;
+                for (VerticalPointLoad verticalPointLoad : verticalLoadsInSegment) {
+                    bendingMomentSum += verticalPointLoad.magnitude().doubleValue() * (doublePosition - verticalPointLoad.position().doubleValue());
+                    sheerForceSum += verticalPointLoad.magnitude().doubleValue();
                 }
-                bendingMomentDiagram.put(Position.of(doublePosition), Magnitude.of(bendingMoment));
-                sheerForceDiagram.put(Position.of(doublePosition), Magnitude.of(sheerForce));
+
+                for (var bendingMoment : bendingMomentsInSegment) {
+                    // negate bm value
+                    bendingMomentSum -= bendingMoment.magnitude().doubleValue();
+                }
+
+                bendingMomentDiagram.put(Position.of(doublePosition), Magnitude.of(bendingMomentSum));
+                sheerForceDiagram.put(Position.of(doublePosition), Magnitude.of(sheerForceSum));
             }
         }
 
@@ -126,6 +155,57 @@ public class SimplySupportedBeam implements Beam {
                 new BendingMomentDiagram(bendingMomentDiagram),
                 new SheerForceDiagram(sheerForceDiagram)
         );
+
+        ///// ---------
+
+//        var supportVerticalReactions = supportVerticalReactions(loading);
+//        List<VerticalPointLoad> verticalPointLoads = new ArrayList<>(loading.verticalPointLoads());
+//        verticalPointLoads.addAll(supportVerticalReactions.values().stream().flatMap(Collection::stream).toList());
+//        verticalPointLoads.sort(Comparator.comparingDouble(value -> value.position().doubleValue()));
+//        if (verticalPointLoads.size() < 2)
+//            throw new RuntimeException("At least two Vertical Loads expected (Support reactions missing)");
+//
+//        Map<Position, Magnitude> bendingMomentDiagram = new LinkedHashMap<>();
+//        Map<Position, Magnitude> sheerForceDiagram = new LinkedHashMap<>();
+//
+//        int size = verticalPointLoads.size();
+//        for (int i = 1; i < size; i++) {
+//            VerticalPointLoad endSegmentReaction = verticalPointLoads.get(i);
+//            VerticalPointLoad previousEndReaction = verticalPointLoads.get(i - 1);
+//            List<VerticalPointLoad> loadsInSegment = new ArrayList<>(verticalPointLoads.stream()
+//                    .filter(verticalPointLoad -> verticalPointLoad.position().isToTheLeftOf(endSegmentReaction.position()))
+//                    .sorted(Comparator.comparingDouble(value -> value.position().doubleValue()))
+//                    .toList());
+//
+//            double segmentOffset = 0.001;
+//
+//            List<Double> positionsPerSpan = new EvenlyDistributedDoubleRange(
+//                    previousEndReaction.position().doubleValue() + segmentOffset,
+//                    endSegmentReaction.position().doubleValue() - segmentOffset,
+//                    10
+//            ).values();
+//
+//            for (double doublePosition : positionsPerSpan) {
+//                Position position = Position.of(doublePosition);
+//                if (bendingMomentDiagram.containsKey(position)) {
+//                    continue;
+//                }
+//
+//                double bendingMoment = 0;
+//                double sheerForce = 0;
+//                for (VerticalPointLoad verticalPointLoad : loadsInSegment) {
+//                    bendingMoment += verticalPointLoad.magnitude().doubleValue() * (doublePosition - verticalPointLoad.position().doubleValue());
+//                    sheerForce += verticalPointLoad.magnitude().doubleValue();
+//                }
+//                bendingMomentDiagram.put(Position.of(doublePosition), Magnitude.of(bendingMoment));
+//                sheerForceDiagram.put(Position.of(doublePosition), Magnitude.of(sheerForce));
+//            }
+//        }
+//
+//        return new LoadingAnalysis(
+//                new BendingMomentDiagram(bendingMomentDiagram),
+//                new SheerForceDiagram(sheerForceDiagram)
+//        );
     }
 
     public Span span() {

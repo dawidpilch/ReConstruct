@@ -1,5 +1,6 @@
 package com.reconstruct.view.viewmodel;
 
+import com.reconstruct.model.beam.loading.distributed.UniformlyDistributedLoad;
 import com.reconstruct.model.beam.loading.moment.BendingMoment;
 import com.reconstruct.model.beam.loading.point.HorizontalPointLoad;
 import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
@@ -10,9 +11,10 @@ public class SimplySupportedBeamViewModel {
     public final AppendableValue<Double> beamLengthValue;
     public final AppendableValue<Double> pinnedSupportPositionValue;
     public final AppendableValue<Double> rollerSupportPositionValue;
-    public final AppendableValue<Collection<VerticalPointLoad>> verticalPointLoadValue;
-    public final AppendableValue<Collection<HorizontalPointLoad>> horizontalPointLoadValue;
-    public final AppendableValue<Collection<BendingMoment>> bendingMomentValue;
+    public final AppendableValue<Collection<VerticalPointLoad>> verticalPointLoadsValue;
+    public final AppendableValue<Collection<HorizontalPointLoad>> horizontalPointLoadsValue;
+    public final AppendableValue<Collection<BendingMoment>> bendingMomentsValue;
+    public final AppendableValue<Collection<UniformlyDistributedLoad>> uniformlyDistributedLoadsValue;
 
     private final Set<AppendableValue<Double>> singlePositionsForRangeCheck;
 
@@ -47,24 +49,40 @@ public class SimplySupportedBeamViewModel {
             } return ValueErrors.empty();
         };
 
-        this.verticalPointLoadValue = new AppendableValue<>(Collections.emptyList(),"Vertical point loads") {
+        this.verticalPointLoadsValue = new AppendableValue<>(Collections.emptyList(),"Vertical point loads") {
             @Override
             protected ValueErrors validateNewValue(Collection<VerticalPointLoad> newValue) {
                 return positionValueErrorsFuncForCollection.apply(newValue.stream().map(verticalPointLoad -> verticalPointLoad.position().doubleValue()).toList());
             }
         };
 
-        this.horizontalPointLoadValue = new AppendableValue<>(Collections.emptyList(),"Horizontal point loads") {
+        this.horizontalPointLoadsValue = new AppendableValue<>(Collections.emptyList(),"Horizontal point loads") {
             @Override
             protected ValueErrors validateNewValue(Collection<HorizontalPointLoad> newValue) {
                 return positionValueErrorsFuncForCollection.apply(newValue.stream().map(horizontalPointLoad -> horizontalPointLoad.position().doubleValue()).toList());
             }
         };
 
-        this.bendingMomentValue = new AppendableValue<>(Collections.emptyList(),"Horizontal point loads") {
+        this.bendingMomentsValue = new AppendableValue<>(Collections.emptyList(),"Horizontal point loads") {
             @Override
             protected ValueErrors validateNewValue(Collection<BendingMoment> newValue) {
                 return positionValueErrorsFuncForCollection.apply(newValue.stream().map(moment -> moment.position().doubleValue()).toList());
+            }
+        };
+
+        this.uniformlyDistributedLoadsValue = new AppendableValue<>(Collections.emptyList(), "Uniformly distributed loads") {
+            @Override
+            protected ValueErrors validateNewValue(Collection<UniformlyDistributedLoad> newValue) {
+                for (var udl : newValue) {
+                    ValueErrors startPosErrors = positionValueErrorsFunc.apply(udl.startPosition().doubleValue());
+                    ValueErrors endPosErrors = positionValueErrorsFunc.apply(udl.endPosition().doubleValue());
+                    if (!startPosErrors.isEmpty()) {
+                        return startPosErrors;
+                    }
+                    if (!endPosErrors.isEmpty()) {
+                        return endPosErrors;
+                    }
+                } return ValueErrors.empty();
             }
         };
 

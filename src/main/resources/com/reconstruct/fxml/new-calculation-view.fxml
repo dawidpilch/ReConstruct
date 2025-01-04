@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.web.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.reconstruct.view.controller.NewCalculationController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.reconstruct.view.controller.NewCalculationController">
    <center>
       <SplitPane dividerPositions="0.25" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER" SplitPane.resizableWithParent="false">
         <items>
@@ -18,7 +18,7 @@
          <children>
             <ButtonBar prefHeight="40.0" prefWidth="200.0" AnchorPane.rightAnchor="5.0">
               <buttons>
-                <Button fx:id="calculateButton" defaultButton="true" mnemonicParsing="false" onAction="#onCalculateButtonAction" text="Calculate" />
+                <Button fx:id="calculateButton" mnemonicParsing="false" onAction="#onCalculateButtonAction" text="Calculate" />
                   <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#onCancelButtonAction" text="Cancel" />
               </buttons>
             </ButtonBar>

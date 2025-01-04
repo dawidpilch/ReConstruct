@@ -25,10 +25,15 @@ public class RCWindow {
     }
 
     public void show() {
+        show(Screen.getPrimary().getBounds().getHeight() / 1.2, Screen.getPrimary().getBounds().getWidth() / 1.2);
+    }
+
+
+    public void show(double height, double width) {
         Stage stage = new Stage();
         stage.setScene(scene);
-        stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.2);
-        stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.2);
+        stage.setHeight(height);
+        stage.setWidth(width);
         stage.minHeightProperty().setValue(580);
         stage.minWidthProperty().setValue(720);
         stage.setTitle(title);

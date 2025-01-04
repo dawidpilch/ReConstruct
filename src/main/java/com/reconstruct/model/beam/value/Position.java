@@ -2,6 +2,7 @@ package com.reconstruct.model.beam.value;
 
 import com.reconstruct.model.beam.span.Span;
 import com.reconstruct.model.value.DoubleValue;
+import org.apache.commons.math3.util.Precision;
 
 import java.util.Objects;
 
@@ -35,7 +36,7 @@ public class Position implements DoubleValue {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Position position = (Position) o;
-        return Double.compare(value, position.value) == 0;
+        return Precision.equals(value, position.doubleValue(), 0.001);
     }
 
     @Override

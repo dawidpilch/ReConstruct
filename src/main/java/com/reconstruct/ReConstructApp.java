@@ -10,11 +10,10 @@ import java.io.IOException;
 public class ReConstructApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(ReConstructApp.class.getResource("fxml/home-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(ReConstructApp.class.getResource("fxml/new-calculation-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         stage.minHeightProperty().setValue(400);
         stage.minWidthProperty().setValue(400);
-        stage.setMaximized(true);
         stage.setTitle("ReConstruct");
         stage.setScene(scene);
         stage.show();

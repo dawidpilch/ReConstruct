@@ -86,6 +86,7 @@ class SimplySupportedBeamTest {
                                         VerticalPointLoad.directedDownwards(Position.of(6), Magnitude.of(5))
                                 ),
                                 List.of(),
+                                List.of(),
                                 List.of()
                         ),
                         Position.of(6.5),           // pinned
@@ -100,6 +101,7 @@ class SimplySupportedBeamTest {
                                         VerticalPointLoad.directedUpwards(Position.of(5), Magnitude.of(8)),
                                         VerticalPointLoad.directedDownwards(Position.of(9), Magnitude.of(5))
                                 ),
+                                List.of(),
                                 List.of(),
                                 List.of()
                         ),
@@ -116,7 +118,8 @@ class SimplySupportedBeamTest {
                                 List.of(
                                         BendingMoment.clockwise(Position.of(5), Magnitude.of(5)),
                                         BendingMoment.counterClockwise(Position.of(2), Magnitude.of(7))
-                                )
+                                ),
+                                List.of()
                         ),
                         Position.of(2),             // pinned
                         Position.of(7),             // roller

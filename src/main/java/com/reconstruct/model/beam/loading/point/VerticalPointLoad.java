@@ -31,6 +31,8 @@ public abstract sealed class VerticalPointLoad extends PointLoad {
     }
 
     public abstract Magnitude magnitude(Position pointOfRotation);
+    public abstract boolean isDirectedUpwards();
+    public abstract boolean isDirectedDownwards();
 
     private static final class VerticalPointLoadDirectedDownwards extends VerticalPointLoad {
         public VerticalPointLoadDirectedDownwards(Position position, Magnitude magnitude) {
@@ -43,6 +45,16 @@ public abstract sealed class VerticalPointLoad extends PointLoad {
             if (position().doubleValue() < pointOfRotation.doubleValue())
                 return this.magnitude().negated();
             return this.magnitude();
+        }
+
+        @Override
+        public boolean isDirectedUpwards() {
+            return false;
+        }
+
+        @Override
+        public boolean isDirectedDownwards() {
+            return true;
         }
     }
 
@@ -59,6 +71,16 @@ public abstract sealed class VerticalPointLoad extends PointLoad {
                 return this.magnitude();
             return this.magnitude().negated();
         }
+
+        @Override
+        public boolean isDirectedUpwards() {
+            return true;
+        }
+
+        @Override
+        public boolean isDirectedDownwards() {
+            return false;
+        }
     }
 
     private final static class ZeroVerticalPointLoad extends VerticalPointLoad {
@@ -73,6 +95,16 @@ public abstract sealed class VerticalPointLoad extends PointLoad {
         @Override
         public Magnitude magnitude(Position pointOfRotation) {
             return this.magnitude();
+        }
+
+        @Override
+        public boolean isDirectedUpwards() {
+            return false;
+        }
+
+        @Override
+        public boolean isDirectedDownwards() {
+            return true;
         }
     }
 }

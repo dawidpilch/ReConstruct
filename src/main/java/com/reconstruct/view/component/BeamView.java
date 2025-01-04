@@ -1,0 +1,304 @@
+package com.reconstruct.view.component;
+
+import com.reconstruct.model.beam.loading.moment.BendingMoment;
+import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
+import com.reconstruct.view.viewmodel.AppendableValue;
+import com.reconstruct.view.viewmodel.SimplySupportedBeamViewModel;
+import javafx.beans.property.ReadOnlyListWrapper;
+import javafx.geometry.Pos;
+
+import javafx.scene.Node;
+import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.*;
+import javafx.scene.transform.Scale;
+import org.apache.commons.math3.util.Precision;
+
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class BeamView {
+    private final SimplySupportedBeamViewModel beamViewModel;
+    private final Map<AppendableValue<Double>, Node> supportPositionsToNodeMap = new HashMap<>();
+
+    private final StackPane contentPane = new StackPane();
+    private final StackPane chartPane = new StackPane();
+    private final StackPane loadingPane = new StackPane();
+    private final AreaChart<Number, Number> areaChart;
+    private final NumberAxis xAxis;
+    private final NumberAxis yAxis;
+
+    private final double componentWidth;
+    private final double componentHeight;
+    private final static double NODE_WIDTH = 40.0;
+
+    public BeamView(double width, double height, SimplySupportedBeamViewModel beamViewModel) {
+        this.componentWidth = width;
+        this.componentHeight = height;
+        this.beamViewModel = beamViewModel;
+
+        NumberAxis xAxis = new NumberAxis();
+        NumberAxis yAxis = new NumberAxis();
+        double yWidth = 19;
+        yAxis.setPrefWidth(yWidth);
+        yAxis.setMinWidth(yWidth);
+        yAxis.setMaxWidth(yWidth);
+        this.areaChart = new AreaChart<>(xAxis, yAxis);
+        this.xAxis = xAxis;
+        this.yAxis = yAxis;
+
+        Node vZeroLine = areaChart.lookup(".chart-vertical-zero-line");
+        if (vZeroLine != null) {
+            vZeroLine.setStyle("""
+                    -fx-stroke: f4f4f4;
+                    -fx-stroke-dash-array: 4 4;
+                    -fx-stroke-width: 1;
+            """);
+        }
+
+        Node hZeroLine = areaChart.lookup(".chart-horizontal-zero-line");
+        if (hZeroLine != null) {
+            hZeroLine.setStyle("""
+                    -fx-stroke: black;
+                    -fx-stroke-width: 3;
+            """);
+        }
+
+        contentPane.setPrefSize(componentWidth + NODE_WIDTH, componentHeight);
+        contentPane.setMaxSize(componentWidth + NODE_WIDTH, componentHeight);
+        contentPane.setMinSize(componentWidth + NODE_WIDTH, componentHeight);
+
+        contentPane.getChildren().add(areaChart);
+        StackPane.setAlignment(areaChart, Pos.CENTER);
+        areaChart.setHorizontalGridLinesVisible(false);
+        areaChart.setVerticalGridLinesVisible(false);
+        areaChart.setTranslateY(10);
+        areaChart.setTranslateX(-10);
+
+        displayDiagram(new XYChart.Series<>());
+
+        areaChart.toFront();
+        displayDiagram(new XYChart.Series<>(new ReadOnlyListWrapper<>()));
+
+        chartPane.setPrefSize(componentWidth, componentHeight);
+        chartPane.setMaxSize(componentWidth, componentHeight);
+        chartPane.setMinSize(componentWidth, componentHeight);
+        contentPane.getChildren().add(chartPane);
+        StackPane.setAlignment(chartPane, Pos.CENTER);
+
+        loadingPane.setPrefSize(contentPane.getPrefWidth(), contentPane.getPrefHeight());
+        loadingPane.setMaxSize(contentPane.getMaxWidth(), contentPane.getMaxHeight());
+        loadingPane.setMinSize(contentPane.getMinWidth(), contentPane.getMinHeight());
+        contentPane.getChildren().add(loadingPane);
+        StackPane.setAlignment(loadingPane, Pos.CENTER);
+
+        Node pinnedSupportNode = pinnedSupport();
+        contentPane.getChildren().add(pinnedSupportNode);
+        StackPane.setAlignment(pinnedSupportNode, Pos.CENTER_LEFT);
+
+        Node rollerSupportNode = rollerSupport();
+        contentPane.getChildren().add(rollerSupportNode);
+        StackPane.setAlignment(rollerSupportNode, Pos.CENTER_LEFT);
+
+        supportPositionsToNodeMap.put(beamViewModel.pinnedSupportPositionValue, pinnedSupportNode);
+        supportPositionsToNodeMap.put(beamViewModel.rollerSupportPositionValue, rollerSupportNode);
+
+        chartPane.toFront();
+        loadingPane.toFront();
+    }
+
+    private void translateXNodesAbsPosition(Node node, double absolutePositionOnBeam) {
+        node.setTranslateX((absolutePositionOnBeam / beamViewModel.beamLengthValue.value()) * componentWidth);
+    }
+
+    private Node pinnedSupport() {
+        double height = 38;
+        Polygon triangle = new Polygon();
+
+        triangle.getPoints().addAll(
+                -19.0, 19.0,
+                19.0, 19.0,
+                0.0, -19.0
+        );
+
+        triangle.setFill(Color.WHITESMOKE);
+        triangle.setStroke(Color.BLACK);
+        triangle.setStrokeWidth(2);
+        triangle.setTranslateY(height / 2);
+        return triangle;
+    }
+
+    private Node rollerSupport() {
+        Circle circle = new Circle(38d / 2);
+        circle.setFill(Color.WHITESMOKE);
+        circle.setStroke(Color.BLACK);
+        circle.setStrokeWidth(2);
+        circle.setTranslateY(38d / 2);
+        return circle;
+    }
+
+    public void displayLoading() {
+        loadingPane.setVisible(true);
+        loadingPane.getChildren().clear();
+
+        for (VerticalPointLoad verticalPointLoad : beamViewModel.verticalPointLoadsValue.value()) {
+            SVGPath svgPath = new SVGPath();
+            double svgHeight = 162;
+            double wrapperHeight = 30 + svgHeight;
+            svgPath.setContent("M 0 -162 H 1 V -10 H 6 Q 3 -3 0 0 Q -3 -3 -6 -10 H -1 V -162 Z");
+            svgPath.setFill(Paint.valueOf("red"));
+
+            StackPane wrapper = new StackPane(svgPath);
+            wrapper.setMaxSize(NODE_WIDTH, wrapperHeight);
+            wrapper.setPrefSize(NODE_WIDTH, wrapperHeight);
+            wrapper.setMinSize(NODE_WIDTH, wrapperHeight);
+            loadingPane.getChildren().add(wrapper);
+            StackPane.setAlignment(wrapper, Pos.CENTER_LEFT);
+
+            Label label = new Label(String.format("%.3f", Math.abs(verticalPointLoad.magnitude().doubleValue())));
+            label.setStyle("-fx-font-size: 16; -fx-text-fill: red;");
+            wrapper.getChildren().add(label);
+            StackPane.setAlignment(label, Pos.TOP_CENTER);
+            StackPane.setAlignment(svgPath, Pos.BOTTOM_CENTER);
+
+            if (verticalPointLoad.isDirectedUpwards()) {
+                double fix = 2d;
+                wrapper.setRotate(180);
+                wrapper.setTranslateY((wrapperHeight / 2) - fix);
+                label.setRotate(180);
+            } else {
+                wrapper.setTranslateY(-(wrapperHeight / 2));
+            }
+
+            translateXNodesAbsPosition(wrapper, verticalPointLoad.position().doubleValue());
+            wrapper.toFront();
+        }
+
+        for (BendingMoment bendingMoment : beamViewModel.bendingMomentsValue.value()) {
+            SVGPath svgPath = new SVGPath();
+            double svgHeight = 107;
+            double wrapperHeight = 30 + svgHeight;
+            svgPath.setContent("M3 0A1 1 0 00-3 0 1 1 0 003 0ZM19 0Q19-27 6-44 3-43 1-42 0-50 1-56 6-53 13-47 10-46 8-45 21-28 21 0 21 29 0 50V48Q19 27 19 0");
+            svgPath.setFill(Paint.valueOf("red"));
+
+            StackPane wrapper = new StackPane(svgPath);
+            wrapper.setMaxSize(NODE_WIDTH, wrapperHeight);
+            wrapper.setPrefSize(NODE_WIDTH, wrapperHeight);
+            wrapper.setMinSize(NODE_WIDTH, wrapperHeight);
+            loadingPane.getChildren().add(wrapper);
+            StackPane.setAlignment(wrapper, Pos.CENTER_LEFT);
+
+            Label label = new Label(String.format("%.3f", Math.abs(bendingMoment.magnitude().doubleValue())));
+            label.setStyle("-fx-font-size: 16; -fx-text-fill: red;");
+            wrapper.getChildren().add(label);
+            StackPane.setAlignment(label, Pos.TOP_CENTER);
+            StackPane.setAlignment(svgPath, Pos.CENTER_RIGHT);
+
+            double fix = 1;
+            if (bendingMoment.isClockwise()) {
+                svgPath.getTransforms().add(new Scale(-1, 1));
+                fix = 2;
+            }
+
+            wrapper.setTranslateY(-6d);
+            translateXNodesAbsPosition(wrapper, bendingMoment.position().doubleValue());
+
+            wrapper.setTranslateX(wrapper.getTranslateX() + fix);
+            wrapper.toFront();
+        }
+    }
+
+    public void hideLoading() {
+        loadingPane.getChildren().clear();
+    }
+
+    public void displayDiagram(XYChart.Series<Number, Number> series) {
+        chartPane.getChildren().clear();
+        areaChart.getData().clear();
+
+        areaChart.getData().add(series);
+        double max = series.getData().stream().map(XYChart.Data::getYValue).map(Number::doubleValue).map(Math::abs).max(Double::compareTo).orElse(0d);
+
+        if (max == 0) {
+            max = 1;
+        }
+
+        List<XYChart.Data<Number, Number>> dataList = series.getData().sorted(Comparator.comparingDouble(o -> o.getXValue().doubleValue())).stream().toList();
+        for (int i = 0; i < dataList.size(); i++) {
+            boolean shouldLabelCurrent = false;
+            if (i == 0 || i == dataList.size() - 1) {
+                shouldLabelCurrent = true;
+            } else {
+                var previousY = dataList.get(i - 1).getYValue().doubleValue();
+                var currentY = dataList.get(i).getYValue().doubleValue();
+                var nextY = dataList.get(i + 1).getYValue().doubleValue();
+
+                if ((previousY > currentY && nextY > currentY) || (previousY < currentY && nextY < currentY)) {
+                    shouldLabelCurrent = true;
+                } else if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i + 1).getXValue().doubleValue(), 0.001)) {
+                    shouldLabelCurrent = true;
+                } else if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i - 1).getXValue().doubleValue(), 0.001)) {
+                    shouldLabelCurrent = true;
+                }
+            }
+
+            if (!shouldLabelCurrent) {
+                continue;
+            }
+
+            Label label = new Label(String.format("%.3f", Math.abs(dataList.get(i).getYValue().doubleValue())));
+            label.setStyle("-fx-font-size: 16; -fx-text-fill: black;");
+            translateXNodesAbsPosition(label, dataList.get(i).getXValue().doubleValue());
+            label.setTranslateX(label.getTranslateX() - 20);
+
+            double y = Precision.equals(dataList.get(i).getYValue().doubleValue(), 0, 0.001) ? max * 0.15 : dataList.get(i).getYValue().doubleValue();
+            double v = ((y - (-max)) / (max - (-max))) * (((componentHeight-150) / 2) - (-((componentHeight-150) / 2))) + (-((componentHeight-150) / 2));
+            label.setTranslateY(-v);
+            chartPane.getChildren().add(label);
+            StackPane.setAlignment(label, Pos.CENTER_LEFT);
+            label.toFront();
+        }
+
+        double offset = 11;
+        areaChart.setPrefSize(componentWidth + NODE_WIDTH + offset, componentHeight - 100);
+        areaChart.setMinSize(componentWidth + NODE_WIDTH  + offset, componentHeight - 100);
+        areaChart.setMaxSize(componentWidth + NODE_WIDTH  + offset, componentHeight - 100);
+        areaChart.setLegendVisible(false);
+//        areaChart.getXAxis().setOpacity(0);
+//        areaChart.getYAxis().setOpacity(0);
+
+        adjustXAxisForLength();
+        yAxis.setAutoRanging(false);
+        yAxis.setUpperBound(max * 1.15);
+        yAxis.setLowerBound(-max * 1.15);
+    }
+
+    public void hideDiagram() {
+        chartPane.getChildren().clear();
+        areaChart.getData().clear();
+    }
+
+    public void refreshGeometry() {
+        adjustXAxisForLength();
+        for (var entry : supportPositionsToNodeMap.entrySet()) {
+            translateXNodesAbsPosition(entry.getValue(), entry.getKey().value());
+        }
+    }
+
+    public Node node() {
+        return contentPane;
+    }
+
+    private void adjustXAxisForLength() {
+        xAxis.setAutoRanging(false);
+        xAxis.setUpperBound(beamViewModel.beamLengthValue.value());
+        xAxis.setLowerBound(0d);
+    }
+}
