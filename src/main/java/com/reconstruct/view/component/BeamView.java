@@ -12,7 +12,7 @@ import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
@@ -158,8 +158,10 @@ public class BeamView {
             SVGPath svgPath = new SVGPath();
             double svgHeight = 107;
             double wrapperHeight = 30 + svgHeight;
+            Color colorFill = Color.rgb(230, 181, 17);
+
             svgPath.setContent("M3 0A1 1 0 00-3 0 1 1 0 003 0ZM19 0Q19-27 6-44 3-43 1-42 0-50 1-56 6-53 13-47 10-46 8-45 21-28 21 0 21 29 0 50V48Q19 27 19 0");
-            svgPath.setFill(Color.rgb(230, 181, 17));
+            svgPath.setFill(colorFill);
 
             StackPane wrapper = new StackPane(svgPath);
             wrapper.setMaxSize(NODE_WIDTH, wrapperHeight);
@@ -168,8 +170,9 @@ public class BeamView {
             loadingPane.getChildren().add(wrapper);
             StackPane.setAlignment(wrapper, Pos.CENTER_LEFT);
 
-            Label label = new Label(String.format("%.3f", Math.abs(bendingMoment.magnitude().doubleValue())));
-            label.setStyle("-fx-font-size: 16; -fx-text-fill: red;");
+            Label label = numericLabel(Math.abs(bendingMoment.magnitude().doubleValue()));
+            label.setStyle("-fx-font-size: 14;");
+            label.setTextFill(colorFill);
             wrapper.getChildren().add(label);
             StackPane.setAlignment(label, Pos.TOP_CENTER);
             StackPane.setAlignment(svgPath, Pos.CENTER_RIGHT);
@@ -233,8 +236,9 @@ public class BeamView {
 
         StackPane.setAlignment(wrapper, Pos.CENTER_LEFT);
 
-        Label label = new Label(String.format("%.3f", Math.abs(magnitude)));
-        label.setStyle("-fx-font-size: 16; -fx-text-fill: red;");
+        Label label = numericLabel(Math.abs(magnitude));
+        label.setStyle("-fx-font-size: 14;");
+        label.setTextFill(paint);
         wrapper.getChildren().add(label);
         StackPane.setAlignment(label, Pos.TOP_CENTER);
         StackPane.setAlignment(svgPath, Pos.BOTTOM_CENTER);
@@ -290,10 +294,10 @@ public class BeamView {
                 continue;
             }
 
-            Label label = new Label(String.format("%.3f", Math.abs(dataList.get(i).getYValue().doubleValue())));
-            label.setStyle("-fx-font-size: 16; -fx-text-fill: black;");
+            Label label = numericLabel(Math.abs(dataList.get(i).getYValue().doubleValue()));
+            label.setStyle("-fx-font-size: 14; -fx-text-fill: black;");
             translateXNodesAbsPosition(label, dataList.get(i).getXValue().doubleValue());
-            label.setTranslateX(label.getTranslateX() - 20);
+            label.setTranslateX(label.getTranslateX() - 150);
 
             double y = Precision.equals(dataList.get(i).getYValue().doubleValue(), 0, 0.001) ? max * 0.15 : dataList.get(i).getYValue().doubleValue();
             double v = ((y - (-max)) / (max - (-max))) * (((componentHeight-150) / 2) - (-((componentHeight-150) / 2))) + (-((componentHeight-150) / 2));
@@ -337,5 +341,13 @@ public class BeamView {
         xAxis.setAutoRanging(false);
         xAxis.setUpperBound(beamViewModel.beamLengthValue.value());
         xAxis.setLowerBound(0d);
+    }
+
+    private Label numericLabel(double value) {
+        Label label = new Label(String.format("%.3f", value));
+        label.setMinWidth(300);
+        label.setWrapText(true);
+        label.setAlignment(Pos.CENTER);
+        return label;
     }
 }
