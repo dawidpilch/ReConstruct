@@ -149,36 +149,9 @@ public class BeamView {
         loadingPane.getChildren().clear();
 
         for (VerticalPointLoad verticalPointLoad : beamViewModel.verticalPointLoadsValue.value()) {
-            SVGPath svgPath = new SVGPath();
-            double svgHeight = 162;
-            double wrapperHeight = 30 + svgHeight;
-            svgPath.setContent("M 0 -162 H 1 V -10 H 6 Q 3 -3 0 0 Q -3 -3 -6 -10 H -1 V -162 Z");
-            svgPath.setFill(Paint.valueOf("red"));
-
-            StackPane wrapper = new StackPane(svgPath);
-            wrapper.setMaxSize(NODE_WIDTH, wrapperHeight);
-            wrapper.setPrefSize(NODE_WIDTH, wrapperHeight);
-            wrapper.setMinSize(NODE_WIDTH, wrapperHeight);
-            loadingPane.getChildren().add(wrapper);
-            StackPane.setAlignment(wrapper, Pos.CENTER_LEFT);
-
-            Label label = new Label(String.format("%.3f", Math.abs(verticalPointLoad.magnitude().doubleValue())));
-            label.setStyle("-fx-font-size: 16; -fx-text-fill: red;");
-            wrapper.getChildren().add(label);
-            StackPane.setAlignment(label, Pos.TOP_CENTER);
-            StackPane.setAlignment(svgPath, Pos.BOTTOM_CENTER);
-
-            if (verticalPointLoad.isDirectedUpwards()) {
-                double fix = 2d;
-                wrapper.setRotate(180);
-                wrapper.setTranslateY((wrapperHeight / 2) - fix);
-                label.setRotate(180);
-            } else {
-                wrapper.setTranslateY(-(wrapperHeight / 2));
-            }
-
-            translateXNodesAbsPosition(wrapper, verticalPointLoad.position().doubleValue());
-            wrapper.toFront();
+            Node pointArrow = pointArrow(verticalPointLoad.magnitude().doubleValue(), verticalPointLoad.position().doubleValue(), verticalPointLoad.isDirectedUpwards(), Paint.valueOf("red"));
+            loadingPane.getChildren().add(pointArrow);
+            pointArrow.toFront();
         }
 
         for (BendingMoment bendingMoment : beamViewModel.bendingMomentsValue.value()) {
@@ -186,7 +159,7 @@ public class BeamView {
             double svgHeight = 107;
             double wrapperHeight = 30 + svgHeight;
             svgPath.setContent("M3 0A1 1 0 00-3 0 1 1 0 003 0ZM19 0Q19-27 6-44 3-43 1-42 0-50 1-56 6-53 13-47 10-46 8-45 21-28 21 0 21 29 0 50V48Q19 27 19 0");
-            svgPath.setFill(Paint.valueOf("red"));
+            svgPath.setFill(Color.rgb(230, 181, 17));
 
             StackPane wrapper = new StackPane(svgPath);
             wrapper.setMaxSize(NODE_WIDTH, wrapperHeight);
@@ -213,6 +186,70 @@ public class BeamView {
             wrapper.setTranslateX(wrapper.getTranslateX() + fix);
             wrapper.toFront();
         }
+
+        for (var udl : beamViewModel.uniformlyDistributedLoadsValue.value()) {
+            Paint strokePaint = Color.rgb(74, 215, 104);
+            Paint fillPaint = Color.rgb(74, 215, 104, 0.3);
+
+            Node startArrow = pointArrow(udl.magnitude().doubleValue(), udl.startPosition().doubleValue(), udl.isDirectedUpwards(), strokePaint);
+            Node endArrow = pointArrow(udl.magnitude().doubleValue(), udl.endPosition().doubleValue(), udl.isDirectedUpwards(), strokePaint);
+
+            double rectangleHeight = 162;
+            Rectangle rectangle = new Rectangle(endArrow.getTranslateX() - startArrow.getTranslateX(), rectangleHeight);
+            rectangle.setFill(fillPaint);
+            rectangle.setStroke(strokePaint);
+            rectangle.setStrokeWidth(2);
+
+            StackPane wrapper = new StackPane(rectangle, startArrow, endArrow);
+
+            double width = (endArrow.getTranslateX() - startArrow.getTranslateX()) + NODE_WIDTH * 2;
+            wrapper.setMaxSize(width, rectangleHeight);
+            wrapper.setPrefSize(width, rectangleHeight);
+            wrapper.setMinSize(width, rectangleHeight);
+
+            StackPane.setAlignment(wrapper, Pos.CENTER_LEFT);
+            StackPane.setAlignment(rectangle, Pos.CENTER_LEFT);
+
+            rectangle.setTranslateX((startArrow.getTranslateX() + NODE_WIDTH/2) - 1);
+            rectangle.setTranslateY(udl.isDirectedUpwards() ? rectangleHeight/2 : (rectangleHeight/2) * -1);
+
+
+            loadingPane.getChildren().add(wrapper);
+            wrapper.toFront();
+        }
+    }
+
+    private Node pointArrow(double magnitude, double absolutePositionOnBeam, boolean directedUpwards, Paint paint) {
+        SVGPath svgPath = new SVGPath();
+        double svgHeight = 162;
+        double wrapperHeight = 30 + svgHeight;
+        svgPath.setContent("M 0 -162 H 1 V -10 H 6 Q 3 -3 0 0 Q -3 -3 -6 -10 H -1 V -162 Z");
+        svgPath.setFill(paint);
+
+        StackPane wrapper = new StackPane(svgPath);
+        wrapper.setMaxSize(NODE_WIDTH, wrapperHeight);
+        wrapper.setPrefSize(NODE_WIDTH, wrapperHeight);
+        wrapper.setMinSize(NODE_WIDTH, wrapperHeight);
+
+        StackPane.setAlignment(wrapper, Pos.CENTER_LEFT);
+
+        Label label = new Label(String.format("%.3f", Math.abs(magnitude)));
+        label.setStyle("-fx-font-size: 16; -fx-text-fill: red;");
+        wrapper.getChildren().add(label);
+        StackPane.setAlignment(label, Pos.TOP_CENTER);
+        StackPane.setAlignment(svgPath, Pos.BOTTOM_CENTER);
+
+        if (directedUpwards) {
+            double fix = 2d;
+            wrapper.setRotate(180);
+            wrapper.setTranslateY((wrapperHeight / 2) - fix);
+            label.setRotate(180);
+        } else {
+            wrapper.setTranslateY(-(wrapperHeight / 2));
+        }
+
+        translateXNodesAbsPosition(wrapper, absolutePositionOnBeam);
+        return wrapper;
     }
 
     public void hideLoading() {

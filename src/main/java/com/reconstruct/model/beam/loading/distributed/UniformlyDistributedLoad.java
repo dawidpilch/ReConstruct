@@ -10,7 +10,7 @@ public class UniformlyDistributedLoad {
     private final Magnitude magnitude;
 
     public static UniformlyDistributedLoad of(Position startPosition, Position endPosition, Magnitude magnitude) {
-        if (startPosition.isToTheLeftOf(endPosition) || startPosition.equals(endPosition)) {
+        if (startPosition.isToTheRightOf(endPosition) || startPosition.equals(endPosition)) {
             throw new IllegalArgumentException("End position must be greater than start position");
         }
 
@@ -28,6 +28,14 @@ public class UniformlyDistributedLoad {
         Position resultantPosition = Position.of(endPosition.doubleValue() / 2);
         Magnitude resultantMagnitude = Magnitude.of(magnitude.doubleValue() * x);
         return VerticalPointLoad.of(resultantPosition, resultantMagnitude);
+    }
+
+    public boolean isDirectedUpwards() {
+        return magnitude.doubleValue() >= 0;
+    }
+
+    public boolean isDirectedDownwards() {
+        return !isDirectedUpwards();
     }
 
     public Position startPosition() {

@@ -370,17 +370,17 @@ public class RCBeamAnalysisDesignController {
             }
 
             udlTableView.getItems().clear();
-            newValue.forEach(bendingMoment -> udlTableView.getItems().add(bendingMoment));
+            newValue.forEach(udl -> udlTableView.getItems().add(udl));
         };
 
-        beamViewModel.uniformlyDistributedLoadsValue.value().forEach(bendingMoment -> udlTableView.getItems().add(bendingMoment));
+        beamViewModel.uniformlyDistributedLoadsValue.value().forEach(udl -> udlTableView.getItems().add(udl));
         beamViewModel.uniformlyDistributedLoadsValue.addOnTryAppendValueListener(fillUDLTableWithDataListener);
         TableColumn<UniformlyDistributedLoad, Number> startPositionColumnUDL = new TableColumn<>("Start position (m)");
-        positionColumnBM.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().position().doubleValue()));
+        startPositionColumnUDL.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().startPosition().doubleValue()));
         TableColumn<UniformlyDistributedLoad, Number> endPositionColumnUDL = new TableColumn<>("End position (m)");
-        positionColumnBM.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().position().doubleValue()));
+        endPositionColumnUDL.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().endPosition().doubleValue()));
         TableColumn<UniformlyDistributedLoad, Number> magnitudeColumnUDL = new TableColumn<>("Magnitude (kN/m)");
-        magnitudeColumnBM.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().magnitude().doubleValue()));
+        magnitudeColumnUDL.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().magnitude().doubleValue()));
         udlTableView.getColumns().add(startPositionColumnUDL);
         udlTableView.getColumns().add(endPositionColumnUDL);
         udlTableView.getColumns().add(magnitudeColumnUDL);
