@@ -2,8 +2,8 @@ package com.reconstruct.model.value.range;
 
 import org.apache.commons.math3.util.Precision;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.DoubleStream;
 
 public class EvenlyDistributedDoubleRange implements Range<List<Double>> {
     private final double min;
@@ -25,10 +25,20 @@ public class EvenlyDistributedDoubleRange implements Range<List<Double>> {
             return List.of();
         }
 
-        double step = Precision.round((max - min) / (numbersInRange - 1), 6);
-        return DoubleStream.iterate(min, d -> d + step)
-                .limit(numbersInRange)
-                .boxed()
-                .toList();
+        List<Double> values = new ArrayList<>();
+        double step = (max - min) / (numbersInRange - 1);
+
+        for (int i = 0; i < numbersInRange; i++) {
+            double value = min + i * step;
+            values.add(value);
+        }
+
+        // Ensure the middle value is exactly the midpoint of the range
+        if (numbersInRange % 2 != 0) {
+            int middleIndex = numbersInRange / 2;
+            values.set(middleIndex, (min + max) / 2);
+        }
+
+        return values;
     }
 }

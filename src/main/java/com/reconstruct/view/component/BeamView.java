@@ -283,9 +283,9 @@ public class BeamView {
 
                 if ((previousY > currentY && nextY > currentY) || (previousY < currentY && nextY < currentY)) {
                     shouldLabelCurrent = true;
-                } else if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i + 1).getXValue().doubleValue(), 0.001)) {
+                } else if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i + 1).getXValue().doubleValue(), 0.000001)) {
                     shouldLabelCurrent = true;
-                } else if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i - 1).getXValue().doubleValue(), 0.001)) {
+                } else if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i - 1).getXValue().doubleValue(), 0.000001)) {
                     shouldLabelCurrent = true;
                 }
             }
@@ -299,7 +299,7 @@ public class BeamView {
             translateXNodesAbsPosition(label, dataList.get(i).getXValue().doubleValue());
             label.setTranslateX(label.getTranslateX() - 150);
 
-            double y = Precision.equals(dataList.get(i).getYValue().doubleValue(), 0, 0.001) ? max * 0.15 : dataList.get(i).getYValue().doubleValue();
+            double y = Precision.equals(dataList.get(i).getYValue().doubleValue(), 0, 0.000001) ? max * 0.15 : dataList.get(i).getYValue().doubleValue();
             double v = ((y - (-max)) / (max - (-max))) * (((componentHeight-150) / 2) - (-((componentHeight-150) / 2))) + (-((componentHeight-150) / 2));
             label.setTranslateY(-v);
             chartPane.getChildren().add(label);

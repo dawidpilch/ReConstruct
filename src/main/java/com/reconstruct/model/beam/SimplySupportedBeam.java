@@ -3,6 +3,7 @@ package com.reconstruct.model.beam;
 import com.reconstruct.model.beam.equation.SummationOfHorizontalForces;
 import com.reconstruct.model.beam.equation.SummationOfMoments;
 import com.reconstruct.model.beam.loading.Loading;
+import com.reconstruct.model.beam.loading.distributed.UniformlyDistributedLoad;
 import com.reconstruct.model.beam.loading.moment.BendingMoment;
 import com.reconstruct.model.beam.loading.point.HorizontalPointLoad;
 import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
@@ -103,28 +104,33 @@ public class SimplySupportedBeam implements Beam {
         });
 
         Position[] positions = positionsSet.toArray(Position[]::new);
-
         int size = positions.length;
         for (int i = 1; i < size; i++) {
-            Position endSegmentPosition = positions[i];
+            Position currentEndPosition = positions[i];
             Position previousEndPosition = positions[i - 1];
 
             List<VerticalPointLoad> verticalLoadsInSegment = new ArrayList<>(verticalPointLoads.stream()
-                    .filter(verticalPointLoad -> verticalPointLoad.position().isToTheLeftOf(endSegmentPosition))
+                    .filter(verticalPointLoad -> verticalPointLoad.position().isToTheLeftOf(currentEndPosition))
                     .sorted(Comparator.comparingDouble(value -> value.position().doubleValue()))
                     .toList()
             );
 
             List<BendingMoment> bendingMomentsInSegment = new ArrayList<>(loading.bendingMoments().stream()
-                    .filter(bendingMoment -> bendingMoment.position().isToTheLeftOf(endSegmentPosition))
+                    .filter(bendingMoment -> bendingMoment.position().isToTheLeftOf(currentEndPosition))
                     .sorted(Comparator.comparingDouble(value -> value.position().doubleValue()))
+                    .toList()
+            );
+
+            List<UniformlyDistributedLoad> uniformlyDistributedLoadsInSegment = new ArrayList<>(loading.uniformlyDistributedLoads().stream()
+                    .filter(uniformlyDistributedLoad -> uniformlyDistributedLoad.startPosition().isToTheLeftOf(currentEndPosition))
+                    .sorted(Comparator.comparingDouble(value -> value.startPosition().doubleValue()))
                     .toList()
             );
 
             double segmentOffset = 0.00001;
             List<Double> positionsPerSpan = new EvenlyDistributedDoubleRange(
                     previousEndPosition.doubleValue() + segmentOffset,
-                    endSegmentPosition.doubleValue() - segmentOffset,
+                    currentEndPosition.doubleValue() - segmentOffset,
                     10
             ).values();
 
@@ -144,6 +150,18 @@ public class SimplySupportedBeam implements Beam {
                 for (var bendingMoment : bendingMomentsInSegment) {
                     // negate bm value
                     bendingMomentSum -= bendingMoment.magnitude().doubleValue();
+                }
+
+                for (var temp : uniformlyDistributedLoadsInSegment) {
+                    UniformlyDistributedLoad udl;
+                    if (temp.endPosition().isToTheRightOf(Position.of(doublePosition))) {
+                        udl = UniformlyDistributedLoad.of(temp.startPosition(), Position.of(doublePosition), temp.magnitude());
+                    } else {
+                        udl = temp;
+                    }
+                    var resultant = udl.resultantForce();
+                    sheerForceSum += resultant.magnitude().doubleValue();
+                    bendingMomentSum += resultant.magnitude().doubleValue() * (udl.endPosition().doubleValue() - resultant.position().doubleValue() + (doublePosition - udl.endPosition().doubleValue()));
                 }
 
                 bendingMomentDiagram.put(Position.of(doublePosition), Magnitude.of(bendingMomentSum));

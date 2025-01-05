@@ -36,7 +36,7 @@ public class Position implements DoubleValue {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Position position = (Position) o;
-        return Precision.equals(value, position.doubleValue(), 0.001);
+        return Precision.equals(value, position.doubleValue(), 0.000001);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.reconstruct.model.beam.loading.distributed;
 
 import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
 import com.reconstruct.model.beam.value.Position;
+import com.reconstruct.model.value.Length;
 import com.reconstruct.model.value.Magnitude;
 
 public class UniformlyDistributedLoad {
@@ -24,8 +25,10 @@ public class UniformlyDistributedLoad {
     }
 
     public VerticalPointLoad resultantForce() {
-        double x = endPosition.doubleValue() - startPosition.doubleValue();
-        Position resultantPosition = Position.of(endPosition.doubleValue() / 2);
+        double x = length().doubleValue();
+        double position = (x / 2) + startPosition.doubleValue();
+
+        Position resultantPosition = Position.of(position);
         Magnitude resultantMagnitude = Magnitude.of(magnitude.doubleValue() * x);
         return VerticalPointLoad.of(resultantPosition, resultantMagnitude);
     }
@@ -48,5 +51,9 @@ public class UniformlyDistributedLoad {
 
     public Magnitude magnitude() {
         return magnitude;
+    }
+
+    public Length length() {
+        return Length.of(endPosition.doubleValue() - startPosition.doubleValue());
     }
 }
