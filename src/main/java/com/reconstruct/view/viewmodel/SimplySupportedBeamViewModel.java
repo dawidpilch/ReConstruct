@@ -16,10 +16,7 @@ public class SimplySupportedBeamViewModel {
     public final AppendableValue<Collection<BendingMoment>> bendingMomentsValue;
     public final AppendableValue<Collection<UniformlyDistributedLoad>> uniformlyDistributedLoadsValue;
 
-    private final Set<AppendableValue<Double>> singlePositionsForRangeCheck;
-
     public SimplySupportedBeamViewModel() {
-        Set<AppendableValue<Double>> singlePositionsForRangeCheck = new HashSet<>();
         this.beamLengthValue = new AppendableValue<>(10d, "Beam Length") {
             @Override
             public ValueErrors validateNewValue(Double newValue) {
@@ -99,15 +96,21 @@ public class SimplySupportedBeamViewModel {
                 return positionValueErrorsFunc.apply(newValue);
             }
         };
-
-        singlePositionsForRangeCheck.add(pinnedSupportPositionValue);
-        singlePositionsForRangeCheck.add(rollerSupportPositionValue);
-        this.singlePositionsForRangeCheck = singlePositionsForRangeCheck;
     }
 
     private boolean allPositionableObjectsInRange(double range) {
-        for (var property : singlePositionsForRangeCheck) {
-            if (property.value() > range) {
+        final Set<Double> positionsForRangeCheck = new HashSet<>();
+        positionsForRangeCheck.add(pinnedSupportPositionValue.value());
+        positionsForRangeCheck.add(rollerSupportPositionValue.value());
+        verticalPointLoadsValue.value().forEach(pointLoad -> positionsForRangeCheck.add(pointLoad.position().doubleValue()));
+        bendingMomentsValue.value().forEach(bendingMoment -> positionsForRangeCheck.add(bendingMoment.position().doubleValue()));
+        uniformlyDistributedLoadsValue.value().forEach(uniformlyDistributedLoad -> {
+            positionsForRangeCheck.add(uniformlyDistributedLoad.startPosition().doubleValue());
+            positionsForRangeCheck.add(uniformlyDistributedLoad.endPosition().doubleValue());
+        });
+
+        for (var position : positionsForRangeCheck) {
+            if (position > range) {
                 return false;
             }
         } return true;
