@@ -32,7 +32,7 @@ public class ErrorDoubleTextField {
             try {
                 newValueDouble = Double.parseDouble(newValue);
             } catch (NumberFormatException e) {
-                textField.setText(oldValue);
+                showErrorMessage("Inappropriate number format.");
                 return;
             }
 
