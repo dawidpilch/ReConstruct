@@ -204,7 +204,7 @@ public class RCBeamAnalysisDesignController {
             Stage stage = simpleStage(new Scene(sceneRoot) , "Add Point Load",380, 520);
 
             AppendableValue<Double> positionValue = positionAppendableValue();
-            AppendableValue<Double> magnitudeValue = magnitudeAppendableValue();
+            AppendableValue<Double> magnitudeValue = magnitudeAppendableValue("kN");
 
             ErrorDoubleTextField positionTF = new ErrorDoubleTextField(positionValue);
             ErrorDoubleTextField magnitudeTF = new ErrorDoubleTextField(magnitudeValue);
@@ -306,7 +306,7 @@ public class RCBeamAnalysisDesignController {
             Stage stage = simpleStage(new Scene(sceneRoot) , "Add Bending Moment",380, 520);
 
             AppendableValue<Double> positionValue = positionAppendableValue();
-            AppendableValue<Double> magnitudeValue = magnitudeAppendableValue();
+            AppendableValue<Double> magnitudeValue = magnitudeAppendableValue("kN/m");
 
             ErrorDoubleTextField positionTF = new ErrorDoubleTextField(positionValue);
             ErrorDoubleTextField magnitudeTF = new ErrorDoubleTextField(magnitudeValue);
@@ -412,7 +412,7 @@ public class RCBeamAnalysisDesignController {
 
             AppendableValue<Double> startPositionValue = positionAppendableValue();
             AppendableValue<Double> endPositionValue = positionAppendableValue(beamViewModel.beamLengthValue.value());
-            AppendableValue<Double> magnitudeValue = magnitudeAppendableValue();
+            AppendableValue<Double> magnitudeValue = magnitudeAppendableValue("kN/m");
 
             ErrorDoubleTextField startPositionTF = new ErrorDoubleTextField(startPositionValue);
             ErrorDoubleTextField endPositionTF = new ErrorDoubleTextField(endPositionValue);
@@ -543,8 +543,8 @@ public class RCBeamAnalysisDesignController {
         stage.showAndWait();
     }
 
-    private AppendableValue<Double> magnitudeAppendableValue() {
-        return new AppendableValue<>(0d, "Magnitude (kN)") {
+    private AppendableValue<Double> magnitudeAppendableValue(String magnitudeUnit) {
+        return new AppendableValue<>(0d, String.format("Magnitude (%s)", magnitudeUnit)) {
             @Override
             protected ValueErrors validateNewValue(Double newValue) {
                 return ValueErrors.empty();

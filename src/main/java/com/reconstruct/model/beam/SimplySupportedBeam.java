@@ -103,11 +103,11 @@ public class SimplySupportedBeam implements Beam {
             positionsSet.add(uniformlyDistributedLoad.endPosition());
         });
 
-        Position[] positions = positionsSet.toArray(Position[]::new);
-        int size = positions.length;
+        Position[] characteristicPoints = positionsSet.toArray(Position[]::new);
+        int size = characteristicPoints.length;
         for (int i = 1; i < size; i++) {
-            Position currentEndPosition = positions[i];
-            Position previousEndPosition = positions[i - 1];
+            Position currentEndPosition = characteristicPoints[i];
+            Position previousEndPosition = characteristicPoints[i - 1];
 
             List<VerticalPointLoad> verticalLoadsInSegment = new ArrayList<>(verticalPointLoads.stream()
                     .filter(verticalPointLoad -> verticalPointLoad.position().isToTheLeftOf(currentEndPosition))
@@ -133,6 +133,7 @@ public class SimplySupportedBeam implements Beam {
                     currentEndPosition.doubleValue() - segmentOffset,
                     10
             ).values();
+
 
             for (double doublePosition : positionsPerSpan) {
                 Position position = Position.of(doublePosition);

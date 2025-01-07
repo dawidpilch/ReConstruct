@@ -344,7 +344,7 @@ public class BeamView {
     }
 
     private Label numericLabel(double value) {
-        Label label = new Label(String.format("%.3f", value));
+        Label label = new Label(String.format("%.2f", value));
         label.setMinWidth(300);
         label.setWrapText(true);
         label.setAlignment(Pos.CENTER);
