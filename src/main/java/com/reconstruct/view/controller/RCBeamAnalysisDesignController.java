@@ -85,16 +85,23 @@ public class RCBeamAnalysisDesignController {
         var pinnedSupportPositionValue = beamViewModel.pinnedSupportPositionValue;
         var rollerSupportPositionValue = beamViewModel.rollerSupportPositionValue;
 
+        var beamLengthValueMemento = beamLengthValue.value();
+        var pinnedSupportPositionValueMemento = pinnedSupportPositionValue.value();
+        var rollerSupportPositionValueMemento = rollerSupportPositionValue.value();
+
         var beamLengthTF = new ErrorDoubleTextField(beamLengthValue);
         var pinnedSuppTF = new ErrorDoubleTextField(pinnedSupportPositionValue);
         var rollerSuppTF = new ErrorDoubleTextField(rollerSupportPositionValue);
 
         double prefButtonWidth = 75d;
-        var okButton = new Button("Ok");
-        okButton.setPrefWidth(prefButtonWidth);
+        var saveButton = new Button("Save");
+        saveButton.setPrefWidth(prefButtonWidth);
+
+        var cancelButton = new Button("Cancel");
+        cancelButton.setPrefWidth(prefButtonWidth);
 
         AppendableValue.OnTryAppendValueListener<Double> listener = (oldValue, newValue, valueErrors) -> {
-            okButton.setDisable(!valueErrors.isEmpty());
+            saveButton.setDisable(!valueErrors.isEmpty());
         };
 
         beamLengthValue.addOnTryAppendValueListener(listener);
@@ -104,7 +111,7 @@ public class RCBeamAnalysisDesignController {
         var propertiesVBox = new VBox(15, beamLengthTF.node(), pinnedSuppTF.node(), rollerSuppTF.node());
         propertiesVBox.setMaxWidth(300);
 
-        HBox buttons = new HBox(15, okButton);
+        HBox buttons = new HBox(15, saveButton, cancelButton);
         buttons.setAlignment(Pos.CENTER_RIGHT);
 
         BorderPane content = new BorderPane();
@@ -116,19 +123,31 @@ public class RCBeamAnalysisDesignController {
         BorderPane.setAlignment(buttons, Pos.CENTER_RIGHT);
         Stage stage = simpleStage(new Scene(content), "Geometry configuration", 380, 300);
 
-        okButton.setOnAction(actionEvent -> {
+        Runnable commonOnCloseAction = () -> {
             beamLengthValue.removeOnTryAppendValueListener(listener);
             pinnedSupportPositionValue.removeOnTryAppendValueListener(listener);
             rollerSupportPositionValue.removeOnTryAppendValueListener(listener);
             beamView.refreshGeometry();
             beamView.displayLoading();
             stage.close();
+        };
+
+        Runnable restoreValuesAction = () -> {
+            beamLengthValue.tryAppend(beamLengthValueMemento);
+            rollerSupportPositionValue.tryAppend(rollerSupportPositionValueMemento);
+            pinnedSupportPositionValue.tryAppend(pinnedSupportPositionValueMemento);
+        };
+
+        saveButton.setOnAction(event -> commonOnCloseAction.run());
+        cancelButton.setOnAction(event -> {
+            restoreValuesAction.run();
+            commonOnCloseAction.run();
         });
 
         beamView.hideDiagram();
-        stage.setOnCloseRequest(event -> okButton.getOnAction().handle(new ActionEvent()));
+        stage.setOnCloseRequest(event -> cancelButton.getOnAction().handle(new ActionEvent()));
 
-        Platform.runLater(okButton::requestFocus);
+        Platform.runLater(saveButton::requestFocus);
         stage.showAndWait();
     }
 
