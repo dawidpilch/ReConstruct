@@ -168,9 +168,6 @@ public class RCBeamAnalysisDesignController {
     }
 
     public void onLoadingConfiguration(ActionEvent ignored) {
-        double prefButtonWidth = 75d;
-        var okButton = new Button("OK");
-        okButton.setPrefWidth(prefButtonWidth);
 
         // --- Point Loads ---- //
         Tab pointLoadsTab = new Tab("Point Loads");
@@ -492,7 +489,14 @@ public class RCBeamAnalysisDesignController {
         TabPane loadingTabPane = new TabPane(pointLoadsTab, bendingMomentsTab, udlTab);
         loadingTabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
-        HBox buttonBox = new HBox(okButton);
+        double prefButtonWidth = 75d;
+        var saveButton = new Button("Save");
+        saveButton.setPrefWidth(prefButtonWidth);
+
+        var cancelButton = new Button("Cancel");
+        cancelButton.setPrefWidth(prefButtonWidth);
+
+        HBox buttonBox = new HBox(15, saveButton, cancelButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
         var content = new VBox(
@@ -505,21 +509,37 @@ public class RCBeamAnalysisDesignController {
         content.setFillWidth(true);
         content.setPrefWidth(Region.USE_COMPUTED_SIZE);
         content.setPadding(new Insets(15));
-
         Stage stage = simpleStage(new Scene(content), "Loading Configuration", 580, 720);
 
-        okButton.setOnAction(actionEvent -> {
+
+        var verticalPointLoadsValueMemento = beamViewModel.verticalPointLoadsValue.value();
+        var bendingMomentsValueMemento = beamViewModel.bendingMomentsValue.value();
+        var udlValueMemento = beamViewModel.uniformlyDistributedLoadsValue.value();
+
+        Runnable commonOnCloseAction = () -> {
             beamViewModel.verticalPointLoadsValue.removeOnTryAppendValueListener(fillPointLoadsTableWithDataListener);
             beamViewModel.bendingMomentsValue.removeOnTryAppendValueListener(fillBendingMomentsTableWithDataListener);
             beamViewModel.uniformlyDistributedLoadsValue.removeOnTryAppendValueListener(fillUDLTableWithDataListener);
             beamView.displayLoading();
             stage.close();
+        };
+
+        Runnable restoreValuesAction = () -> {
+            beamViewModel.verticalPointLoadsValue.tryAppend(verticalPointLoadsValueMemento);
+            beamViewModel.bendingMomentsValue.tryAppend(bendingMomentsValueMemento);
+            beamViewModel.uniformlyDistributedLoadsValue.tryAppend(udlValueMemento);
+        };
+
+        saveButton.setOnAction(event -> commonOnCloseAction.run());
+        cancelButton.setOnAction(event -> {
+            restoreValuesAction.run();
+            commonOnCloseAction.run();
         });
 
         beamView.hideDiagram();
-        stage.setOnCloseRequest(event -> okButton.getOnAction().handle(new ActionEvent()));
+        stage.setOnCloseRequest(event -> cancelButton.getOnAction().handle(new ActionEvent()));
 
-        Platform.runLater(okButton::requestFocus);
+        Platform.runLater(saveButton::requestFocus);
         stage.showAndWait();
     }
 
