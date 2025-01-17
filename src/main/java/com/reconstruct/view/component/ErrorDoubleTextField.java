@@ -72,4 +72,8 @@ public class ErrorDoubleTextField {
     public Node node() {
         return node;
     }
+
+    public void setText(String text) {
+        this.textField.textProperty().setValue(text);
+    }
 }
