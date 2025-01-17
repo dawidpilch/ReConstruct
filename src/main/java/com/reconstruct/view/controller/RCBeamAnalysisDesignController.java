@@ -12,14 +12,17 @@ import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
 import com.reconstruct.model.beam.section.Rectangular;
 import com.reconstruct.model.beam.span.Span;
 import com.reconstruct.model.beam.value.Position;
+import com.reconstruct.model.standard.PN02;
 import com.reconstruct.model.value.Length;
 import com.reconstruct.model.value.Magnitude;
 import com.reconstruct.model.value.PositiveDouble;
 import com.reconstruct.view.component.BeamView;
 import com.reconstruct.view.component.ErrorDoubleTextField;
+import com.reconstruct.view.component.SaveCancelButtonPanel;
 import com.reconstruct.view.viewmodel.*;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,6 +38,7 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Callback;
 
 import java.util.*;
 
@@ -569,7 +573,7 @@ public class RCBeamAnalysisDesignController {
         return positionAppendableValue(0d);
     }
 
-    public void onShowInternalForcesRequest(ActionEvent ignored) {
+    public void onResultsInternalForces(ActionEvent ignored) {
         BorderPane pane = new BorderPane();
         pane.setMinWidth(200);
         pane.setMinWidth(200);
@@ -654,5 +658,97 @@ public class RCBeamAnalysisDesignController {
             internalForcesComboBox.getSelectionModel().select(internalForcesToActionMap.keySet().stream().findFirst().get());
             endPreviewButton.requestFocus();
         });
+    }
+
+    public void onResultsReinforcement(ActionEvent ignored) {
+        BorderPane content = new BorderPane();
+        VBox propertiesVBox = new VBox();
+        content.setCenter(propertiesVBox);
+
+        AppendableValue<Double> minCorrosionCoverThickness = new AppendableValue<>(5d, "Minimal corrosion cover thickness (mm)") {
+            @Override
+            protected ValueErrors validateNewValue(Double newValue) {
+                var errors = new ArrayList<String>();
+                if (newValue < 0) {
+                    errors.add("Value must be greater than zero");
+                } return new ValueErrors(errors);
+            }
+        };
+
+        ErrorDoubleTextField minCorrosionCoverThicknessTF = new ErrorDoubleTextField(minCorrosionCoverThickness);
+        Button selectMinCorrosionCoverThickness = new Button("...");
+        selectMinCorrosionCoverThickness.setOnAction(event -> {
+            BorderPane localContent = new BorderPane();
+
+            ListView<Map.Entry<String, Double>> listView = new ListView<>();
+            listView.setCellFactory(new Callback<>() {
+                @Override
+                public javafx.scene.control.ListCell<Map.Entry<String, Double>> call(javafx.scene.control.ListView<Map.Entry<String, Double>> param) {
+                    return new javafx.scene.control.ListCell<>() {
+                        @Override
+                        protected void updateItem(Map.Entry<String, Double> item, boolean empty) {
+                            super.updateItem(item, empty);
+                            if (item == null || empty) {
+                                setText(null);
+                            } else {
+                                // Format the text as "SomeText - 45"
+                                setText(item.getKey() + " - " + item.getValue().intValue() + " (mm)");
+                            }
+                        }
+                    };
+                }
+            });
+            listView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+
+            Map<String, Runnable> standardComboBoxActionMap = new LinkedHashMap<>();
+            standardComboBoxActionMap.put("PN-02 - Prestressed steel", () -> listView.setItems(FXCollections.observableList(PN02.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_PRESTRESSED_STEEL_MM.entrySet().stream().toList())));
+            standardComboBoxActionMap.put("PN-02 - Standard steel", () -> listView.setItems(FXCollections.observableList(PN02.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_STANDARD_STEEL_MM.entrySet().stream().toList())));
+
+            ComboBox<String> standardComboBox = new ComboBox<>();
+            standardComboBox.setPrefWidth(Double.MAX_VALUE);
+            standardComboBox.getItems().addAll(standardComboBoxActionMap.keySet());
+            standardComboBox.setOnAction(e -> {
+                standardComboBoxActionMap.getOrDefault(
+                        standardComboBox.getSelectionModel().getSelectedItem(),
+                        () -> { /* do nothing */ }
+                ).run();
+            });
+
+            Stage localStage = simpleStage(new Scene(localContent), "Minimal corrosion cover thickness", 580, 460);
+            localContent.setTop(standardComboBox);
+            localContent.setCenter(listView);
+            SaveCancelButtonPanel saveCancelButtonPanel = new SaveCancelButtonPanel(
+                    onSave -> {
+                        minCorrosionCoverThicknessTF.setText(listView.getSelectionModel().getSelectedItem().getValue().toString());
+                        localStage.hide();
+                    },
+                    onCancel -> localStage.hide()
+            );
+            localContent.setBottom(saveCancelButtonPanel.node());
+            listView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> saveCancelButtonPanel.saveButtonDisabled(newValue == null));
+            saveCancelButtonPanel.saveButtonDisabled(true);
+
+            localContent.setPadding(new Insets(15));
+            var insets = new Insets(0, 0, 15, 0);
+            BorderPane.setMargin(localContent.getTop(), insets);
+            BorderPane.setMargin(localContent.getCenter(), insets);
+
+            Platform.runLater(() -> {
+                standardComboBox.getSelectionModel().select(standardComboBoxActionMap.keySet().stream().findFirst().get());
+                saveCancelButtonPanel.requestFocus();
+            });
+            localStage.showAndWait();
+        });
+
+        HBox minCorrosionCoverThicknessHBox = new HBox(15, minCorrosionCoverThicknessTF.node(), selectMinCorrosionCoverThickness);
+        propertiesVBox.getChildren().add(minCorrosionCoverThicknessHBox);
+        HBox.setHgrow(minCorrosionCoverThicknessTF.node(), Priority.ALWAYS);
+        minCorrosionCoverThicknessHBox.setAlignment(Pos.BOTTOM_CENTER);
+
+        content.setPadding(new Insets(15));
+
+        Stage stage = simpleStage(new Scene(content), "Reinforcement", 580, 520);
+        stage.showAndWait();
     }
 }

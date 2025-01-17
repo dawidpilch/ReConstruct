@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="borderPane" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.reconstruct.view.controller.RCBeamAnalysisDesignController">
+<BorderPane fx:id="borderPane" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.reconstruct.view.controller.RCBeamAnalysisDesignController">
    <center>
       <StackPane fx:id="centerPane" prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
    </center>
@@ -27,7 +27,8 @@
                </items></Menu>
             <Menu mnemonicParsing="false" text="Results">
                <items>
-                  <MenuItem mnemonicParsing="false" onAction="#onShowInternalForcesRequest" text="Internal forces" />
+                  <MenuItem mnemonicParsing="false" onAction="#onResultsInternalForces" text="Internal forces" />
+                  <MenuItem mnemonicParsing="false" onAction="#onResultsReinforcement" text="Reinforcement..." />
                </items></Menu>
             <Menu mnemonicParsing="false" text="Help" />
         </menus>
