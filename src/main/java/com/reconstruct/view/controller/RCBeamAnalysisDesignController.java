@@ -662,7 +662,7 @@ public class RCBeamAnalysisDesignController {
 
     public void onResultsReinforcement(ActionEvent ignored) {
         BorderPane content = new BorderPane();
-        VBox propertiesVBox = new VBox();
+        VBox propertiesVBox = new VBox(15);
         content.setCenter(propertiesVBox);
 
         AppendableValue<Double> minCorrosionCoverThickness = new AppendableValue<>(5d, "Minimal corrosion cover thickness (mm)") {
@@ -674,7 +674,6 @@ public class RCBeamAnalysisDesignController {
                 } return new ValueErrors(errors);
             }
         };
-
         ErrorDoubleTextField minCorrosionCoverThicknessTF = new ErrorDoubleTextField(minCorrosionCoverThickness);
         Button selectMinCorrosionCoverThickness = new Button("...");
         selectMinCorrosionCoverThickness.setOnAction(event -> {
@@ -740,15 +739,71 @@ public class RCBeamAnalysisDesignController {
             });
             localStage.showAndWait();
         });
-
         HBox minCorrosionCoverThicknessHBox = new HBox(15, minCorrosionCoverThicknessTF.node(), selectMinCorrosionCoverThickness);
         propertiesVBox.getChildren().add(minCorrosionCoverThicknessHBox);
         HBox.setHgrow(minCorrosionCoverThicknessTF.node(), Priority.ALWAYS);
         minCorrosionCoverThicknessHBox.setAlignment(Pos.BOTTOM_CENTER);
 
-        content.setPadding(new Insets(15));
+        AppendableValue<Double> diameterOfSingleReinforcementBar = new AppendableValue<>(5d, "Diameter of single reinforcement bar (mm)") {
+            @Override
+            protected ValueErrors validateNewValue(Double newValue) {
+                var errors = new ArrayList<String>();
+                if (newValue < 0) {
+                    errors.add("Value must be greater than zero");
+                } return new ValueErrors(errors);
+            }
+        };
 
+        propertiesVBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
+
+        Map<String, Double> compressionCalculationMpaValuesOfReinforcedConcreteMap = PN02.COMPRESSION_CALCULATION_MPA_VALUES_OF_REINFORCED_CONCRETE;
+        AppendableValue<Double> concreteGradeValue = new AppendableValue<>(compressionCalculationMpaValuesOfReinforcedConcreteMap.values().stream().findFirst().get()) {
+            @Override
+            protected ValueErrors validateNewValue(Double newValue) {
+                return ValueErrors.empty();
+            }
+        };
+        ComboBox<String> concreteGradeComboBox = new ComboBox<>();
+        HBox concreteGradeHBox = new HBox(15, new Label("Concrete grade:"), concreteGradeComboBox);
+        propertiesVBox.getChildren().add(concreteGradeHBox);
+        concreteGradeHBox.getChildren().forEach(node -> HBox.setHgrow(node, Priority.ALWAYS));
+        concreteGradeHBox.setAlignment(Pos.CENTER_LEFT);
+        concreteGradeComboBox.getItems().addAll(compressionCalculationMpaValuesOfReinforcedConcreteMap.keySet());
+        concreteGradeComboBox.setOnAction(e -> {
+            ValueErrors errors = concreteGradeValue.tryAppend(compressionCalculationMpaValuesOfReinforcedConcreteMap.get(concreteGradeComboBox.getSelectionModel().getSelectedItem()));
+            if (errors.isEmpty()) {
+                return;
+            }
+        });
+
+        Map<String, Double> yieldStrengthCalculationMpaValuesOfReinforcementSteel = PN02.YIELD_STRENGTH_CALCULATION_MPA_VALUES_OF_REINFORCEMENT_STEEL;
+        AppendableValue<Double> reinforcementSteelGradeValue = new AppendableValue<>(compressionCalculationMpaValuesOfReinforcedConcreteMap.values().stream().findFirst().get()) {
+            @Override
+            protected ValueErrors validateNewValue(Double newValue) {
+                return ValueErrors.empty();
+            }
+        };
+        ComboBox<String> reinforcementSteelGradeComboBox = new ComboBox<>();
+        HBox reinforcementSteelGradeHBox = new HBox(15, new Label("Reinforcement steel grade:"), reinforcementSteelGradeComboBox);
+        propertiesVBox.getChildren().add(reinforcementSteelGradeHBox);
+        reinforcementSteelGradeComboBox.getItems().addAll(yieldStrengthCalculationMpaValuesOfReinforcementSteel.keySet());
+        reinforcementSteelGradeHBox.setAlignment(Pos.CENTER_LEFT);
+        reinforcementSteelGradeComboBox.setOnAction(e -> {
+            ValueErrors errors = reinforcementSteelGradeValue.tryAppend(yieldStrengthCalculationMpaValuesOfReinforcementSteel.get(reinforcementSteelGradeComboBox.getSelectionModel().getSelectedItem()));
+            if (errors.isEmpty()) {
+                return;
+            }
+        });
+
+
+
+        content.setPadding(new Insets(15));
         Stage stage = simpleStage(new Scene(content), "Reinforcement", 580, 520);
+
+        Platform.runLater(() -> {
+            concreteGradeComboBox.getSelectionModel().select(concreteGradeComboBox.getItems().getFirst());
+            reinforcementSteelGradeComboBox.getSelectionModel().select(reinforcementSteelGradeComboBox.getItems().getFirst());
+        });
         stage.showAndWait();
     }
 }
