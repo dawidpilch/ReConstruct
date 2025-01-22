@@ -16,12 +16,17 @@ public record Rectangular(PositiveDouble depth, PositiveDouble width) implements
     }
 
     @Override
-    public String name() {
+    public String toString() {
         return String.format("R %sx%s", width, depth);
     }
 
     @Override
-    public String toString() {
-        return name();
+    public PositiveDouble depth() {
+        return depth;
+    }
+
+    @Override
+    public PositiveDouble width() {
+        return width;
     }
 }
