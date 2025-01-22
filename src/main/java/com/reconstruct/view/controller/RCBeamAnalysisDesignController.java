@@ -1,15 +1,12 @@
 package com.reconstruct.view.controller;
 
-import com.reconstruct.model.beam.BendingMomentDiagram;
-import com.reconstruct.model.beam.LoadingAnalysis;
-import com.reconstruct.model.beam.SheerForceDiagram;
-import com.reconstruct.model.beam.SimplySupportedBeam;
+import com.reconstruct.model.beam.*;
 import com.reconstruct.model.beam.loading.Loading;
 import com.reconstruct.model.beam.loading.distributed.UniformlyDistributedLoad;
 import com.reconstruct.model.beam.loading.moment.BendingMoment;
 import com.reconstruct.model.beam.loading.point.PointLoad;
 import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
-import com.reconstruct.model.beam.section.Rectangular;
+import com.reconstruct.model.beam.section.RectangularSection;
 import com.reconstruct.model.beam.span.Span;
 import com.reconstruct.model.beam.value.Position;
 import com.reconstruct.model.standard.PN02;
@@ -75,7 +72,7 @@ public class RCBeamAnalysisDesignController {
         SimplySupportedBeam simplySupportedBeam = SimplySupportedBeam.withCustomSupportPositions(
                 new Span(
                         Length.of(length),
-                        new Rectangular(
+                        new RectangularSection(
                                 PositiveDouble.of(10),
                                 PositiveDouble.of(10)
                         )
@@ -757,34 +754,19 @@ public class RCBeamAnalysisDesignController {
 
         propertiesVBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
 
-        Map<String, Double> compressionCalculationMpaValuesOfReinforcedConcreteMap = PN02.COMPRESSION_CALCULATION_MPA_VALUES_OF_REINFORCED_CONCRETE;
-        AppendableProperty<Double> concreteGradeProperty = new PositiveDoubleAppendableProperty(compressionCalculationMpaValuesOfReinforcedConcreteMap.values().stream().findFirst().get());
+        List<ConcreteGrade> concreteGrades = PN02.CONCRETE_GRADE;
         ComboBox<String> concreteGradeComboBox = new ComboBox<>();
         HBox concreteGradeHBox = new HBox(15, new Label("Concrete grade:"), concreteGradeComboBox);
+        concreteGrades.forEach(concreteGrade -> concreteGradeComboBox.getItems().add(concreteGrade.name()));
         propertiesVBox.getChildren().add(concreteGradeHBox);
-        concreteGradeHBox.getChildren().forEach(node -> HBox.setHgrow(node, Priority.ALWAYS));
         concreteGradeHBox.setAlignment(Pos.CENTER_LEFT);
-        concreteGradeComboBox.getItems().addAll(compressionCalculationMpaValuesOfReinforcedConcreteMap.keySet());
-        concreteGradeComboBox.setOnAction(e -> {
-            PropertyErrors errors = concreteGradeProperty.tryAppend(compressionCalculationMpaValuesOfReinforcedConcreteMap.get(concreteGradeComboBox.getSelectionModel().getSelectedItem()));
-            if (errors.isEmpty()) {
-                return;
-            }
-        });
 
-        Map<String, Double> yieldStrengthCalculationMpaValuesOfReinforcementSteel = PN02.YIELD_STRENGTH_CALCULATION_MPA_VALUES_OF_REINFORCEMENT_STEEL;
-        AppendableProperty<Double> reinforcementSteelGradeProperty = new PositiveDoubleAppendableProperty(yieldStrengthCalculationMpaValuesOfReinforcementSteel.values().stream().findFirst().get());
+        List<ReinforcementMaterialGrade> steelGrades = PN02.STEEL_GRADES;
         ComboBox<String> reinforcementSteelGradeComboBox = new ComboBox<>();
         HBox reinforcementSteelGradeHBox = new HBox(15, new Label("Reinforcement steel grade:"), reinforcementSteelGradeComboBox);
+        steelGrades.forEach(reinforcementMaterialGrade -> reinforcementSteelGradeComboBox.getItems().add(reinforcementMaterialGrade.name()));
         propertiesVBox.getChildren().add(reinforcementSteelGradeHBox);
-        reinforcementSteelGradeComboBox.getItems().addAll(yieldStrengthCalculationMpaValuesOfReinforcementSteel.keySet());
         reinforcementSteelGradeHBox.setAlignment(Pos.CENTER_LEFT);
-        reinforcementSteelGradeComboBox.setOnAction(e -> {
-            PropertyErrors errors = reinforcementSteelGradeProperty.tryAppend(yieldStrengthCalculationMpaValuesOfReinforcementSteel.get(reinforcementSteelGradeComboBox.getSelectionModel().getSelectedItem()));
-            if (errors.isEmpty()) {
-                return;
-            }
-        });
 
         content.setPadding(new Insets(15));
         Stage stage = simpleStage(new Scene(content), "Reinforcement", 580, 520);

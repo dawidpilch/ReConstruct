@@ -1,6 +1,11 @@
 package com.reconstruct.model.standard;
 
+import com.reconstruct.model.beam.ConcreteGrade;
+import com.reconstruct.model.beam.ReinforcementMaterialGrade;
+
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class PN02 {
@@ -26,25 +31,65 @@ public class PN02 {
         MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_PRESTRESSED_STEEL_MM.put("XS1/XS2/XS3", 50d);
     }
 
-    public static Map<String, Double> COMPRESSION_CALCULATION_MPA_VALUES_OF_REINFORCED_CONCRETE = new LinkedHashMap<>();
+    public static List<ConcreteGrade> CONCRETE_GRADE = new LinkedList<>();
     static {
-        COMPRESSION_CALCULATION_MPA_VALUES_OF_REINFORCED_CONCRETE.put("B15", 8.0d);
-        COMPRESSION_CALCULATION_MPA_VALUES_OF_REINFORCED_CONCRETE.put("B20", 10.6d);
-        COMPRESSION_CALCULATION_MPA_VALUES_OF_REINFORCED_CONCRETE.put("B25", 13.3d);
-        COMPRESSION_CALCULATION_MPA_VALUES_OF_REINFORCED_CONCRETE.put("B30", 16.7d);
-        COMPRESSION_CALCULATION_MPA_VALUES_OF_REINFORCED_CONCRETE.put("B37", 20.0d);
-        COMPRESSION_CALCULATION_MPA_VALUES_OF_REINFORCED_CONCRETE.put("B45", 23.3d);
-        COMPRESSION_CALCULATION_MPA_VALUES_OF_REINFORCED_CONCRETE.put("B50", 26.7d);
-        COMPRESSION_CALCULATION_MPA_VALUES_OF_REINFORCED_CONCRETE.put("B55", 30.0d);
-        COMPRESSION_CALCULATION_MPA_VALUES_OF_REINFORCED_CONCRETE.put("B60", 33.3d);
+        CONCRETE_GRADE.add(new ConcreteGrade("B15", 8.0d));
+        CONCRETE_GRADE.add(new ConcreteGrade("B20", 10.6d));
+        CONCRETE_GRADE.add(new ConcreteGrade("B25", 13.3d));
+        CONCRETE_GRADE.add(new ConcreteGrade("B30", 16.7d));
+        CONCRETE_GRADE.add(new ConcreteGrade("B37", 20.0d));
+        CONCRETE_GRADE.add(new ConcreteGrade("B45", 23.3d));
+        CONCRETE_GRADE.add(new ConcreteGrade("B50", 26.7d));
+        CONCRETE_GRADE.add(new ConcreteGrade("B55", 30.0d));
+        CONCRETE_GRADE.add(new ConcreteGrade("B60", 33.3d));
     }
 
-    public static Map<String, Double> YIELD_STRENGTH_CALCULATION_MPA_VALUES_OF_REINFORCEMENT_STEEL = new LinkedHashMap<>();
+    public static List<ReinforcementMaterialGrade> STEEL_GRADES = new LinkedList<>();
     static {
-        YIELD_STRENGTH_CALCULATION_MPA_VALUES_OF_REINFORCEMENT_STEEL.put("A-0", 190.0d);
-        YIELD_STRENGTH_CALCULATION_MPA_VALUES_OF_REINFORCEMENT_STEEL.put("A-I", 210.0d);
-        YIELD_STRENGTH_CALCULATION_MPA_VALUES_OF_REINFORCEMENT_STEEL.put("A-II", 310.0d);
-        YIELD_STRENGTH_CALCULATION_MPA_VALUES_OF_REINFORCEMENT_STEEL.put("A-III", 350.0d);
-        YIELD_STRENGTH_CALCULATION_MPA_VALUES_OF_REINFORCEMENT_STEEL.put("A-IIIN", 420.0d);
+        STEEL_GRADES.add(
+                new ReinforcementMaterialGrade(
+                        "A-0",
+                        190.0d,
+                        0.637,
+                        0.673,
+                        0.428
+                )
+        );
+        STEEL_GRADES.add(
+                new ReinforcementMaterialGrade(
+                        "A-I",
+                        210.0d,
+                        0.622,
+                        0.680,
+                        0.423
+                )
+        );
+        STEEL_GRADES.add(
+                new ReinforcementMaterialGrade(
+                        "A-II",
+                        310.0d,
+                        0.561,
+                        0.712,
+                        0.399
+                )
+        );
+        STEEL_GRADES.add(
+                new ReinforcementMaterialGrade(
+                        "A-III",
+                        350.0d,
+                        0.540,
+                        0.772,
+                        0.390
+                )
+        );
+        STEEL_GRADES.add(
+                new ReinforcementMaterialGrade(
+                        "A-IIIN",
+                        420.0d,
+                        0.505,
+                        0.740,
+                        0.374
+                )
+        );
     }
 }

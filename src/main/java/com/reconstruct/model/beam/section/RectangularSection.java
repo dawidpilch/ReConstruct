@@ -4,8 +4,8 @@ import com.reconstruct.model.value.PositiveDouble;
 
 import java.util.Objects;
 
-public record Rectangular(PositiveDouble depth, PositiveDouble width) implements Section {
-    public Rectangular {
+public record RectangularSection(PositiveDouble depth, PositiveDouble width) implements Section {
+    public RectangularSection {
         Objects.requireNonNull(depth);
         Objects.requireNonNull(width);
     }

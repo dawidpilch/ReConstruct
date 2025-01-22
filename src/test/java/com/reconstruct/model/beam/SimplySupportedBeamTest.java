@@ -3,7 +3,7 @@ package com.reconstruct.model.beam;
 import com.reconstruct.model.beam.loading.Loading;
 import com.reconstruct.model.beam.loading.moment.BendingMoment;
 import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
-import com.reconstruct.model.beam.section.Rectangular;
+import com.reconstruct.model.beam.section.RectangularSection;
 import com.reconstruct.model.beam.span.Span;
 import com.reconstruct.model.beam.value.Position;
 import com.reconstruct.model.value.Length;
@@ -25,7 +25,7 @@ class SimplySupportedBeamTest {
 
     private static final Span COMMON_SPAN = new Span(
             Length.of(10),
-            new Rectangular(PositiveDouble.of(5), PositiveDouble.of(5))
+            new RectangularSection(PositiveDouble.of(5), PositiveDouble.of(5))
     );
 
     @ParameterizedTest
