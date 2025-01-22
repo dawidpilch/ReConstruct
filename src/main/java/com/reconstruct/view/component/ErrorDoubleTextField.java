@@ -1,8 +1,7 @@
 package com.reconstruct.view.component;
 
-import com.reconstruct.view.viewmodel.AppendableValue;
-import com.reconstruct.view.viewmodel.ValueErrors;
-import javafx.geometry.Insets;
+import com.reconstruct.view.viewmodel.AppendableProperty;
+import com.reconstruct.view.viewmodel.PropertyErrors;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -10,18 +9,18 @@ import javafx.scene.layout.VBox;
 
 public class ErrorDoubleTextField {
     private final VBox node = new VBox();
-    private final AppendableValue<Double> appendableValue;
+    private final AppendableProperty<Double> appendableProperty;
     private final TextField textField;
     private final Label errorMessage;
 
-    public ErrorDoubleTextField(AppendableValue<Double> appendableValue) {
-        this.appendableValue = appendableValue;
-        this.textField = new TextField(this.appendableValue.value().toString());
+    public ErrorDoubleTextField(AppendableProperty<Double> appendableProperty) {
+        this.appendableProperty = appendableProperty;
+        this.textField = new TextField(this.appendableProperty.value().toString());
         this.errorMessage = new Label();
 
         errorMessage.setWrapText(true);
         errorMessage.setStyle("-fx-text-fill: red;");
-        node.getChildren().add(new Label(this.appendableValue.name()));
+        node.getChildren().add(new Label(this.appendableProperty.name()));
         node.getChildren().add(textField);
         node.getChildren().add(errorMessage);
         errorMessage.setVisible(false);
@@ -36,7 +35,7 @@ public class ErrorDoubleTextField {
                 return;
             }
 
-            ValueErrors errors = this.appendableValue.tryAppend(newValueDouble);
+            PropertyErrors errors = this.appendableProperty.tryAppend(newValueDouble);
             if (errors.isEmpty()) {
                 textField.setText(newValue);
                 hideErrorMessage();
@@ -45,7 +44,7 @@ public class ErrorDoubleTextField {
 
             showErrorMessage(errors.iterator().next());
         });
-        this.appendableValue.tryAppend(this.appendableValue.value());
+        this.appendableProperty.tryAppend(this.appendableProperty.value());
     }
 
     private void showErrorMessage(String message) {

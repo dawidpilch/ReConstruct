@@ -3,15 +3,19 @@ package com.reconstruct.view.viewmodel;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class ValueErrors implements Iterable<String> {
+public class PropertyErrors implements Iterable<String> {
     private final Collection<String> errors;
 
-    public ValueErrors(Collection<String> errors) {
+    public PropertyErrors(Collection<String> errors) {
         this.errors = List.copyOf(errors);
     }
 
-    public static ValueErrors empty() {
-        return new ValueErrors(Collections.emptyList());
+    public static PropertyErrors of(String... errors) {
+        return new PropertyErrors(Arrays.asList(errors));
+    }
+
+    public static PropertyErrors empty() {
+        return new PropertyErrors(Collections.emptyList());
     }
 
     @Override

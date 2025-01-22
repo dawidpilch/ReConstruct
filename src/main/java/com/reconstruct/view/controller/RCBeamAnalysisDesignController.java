@@ -49,6 +49,7 @@ public class RCBeamAnalysisDesignController {
 
     private BeamView beamView;
     private final SimplySupportedBeamViewModel beamViewModel = new SimplySupportedBeamViewModel();
+    private final RectangularSectionViewModel rectangularSectionViewModel = new RectangularSectionViewModel();
 
     @FXML
     public void initialize() {
@@ -61,15 +62,15 @@ public class RCBeamAnalysisDesignController {
 
     private LoadingAnalysis loadingAnalysis() {
         Loading loading = new Loading(
-                beamViewModel.verticalPointLoadsValue.value(),
-                beamViewModel.horizontalPointLoadsValue.value(),
-                beamViewModel.bendingMomentsValue.value(),
-                beamViewModel.uniformlyDistributedLoadsValue.value()
+                beamViewModel.verticalPointLoadsProperty.value(),
+                beamViewModel.horizontalPointLoadsProperty.value(),
+                beamViewModel.bendingMomentsProperty.value(),
+                beamViewModel.uniformlyDistributedLoadsProperty.value()
         );
 
-        double length = beamViewModel.beamLengthValue.value();
-        Position pinnedPosition = Position.of(beamViewModel.pinnedSupportPositionValue.value());
-        Position rollerPosition = Position.of(beamViewModel.rollerSupportPositionValue.value());
+        double length = beamViewModel.beamLengthProperty.value();
+        Position pinnedPosition = Position.of(beamViewModel.pinnedSupportPositionProperty.value());
+        Position rollerPosition = Position.of(beamViewModel.rollerSupportPositionProperty.value());
 
         SimplySupportedBeam simplySupportedBeam = SimplySupportedBeam.withCustomSupportPositions(
                 new Span(
@@ -85,17 +86,23 @@ public class RCBeamAnalysisDesignController {
     }
 
     public void onGeometryConfiguration(ActionEvent ignored) {
-        var beamLengthValue = beamViewModel.beamLengthValue;
-        var pinnedSupportPositionValue = beamViewModel.pinnedSupportPositionValue;
-        var rollerSupportPositionValue = beamViewModel.rollerSupportPositionValue;
+        var beamLengthProperty = beamViewModel.beamLengthProperty;
+        var pinnedSupportPositionProperty = beamViewModel.pinnedSupportPositionProperty;
+        var rollerSupportPositionProperty = beamViewModel.rollerSupportPositionProperty;
+        var sectionDepthProperty = rectangularSectionViewModel.depthProperty;
+        var sectionWidthProperty = rectangularSectionViewModel.widthProperty;
 
-        var beamLengthValueMemento = beamLengthValue.value();
-        var pinnedSupportPositionValueMemento = pinnedSupportPositionValue.value();
-        var rollerSupportPositionValueMemento = rollerSupportPositionValue.value();
+        var beamLengthPropertyMemento = beamLengthProperty.value();
+        var pinnedSupportPositionPropertyMemento = pinnedSupportPositionProperty.value();
+        var rollerSupportPositionPropertyMemento = rollerSupportPositionProperty.value();
+        var sectionDepthPropertyMemento = rollerSupportPositionProperty.value();
+        var sectionWidthPropertyMemento = rollerSupportPositionProperty.value();
 
-        var beamLengthTF = new ErrorDoubleTextField(beamLengthValue);
-        var pinnedSuppTF = new ErrorDoubleTextField(pinnedSupportPositionValue);
-        var rollerSuppTF = new ErrorDoubleTextField(rollerSupportPositionValue);
+        var beamLengthTF = new ErrorDoubleTextField(beamLengthProperty);
+        var pinnedSuppTF = new ErrorDoubleTextField(pinnedSupportPositionProperty);
+        var rollerSuppTF = new ErrorDoubleTextField(rollerSupportPositionProperty);
+        var sectionDepthTF = new ErrorDoubleTextField(sectionDepthProperty);
+        var sectionWidthTF = new ErrorDoubleTextField(sectionWidthProperty);
 
         double prefButtonWidth = 75d;
         var saveButton = new Button("Save");
@@ -104,42 +111,50 @@ public class RCBeamAnalysisDesignController {
         var cancelButton = new Button("Cancel");
         cancelButton.setPrefWidth(prefButtonWidth);
 
-        AppendableValue.OnTryAppendValueListener<Double> listener = (oldValue, newValue, valueErrors) -> {
+        AppendableProperty.OnTryAppendValueListener<Double> listener = (oldValue, newValue, valueErrors) -> {
             saveButton.setDisable(!valueErrors.isEmpty());
         };
 
-        beamLengthValue.addOnTryAppendValueListener(listener);
-        pinnedSupportPositionValue.addOnTryAppendValueListener(listener);
-        rollerSupportPositionValue.addOnTryAppendValueListener(listener);
+        beamLengthProperty.addOnTryAppendValueListener(listener);
+        pinnedSupportPositionProperty.addOnTryAppendValueListener(listener);
+        rollerSupportPositionProperty.addOnTryAppendValueListener(listener);
+        sectionDepthProperty.addOnTryAppendValueListener(listener);
+        sectionWidthProperty.addOnTryAppendValueListener(listener);
 
         var propertiesVBox = new VBox(15, beamLengthTF.node(), pinnedSuppTF.node(), rollerSuppTF.node());
         propertiesVBox.setMaxWidth(300);
+
+        var sectionVBox = new VBox(15, sectionDepthTF.node(), sectionWidthTF.node());
 
         HBox buttons = new HBox(15, saveButton, cancelButton);
         buttons.setAlignment(Pos.CENTER_RIGHT);
 
         BorderPane content = new BorderPane();
-        content.setCenter(propertiesVBox);
+        content.setCenter(new HBox(15, propertiesVBox, new Separator(Orientation.VERTICAL), sectionVBox));
         content.setBottom(new VBox(15, new Separator(Orientation.HORIZONTAL), buttons));
         content.setPadding(new Insets(15));
 
         BorderPane.setAlignment(propertiesVBox, Pos.TOP_LEFT);
         BorderPane.setAlignment(buttons, Pos.CENTER_RIGHT);
-        Stage stage = simpleStage(new Scene(content), "Geometry configuration", 380, 300);
+        Stage stage = simpleStage(new Scene(content), "Geometry configuration", 380, 540);
 
         Runnable commonOnCloseAction = () -> {
-            beamLengthValue.removeOnTryAppendValueListener(listener);
-            pinnedSupportPositionValue.removeOnTryAppendValueListener(listener);
-            rollerSupportPositionValue.removeOnTryAppendValueListener(listener);
+            beamLengthProperty.removeOnTryAppendValueListener(listener);
+            pinnedSupportPositionProperty.removeOnTryAppendValueListener(listener);
+            rollerSupportPositionProperty.removeOnTryAppendValueListener(listener);
+            sectionDepthProperty.removeOnTryAppendValueListener(listener);
+            sectionWidthProperty.removeOnTryAppendValueListener(listener);
             beamView.refreshGeometry();
             beamView.displayLoading();
             stage.close();
         };
 
         Runnable restoreValuesAction = () -> {
-            beamLengthValue.tryAppend(beamLengthValueMemento);
-            rollerSupportPositionValue.tryAppend(rollerSupportPositionValueMemento);
-            pinnedSupportPositionValue.tryAppend(pinnedSupportPositionValueMemento);
+            beamLengthProperty.tryAppend(beamLengthPropertyMemento);
+            rollerSupportPositionProperty.tryAppend(rollerSupportPositionPropertyMemento);
+            pinnedSupportPositionProperty.tryAppend(pinnedSupportPositionPropertyMemento);
+            sectionDepthProperty.tryAppend(sectionDepthPropertyMemento);
+            sectionWidthProperty.tryAppend(sectionWidthPropertyMemento);
         };
 
         saveButton.setOnAction(event -> commonOnCloseAction.run());
@@ -180,7 +195,7 @@ public class RCBeamAnalysisDesignController {
         pointLoadsTableView.getSelectionModel().setCellSelectionEnabled(false);
         pointLoadsTableView.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.SINGLE);
         pointLoadsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_SUBSEQUENT_COLUMNS);
-        AppendableValue.OnTryAppendValueListener<Collection<VerticalPointLoad>> fillPointLoadsTableWithDataListener = (oldValue, newValue, errors) -> {
+        AppendableProperty.OnTryAppendValueListener<Collection<VerticalPointLoad>> fillPointLoadsTableWithDataListener = (oldValue, newValue, errors) -> {
             if (!errors.isEmpty()) {
                 return;
             }
@@ -189,8 +204,8 @@ public class RCBeamAnalysisDesignController {
             newValue.forEach(verticalPointLoad -> pointLoadsTableView.getItems().add(verticalPointLoad));
         };
 
-        beamViewModel.verticalPointLoadsValue.value().forEach(verticalPointLoad -> pointLoadsTableView.getItems().add(verticalPointLoad));
-        beamViewModel.verticalPointLoadsValue.addOnTryAppendValueListener(fillPointLoadsTableWithDataListener);
+        beamViewModel.verticalPointLoadsProperty.value().forEach(verticalPointLoad -> pointLoadsTableView.getItems().add(verticalPointLoad));
+        beamViewModel.verticalPointLoadsProperty.addOnTryAppendValueListener(fillPointLoadsTableWithDataListener);
         TableColumn<VerticalPointLoad, Number> positionColumn = new TableColumn<>("Position (m)");
         positionColumn.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().position().doubleValue()));
         TableColumn<VerticalPointLoad, Number> magnitudeColumn = new TableColumn<>("Magnitude (kN)");
@@ -207,17 +222,17 @@ public class RCBeamAnalysisDesignController {
 
             Stage stage = simpleStage(new Scene(sceneRoot) , "Add Point Load",380, 520);
 
-            AppendableValue<Double> positionValue = positionAppendableValue();
-            AppendableValue<Double> magnitudeValue = magnitudeAppendableValue("kN");
+            AppendableProperty<Double> positionValue = positionAppendableValue();
+            AppendableProperty<Double> magnitudeValue = magnitudeAppendableValue("kN");
 
             ErrorDoubleTextField positionTF = new ErrorDoubleTextField(positionValue);
             ErrorDoubleTextField magnitudeTF = new ErrorDoubleTextField(magnitudeValue);
 
             Button addButton = new Button("Add");
             addButton.setOnAction(addBtnEvent -> {
-                var modified = new ArrayList<>(beamViewModel.verticalPointLoadsValue.value());
+                var modified = new ArrayList<>(beamViewModel.verticalPointLoadsProperty.value());
                 modified.add(VerticalPointLoad.of(Position.of(positionValue.value()), Magnitude.of(magnitudeValue.value())));
-                ValueErrors errors = beamViewModel.verticalPointLoadsValue.tryAppend(modified);
+                PropertyErrors errors = beamViewModel.verticalPointLoadsProperty.tryAppend(modified);
                 if (!errors.isEmpty()) {
                     new Alert(Alert.AlertType.ERROR, errors.iterator().next(), ButtonType.OK).showAndWait();
                     return;
@@ -254,9 +269,9 @@ public class RCBeamAnalysisDesignController {
             }
 
             PointLoad pointLoad = selectedItems.getFirst();
-            var modified = new ArrayList<>(beamViewModel.verticalPointLoadsValue.value());
+            var modified = new ArrayList<>(beamViewModel.verticalPointLoadsProperty.value());
             modified.remove(pointLoad);
-            beamViewModel.verticalPointLoadsValue.tryAppend(modified);
+            beamViewModel.verticalPointLoadsProperty.tryAppend(modified);
         });
 
         ScrollPane tableViewScrollPane = new ScrollPane(pointLoadsTableView);
@@ -282,7 +297,7 @@ public class RCBeamAnalysisDesignController {
         bendingMomentsTableView.getSelectionModel().setCellSelectionEnabled(false);
         bendingMomentsTableView.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.SINGLE);
         bendingMomentsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_SUBSEQUENT_COLUMNS);
-        AppendableValue.OnTryAppendValueListener<Collection<BendingMoment>> fillBendingMomentsTableWithDataListener = (oldValue, newValue, errors) -> {
+        AppendableProperty.OnTryAppendValueListener<Collection<BendingMoment>> fillBendingMomentsTableWithDataListener = (oldValue, newValue, errors) -> {
             if (!errors.isEmpty()) {
                 return;
             }
@@ -291,8 +306,8 @@ public class RCBeamAnalysisDesignController {
             newValue.forEach(bendingMoment -> bendingMomentsTableView.getItems().add(bendingMoment));
         };
 
-        beamViewModel.bendingMomentsValue.value().forEach(bendingMoment -> bendingMomentsTableView.getItems().add(bendingMoment));
-        beamViewModel.bendingMomentsValue.addOnTryAppendValueListener(fillBendingMomentsTableWithDataListener);
+        beamViewModel.bendingMomentsProperty.value().forEach(bendingMoment -> bendingMomentsTableView.getItems().add(bendingMoment));
+        beamViewModel.bendingMomentsProperty.addOnTryAppendValueListener(fillBendingMomentsTableWithDataListener);
         TableColumn<BendingMoment, Number> positionColumnBM = new TableColumn<>("Position (m)");
         positionColumnBM.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().position().doubleValue()));
         TableColumn<BendingMoment, Number> magnitudeColumnBM = new TableColumn<>("Magnitude (kN/m)");
@@ -309,17 +324,17 @@ public class RCBeamAnalysisDesignController {
 
             Stage stage = simpleStage(new Scene(sceneRoot) , "Add Bending Moment",380, 520);
 
-            AppendableValue<Double> positionValue = positionAppendableValue();
-            AppendableValue<Double> magnitudeValue = magnitudeAppendableValue("kN/m");
+            AppendableProperty<Double> positionValue = positionAppendableValue();
+            AppendableProperty<Double> magnitudeValue = magnitudeAppendableValue("kN/m");
 
             ErrorDoubleTextField positionTF = new ErrorDoubleTextField(positionValue);
             ErrorDoubleTextField magnitudeTF = new ErrorDoubleTextField(magnitudeValue);
 
             Button addButton = new Button("Add");
             addButton.setOnAction(addBtnEvent -> {
-                var modified = new ArrayList<>(beamViewModel.bendingMomentsValue.value());
+                var modified = new ArrayList<>(beamViewModel.bendingMomentsProperty.value());
                 modified.add(BendingMoment.of(Position.of(positionValue.value()), Magnitude.of(magnitudeValue.value())));
-                ValueErrors errors = beamViewModel.bendingMomentsValue.tryAppend(modified);
+                PropertyErrors errors = beamViewModel.bendingMomentsProperty.tryAppend(modified);
                 if (!errors.isEmpty()) {
                     new Alert(Alert.AlertType.ERROR, errors.iterator().next(), ButtonType.OK).showAndWait();
                     return;
@@ -356,9 +371,9 @@ public class RCBeamAnalysisDesignController {
             }
             BendingMoment bendingMoment = selectedItems.getFirst();
 
-            var modified = new ArrayList<>(beamViewModel.bendingMomentsValue.value());
+            var modified = new ArrayList<>(beamViewModel.bendingMomentsProperty.value());
             modified.remove(bendingMoment);
-            beamViewModel.bendingMomentsValue.tryAppend(modified);
+            beamViewModel.bendingMomentsProperty.tryAppend(modified);
         });
 
         ScrollPane bendingMomentsScrollPane = new ScrollPane(bendingMomentsTableView);
@@ -384,7 +399,7 @@ public class RCBeamAnalysisDesignController {
         udlTableView.getSelectionModel().setCellSelectionEnabled(false);
         udlTableView.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.SINGLE);
         udlTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_SUBSEQUENT_COLUMNS);
-        AppendableValue.OnTryAppendValueListener<Collection<UniformlyDistributedLoad>> fillUDLTableWithDataListener = (oldValue, newValue, errors) -> {
+        AppendableProperty.OnTryAppendValueListener<Collection<UniformlyDistributedLoad>> fillUDLTableWithDataListener = (oldValue, newValue, errors) -> {
             if (!errors.isEmpty()) {
                 return;
             }
@@ -393,8 +408,8 @@ public class RCBeamAnalysisDesignController {
             newValue.forEach(udl -> udlTableView.getItems().add(udl));
         };
 
-        beamViewModel.uniformlyDistributedLoadsValue.value().forEach(udl -> udlTableView.getItems().add(udl));
-        beamViewModel.uniformlyDistributedLoadsValue.addOnTryAppendValueListener(fillUDLTableWithDataListener);
+        beamViewModel.uniformlyDistributedLoadsProperty.value().forEach(udl -> udlTableView.getItems().add(udl));
+        beamViewModel.uniformlyDistributedLoadsProperty.addOnTryAppendValueListener(fillUDLTableWithDataListener);
         TableColumn<UniformlyDistributedLoad, Number> startPositionColumnUDL = new TableColumn<>("Start position (m)");
         startPositionColumnUDL.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().startPosition().doubleValue()));
         TableColumn<UniformlyDistributedLoad, Number> endPositionColumnUDL = new TableColumn<>("End position (m)");
@@ -414,9 +429,9 @@ public class RCBeamAnalysisDesignController {
 
             Stage stage = simpleStage(new Scene(sceneRoot) , "Add Bending Moment",380, 520);
 
-            AppendableValue<Double> startPositionValue = positionAppendableValue();
-            AppendableValue<Double> endPositionValue = positionAppendableValue(beamViewModel.beamLengthValue.value());
-            AppendableValue<Double> magnitudeValue = magnitudeAppendableValue("kN/m");
+            AppendableProperty<Double> startPositionValue = positionAppendableValue();
+            AppendableProperty<Double> endPositionValue = positionAppendableValue(beamViewModel.beamLengthProperty.value());
+            AppendableProperty<Double> magnitudeValue = magnitudeAppendableValue("kN/m");
 
             ErrorDoubleTextField startPositionTF = new ErrorDoubleTextField(startPositionValue);
             ErrorDoubleTextField endPositionTF = new ErrorDoubleTextField(endPositionValue);
@@ -424,13 +439,13 @@ public class RCBeamAnalysisDesignController {
 
             Button addButton = new Button("Add");
             addButton.setOnAction(addBtnEvent -> {
-                var modified = new ArrayList<>(beamViewModel.uniformlyDistributedLoadsValue.value());
+                var modified = new ArrayList<>(beamViewModel.uniformlyDistributedLoadsProperty.value());
                 modified.add(UniformlyDistributedLoad.of(
                         Position.of(startPositionValue.value()),
                         Position.of(endPositionValue.value()),
                         Magnitude.of(magnitudeValue.value())
                 ));
-                ValueErrors errors = beamViewModel.uniformlyDistributedLoadsValue.tryAppend(modified);
+                PropertyErrors errors = beamViewModel.uniformlyDistributedLoadsProperty.tryAppend(modified);
                 if (!errors.isEmpty()) {
                     new Alert(Alert.AlertType.ERROR, errors.iterator().next(), ButtonType.OK).showAndWait();
                     return;
@@ -468,9 +483,9 @@ public class RCBeamAnalysisDesignController {
             }
             UniformlyDistributedLoad udl = selectedItems.getFirst();
 
-            var modified = new ArrayList<>(beamViewModel.uniformlyDistributedLoadsValue.value());
+            var modified = new ArrayList<>(beamViewModel.uniformlyDistributedLoadsProperty.value());
             modified.remove(udl);
-            beamViewModel.uniformlyDistributedLoadsValue.tryAppend(modified);
+            beamViewModel.uniformlyDistributedLoadsProperty.tryAppend(modified);
         });
 
         ScrollPane udlScrollPane = new ScrollPane(udlTableView);
@@ -516,22 +531,22 @@ public class RCBeamAnalysisDesignController {
         Stage stage = simpleStage(new Scene(content), "Loading Configuration", 580, 720);
 
 
-        var verticalPointLoadsValueMemento = beamViewModel.verticalPointLoadsValue.value();
-        var bendingMomentsValueMemento = beamViewModel.bendingMomentsValue.value();
-        var udlValueMemento = beamViewModel.uniformlyDistributedLoadsValue.value();
+        var verticalPointLoadsValueMemento = beamViewModel.verticalPointLoadsProperty.value();
+        var bendingMomentsValueMemento = beamViewModel.bendingMomentsProperty.value();
+        var udlValueMemento = beamViewModel.uniformlyDistributedLoadsProperty.value();
 
         Runnable commonOnCloseAction = () -> {
-            beamViewModel.verticalPointLoadsValue.removeOnTryAppendValueListener(fillPointLoadsTableWithDataListener);
-            beamViewModel.bendingMomentsValue.removeOnTryAppendValueListener(fillBendingMomentsTableWithDataListener);
-            beamViewModel.uniformlyDistributedLoadsValue.removeOnTryAppendValueListener(fillUDLTableWithDataListener);
+            beamViewModel.verticalPointLoadsProperty.removeOnTryAppendValueListener(fillPointLoadsTableWithDataListener);
+            beamViewModel.bendingMomentsProperty.removeOnTryAppendValueListener(fillBendingMomentsTableWithDataListener);
+            beamViewModel.uniformlyDistributedLoadsProperty.removeOnTryAppendValueListener(fillUDLTableWithDataListener);
             beamView.displayLoading();
             stage.close();
         };
 
         Runnable restoreValuesAction = () -> {
-            beamViewModel.verticalPointLoadsValue.tryAppend(verticalPointLoadsValueMemento);
-            beamViewModel.bendingMomentsValue.tryAppend(bendingMomentsValueMemento);
-            beamViewModel.uniformlyDistributedLoadsValue.tryAppend(udlValueMemento);
+            beamViewModel.verticalPointLoadsProperty.tryAppend(verticalPointLoadsValueMemento);
+            beamViewModel.bendingMomentsProperty.tryAppend(bendingMomentsValueMemento);
+            beamViewModel.uniformlyDistributedLoadsProperty.tryAppend(udlValueMemento);
         };
 
         saveButton.setOnAction(event -> commonOnCloseAction.run());
@@ -547,29 +562,29 @@ public class RCBeamAnalysisDesignController {
         stage.showAndWait();
     }
 
-    private AppendableValue<Double> magnitudeAppendableValue(String magnitudeUnit) {
-        return new AppendableValue<>(0d, String.format("Magnitude (%s)", magnitudeUnit)) {
+    private AppendableProperty<Double> magnitudeAppendableValue(String magnitudeUnit) {
+        return new AppendableProperty<>(0d, String.format("Magnitude (%s)", magnitudeUnit)) {
             @Override
-            protected ValueErrors validateNewValue(Double newValue) {
-                return ValueErrors.empty();
+            protected PropertyErrors validateNewValue(Double newValue) {
+                return PropertyErrors.empty();
             }
         };
     }
 
-    private AppendableValue<Double> positionAppendableValue(double defaultValue) {
-        return new AppendableValue<>(defaultValue, "Position (m)") {
+    private AppendableProperty<Double> positionAppendableValue(double defaultValue) {
+        return new AppendableProperty<>(defaultValue, "Position (m)") {
             @Override
-            protected ValueErrors validateNewValue(Double newValue) {
+            protected PropertyErrors validateNewValue(Double newValue) {
                 List<String> errors = new ArrayList<>(2);
-                if ((newValue < 0) || (newValue > beamViewModel.beamLengthValue.value())) {
+                if ((newValue < 0) || (newValue > beamViewModel.beamLengthProperty.value())) {
                     errors.add("Position must be in range of the beam");
                 }
-                return new ValueErrors(errors);
+                return new PropertyErrors(errors);
             }
         };
     }
 
-    private AppendableValue<Double> positionAppendableValue() {
+    private AppendableProperty<Double> positionAppendableValue() {
         return positionAppendableValue(0d);
     }
 
@@ -665,17 +680,9 @@ public class RCBeamAnalysisDesignController {
         VBox propertiesVBox = new VBox(15);
         content.setCenter(propertiesVBox);
 
-        AppendableValue<Double> minCorrosionCoverThickness = new AppendableValue<>(5d, "Minimal corrosion cover thickness (mm)") {
-            @Override
-            protected ValueErrors validateNewValue(Double newValue) {
-                var errors = new ArrayList<String>();
-                if (newValue < 0) {
-                    errors.add("Value must be greater than zero");
-                } return new ValueErrors(errors);
-            }
-        };
+        AppendableProperty<Double> minCorrosionCoverThickness = new PositiveDoubleAppendableProperty(5d, "Minimal corrosion cover thickness (mm)");
         ErrorDoubleTextField minCorrosionCoverThicknessTF = new ErrorDoubleTextField(minCorrosionCoverThickness);
-        Button selectMinCorrosionCoverThickness = new Button("...");
+        Button selectMinCorrosionCoverThickness = new Button(". . .");
         selectMinCorrosionCoverThickness.setOnAction(event -> {
             BorderPane localContent = new BorderPane();
 
@@ -744,25 +751,14 @@ public class RCBeamAnalysisDesignController {
         HBox.setHgrow(minCorrosionCoverThicknessTF.node(), Priority.ALWAYS);
         minCorrosionCoverThicknessHBox.setAlignment(Pos.BOTTOM_CENTER);
 
-        AppendableValue<Double> diameterOfSingleReinforcementBar = new AppendableValue<>(5d, "Diameter of single reinforcement bar (mm)") {
-            @Override
-            protected ValueErrors validateNewValue(Double newValue) {
-                var errors = new ArrayList<String>();
-                if (newValue < 0) {
-                    errors.add("Value must be greater than zero");
-                } return new ValueErrors(errors);
-            }
-        };
+        AppendableProperty<Double> diameterOfReinforcementBar = new PositiveDoubleAppendableProperty(20d, "Diameter of reinforcement bar (mm)");
+        ErrorDoubleTextField diameterOfReinforcementBarTF = new ErrorDoubleTextField(diameterOfReinforcementBar);
+        propertiesVBox.getChildren().add(diameterOfReinforcementBarTF.node());
 
         propertiesVBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
 
         Map<String, Double> compressionCalculationMpaValuesOfReinforcedConcreteMap = PN02.COMPRESSION_CALCULATION_MPA_VALUES_OF_REINFORCED_CONCRETE;
-        AppendableValue<Double> concreteGradeValue = new AppendableValue<>(compressionCalculationMpaValuesOfReinforcedConcreteMap.values().stream().findFirst().get()) {
-            @Override
-            protected ValueErrors validateNewValue(Double newValue) {
-                return ValueErrors.empty();
-            }
-        };
+        AppendableProperty<Double> concreteGradeProperty = new PositiveDoubleAppendableProperty(compressionCalculationMpaValuesOfReinforcedConcreteMap.values().stream().findFirst().get());
         ComboBox<String> concreteGradeComboBox = new ComboBox<>();
         HBox concreteGradeHBox = new HBox(15, new Label("Concrete grade:"), concreteGradeComboBox);
         propertiesVBox.getChildren().add(concreteGradeHBox);
@@ -770,32 +766,25 @@ public class RCBeamAnalysisDesignController {
         concreteGradeHBox.setAlignment(Pos.CENTER_LEFT);
         concreteGradeComboBox.getItems().addAll(compressionCalculationMpaValuesOfReinforcedConcreteMap.keySet());
         concreteGradeComboBox.setOnAction(e -> {
-            ValueErrors errors = concreteGradeValue.tryAppend(compressionCalculationMpaValuesOfReinforcedConcreteMap.get(concreteGradeComboBox.getSelectionModel().getSelectedItem()));
+            PropertyErrors errors = concreteGradeProperty.tryAppend(compressionCalculationMpaValuesOfReinforcedConcreteMap.get(concreteGradeComboBox.getSelectionModel().getSelectedItem()));
             if (errors.isEmpty()) {
                 return;
             }
         });
 
         Map<String, Double> yieldStrengthCalculationMpaValuesOfReinforcementSteel = PN02.YIELD_STRENGTH_CALCULATION_MPA_VALUES_OF_REINFORCEMENT_STEEL;
-        AppendableValue<Double> reinforcementSteelGradeValue = new AppendableValue<>(compressionCalculationMpaValuesOfReinforcedConcreteMap.values().stream().findFirst().get()) {
-            @Override
-            protected ValueErrors validateNewValue(Double newValue) {
-                return ValueErrors.empty();
-            }
-        };
+        AppendableProperty<Double> reinforcementSteelGradeProperty = new PositiveDoubleAppendableProperty(yieldStrengthCalculationMpaValuesOfReinforcementSteel.values().stream().findFirst().get());
         ComboBox<String> reinforcementSteelGradeComboBox = new ComboBox<>();
         HBox reinforcementSteelGradeHBox = new HBox(15, new Label("Reinforcement steel grade:"), reinforcementSteelGradeComboBox);
         propertiesVBox.getChildren().add(reinforcementSteelGradeHBox);
         reinforcementSteelGradeComboBox.getItems().addAll(yieldStrengthCalculationMpaValuesOfReinforcementSteel.keySet());
         reinforcementSteelGradeHBox.setAlignment(Pos.CENTER_LEFT);
         reinforcementSteelGradeComboBox.setOnAction(e -> {
-            ValueErrors errors = reinforcementSteelGradeValue.tryAppend(yieldStrengthCalculationMpaValuesOfReinforcementSteel.get(reinforcementSteelGradeComboBox.getSelectionModel().getSelectedItem()));
+            PropertyErrors errors = reinforcementSteelGradeProperty.tryAppend(yieldStrengthCalculationMpaValuesOfReinforcementSteel.get(reinforcementSteelGradeComboBox.getSelectionModel().getSelectedItem()));
             if (errors.isEmpty()) {
                 return;
             }
         });
-
-
 
         content.setPadding(new Insets(15));
         Stage stage = simpleStage(new Scene(content), "Reinforcement", 580, 520);

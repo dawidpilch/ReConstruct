@@ -2,7 +2,7 @@ package com.reconstruct.view.component;
 
 import com.reconstruct.model.beam.loading.moment.BendingMoment;
 import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
-import com.reconstruct.view.viewmodel.AppendableValue;
+import com.reconstruct.view.viewmodel.AppendableProperty;
 import com.reconstruct.view.viewmodel.SimplySupportedBeamViewModel;
 import javafx.beans.property.ReadOnlyListWrapper;
 import javafx.geometry.Pos;
@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class BeamView {
     private final SimplySupportedBeamViewModel beamViewModel;
-    private final Map<AppendableValue<Double>, Node> supportPositionsToNodeMap = new HashMap<>();
+    private final Map<AppendableProperty<Double>, Node> supportPositionsToNodeMap = new HashMap<>();
 
     private final StackPane contentPane = new StackPane();
     private final StackPane chartPane = new StackPane();
@@ -107,15 +107,15 @@ public class BeamView {
         contentPane.getChildren().add(rollerSupportNode);
         StackPane.setAlignment(rollerSupportNode, Pos.CENTER_LEFT);
 
-        supportPositionsToNodeMap.put(beamViewModel.pinnedSupportPositionValue, pinnedSupportNode);
-        supportPositionsToNodeMap.put(beamViewModel.rollerSupportPositionValue, rollerSupportNode);
+        supportPositionsToNodeMap.put(beamViewModel.pinnedSupportPositionProperty, pinnedSupportNode);
+        supportPositionsToNodeMap.put(beamViewModel.rollerSupportPositionProperty, rollerSupportNode);
 
         chartPane.toFront();
         loadingPane.toFront();
     }
 
     private void translateXNodesAbsPosition(Node node, double absolutePositionOnBeam) {
-        node.setTranslateX((absolutePositionOnBeam / beamViewModel.beamLengthValue.value()) * componentWidth);
+        node.setTranslateX((absolutePositionOnBeam / beamViewModel.beamLengthProperty.value()) * componentWidth);
     }
 
     private Node pinnedSupport() {
@@ -148,13 +148,13 @@ public class BeamView {
         loadingPane.setVisible(true);
         loadingPane.getChildren().clear();
 
-        for (VerticalPointLoad verticalPointLoad : beamViewModel.verticalPointLoadsValue.value()) {
+        for (VerticalPointLoad verticalPointLoad : beamViewModel.verticalPointLoadsProperty.value()) {
             Node pointArrow = pointArrow(verticalPointLoad.magnitude().doubleValue(), verticalPointLoad.position().doubleValue(), verticalPointLoad.isDirectedUpwards(), Paint.valueOf("red"));
             loadingPane.getChildren().add(pointArrow);
             pointArrow.toFront();
         }
 
-        for (BendingMoment bendingMoment : beamViewModel.bendingMomentsValue.value()) {
+        for (BendingMoment bendingMoment : beamViewModel.bendingMomentsProperty.value()) {
             SVGPath svgPath = new SVGPath();
             double svgHeight = 107;
             double wrapperHeight = 30 + svgHeight;
@@ -190,7 +190,7 @@ public class BeamView {
             wrapper.toFront();
         }
 
-        for (var udl : beamViewModel.uniformlyDistributedLoadsValue.value()) {
+        for (var udl : beamViewModel.uniformlyDistributedLoadsProperty.value()) {
             Paint strokePaint = Color.rgb(74, 215, 104);
             Paint fillPaint = Color.rgb(74, 215, 104, 0.3);
 
@@ -339,7 +339,7 @@ public class BeamView {
 
     private void adjustXAxisForLength() {
         xAxis.setAutoRanging(false);
-        xAxis.setUpperBound(beamViewModel.beamLengthValue.value());
+        xAxis.setUpperBound(beamViewModel.beamLengthProperty.value());
         xAxis.setLowerBound(0d);
     }
 

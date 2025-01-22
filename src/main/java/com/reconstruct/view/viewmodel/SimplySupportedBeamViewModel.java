@@ -8,91 +8,91 @@ import java.util.*;
 import java.util.function.Function;
 
 public class SimplySupportedBeamViewModel {
-    public final AppendableValue<Double> beamLengthValue;
-    public final AppendableValue<Double> pinnedSupportPositionValue;
-    public final AppendableValue<Double> rollerSupportPositionValue;
-    public final AppendableValue<Collection<VerticalPointLoad>> verticalPointLoadsValue;
-    public final AppendableValue<Collection<HorizontalPointLoad>> horizontalPointLoadsValue;
-    public final AppendableValue<Collection<BendingMoment>> bendingMomentsValue;
-    public final AppendableValue<Collection<UniformlyDistributedLoad>> uniformlyDistributedLoadsValue;
+    public final AppendableProperty<Double> beamLengthProperty;
+    public final AppendableProperty<Double> pinnedSupportPositionProperty;
+    public final AppendableProperty<Double> rollerSupportPositionProperty;
+    public final AppendableProperty<Collection<VerticalPointLoad>> verticalPointLoadsProperty;
+    public final AppendableProperty<Collection<HorizontalPointLoad>> horizontalPointLoadsProperty;
+    public final AppendableProperty<Collection<BendingMoment>> bendingMomentsProperty;
+    public final AppendableProperty<Collection<UniformlyDistributedLoad>> uniformlyDistributedLoadsProperty;
 
     public SimplySupportedBeamViewModel() {
-        this.beamLengthValue = new AppendableValue<>(10d, "Beam Length") {
+        this.beamLengthProperty = new AppendableProperty<>(10d, "Beam Length (mm)") {
             @Override
-            public ValueErrors validateNewValue(Double newValue) {
+            public PropertyErrors validateNewValue(Double newValue) {
                 List<String> errors = new ArrayList<>();
                 if (newValue <= 0) {
                     errors.add("The length must be greater than 0");
                 } else if (!allPositionableObjectsInRange(newValue)) {
                     errors.add("The length cannot be changed because there are supports defined outside of the beam");
                 }
-                return new ValueErrors(errors);
+                return new PropertyErrors(errors);
             }
         };
 
-        Function<Double, ValueErrors> positionValueErrorsFunc = aDouble -> {
+        Function<Double, PropertyErrors> positionValueErrorsFunc = aDouble -> {
             List<String> errors = new ArrayList<>(2);
-            if ((aDouble < 0) || (aDouble > beamLengthValue.value())) {
+            if ((aDouble < 0) || (aDouble > beamLengthProperty.value())) {
                 errors.add("Position must be in range of the beam");
-            } return new ValueErrors(errors);
+            } return new PropertyErrors(errors);
         };
 
-        Function<Collection<Double>, ValueErrors> positionValueErrorsFuncForCollection = doubles -> {
+        Function<Collection<Double>, PropertyErrors> positionValueErrorsFuncForCollection = doubles -> {
             for (var value : doubles) {
-                ValueErrors errors = positionValueErrorsFunc.apply(value);
+                PropertyErrors errors = positionValueErrorsFunc.apply(value);
                 if(!errors.isEmpty()) {
                     return errors;
                 }
-            } return ValueErrors.empty();
+            } return PropertyErrors.empty();
         };
 
-        this.verticalPointLoadsValue = new AppendableValue<>(Collections.emptyList(),"Vertical point loads") {
+        this.verticalPointLoadsProperty = new AppendableProperty<>(Collections.emptyList(),"Vertical point loads") {
             @Override
-            protected ValueErrors validateNewValue(Collection<VerticalPointLoad> newValue) {
+            protected PropertyErrors validateNewValue(Collection<VerticalPointLoad> newValue) {
                 return positionValueErrorsFuncForCollection.apply(newValue.stream().map(verticalPointLoad -> verticalPointLoad.position().doubleValue()).toList());
             }
         };
 
-        this.horizontalPointLoadsValue = new AppendableValue<>(Collections.emptyList(),"Horizontal point loads") {
+        this.horizontalPointLoadsProperty = new AppendableProperty<>(Collections.emptyList(),"Horizontal point loads") {
             @Override
-            protected ValueErrors validateNewValue(Collection<HorizontalPointLoad> newValue) {
+            protected PropertyErrors validateNewValue(Collection<HorizontalPointLoad> newValue) {
                 return positionValueErrorsFuncForCollection.apply(newValue.stream().map(horizontalPointLoad -> horizontalPointLoad.position().doubleValue()).toList());
             }
         };
 
-        this.bendingMomentsValue = new AppendableValue<>(Collections.emptyList(),"Horizontal point loads") {
+        this.bendingMomentsProperty = new AppendableProperty<>(Collections.emptyList(),"Horizontal point loads") {
             @Override
-            protected ValueErrors validateNewValue(Collection<BendingMoment> newValue) {
+            protected PropertyErrors validateNewValue(Collection<BendingMoment> newValue) {
                 return positionValueErrorsFuncForCollection.apply(newValue.stream().map(moment -> moment.position().doubleValue()).toList());
             }
         };
 
-        this.uniformlyDistributedLoadsValue = new AppendableValue<>(Collections.emptyList(), "Uniformly distributed loads") {
+        this.uniformlyDistributedLoadsProperty = new AppendableProperty<>(Collections.emptyList(), "Uniformly distributed loads") {
             @Override
-            protected ValueErrors validateNewValue(Collection<UniformlyDistributedLoad> newValue) {
+            protected PropertyErrors validateNewValue(Collection<UniformlyDistributedLoad> newValue) {
                 for (var udl : newValue) {
-                    ValueErrors startPosErrors = positionValueErrorsFunc.apply(udl.startPosition().doubleValue());
-                    ValueErrors endPosErrors = positionValueErrorsFunc.apply(udl.endPosition().doubleValue());
+                    PropertyErrors startPosErrors = positionValueErrorsFunc.apply(udl.startPosition().doubleValue());
+                    PropertyErrors endPosErrors = positionValueErrorsFunc.apply(udl.endPosition().doubleValue());
                     if (!startPosErrors.isEmpty()) {
                         return startPosErrors;
                     }
                     if (!endPosErrors.isEmpty()) {
                         return endPosErrors;
                     }
-                } return ValueErrors.empty();
+                } return PropertyErrors.empty();
             }
         };
 
-        this.pinnedSupportPositionValue = new AppendableValue<>(0d, "Pinned support position") {
+        this.pinnedSupportPositionProperty = new AppendableProperty<>(0d, "Pinned support position (mm)") {
             @Override
-            public ValueErrors validateNewValue(Double newValue) {
+            public PropertyErrors validateNewValue(Double newValue) {
                 return positionValueErrorsFunc.apply(newValue);
             }
         };
 
-        this.rollerSupportPositionValue = new AppendableValue<>(10d, "Roller support position") {
+        this.rollerSupportPositionProperty = new AppendableProperty<>(10d, "Roller support position (mm)") {
             @Override
-            public ValueErrors validateNewValue(Double newValue) {
+            public PropertyErrors validateNewValue(Double newValue) {
                 return positionValueErrorsFunc.apply(newValue);
             }
         };
@@ -100,11 +100,11 @@ public class SimplySupportedBeamViewModel {
 
     private boolean allPositionableObjectsInRange(double range) {
         final Set<Double> positionsForRangeCheck = new HashSet<>();
-        positionsForRangeCheck.add(pinnedSupportPositionValue.value());
-        positionsForRangeCheck.add(rollerSupportPositionValue.value());
-        verticalPointLoadsValue.value().forEach(pointLoad -> positionsForRangeCheck.add(pointLoad.position().doubleValue()));
-        bendingMomentsValue.value().forEach(bendingMoment -> positionsForRangeCheck.add(bendingMoment.position().doubleValue()));
-        uniformlyDistributedLoadsValue.value().forEach(uniformlyDistributedLoad -> {
+        positionsForRangeCheck.add(pinnedSupportPositionProperty.value());
+        positionsForRangeCheck.add(rollerSupportPositionProperty.value());
+        verticalPointLoadsProperty.value().forEach(pointLoad -> positionsForRangeCheck.add(pointLoad.position().doubleValue()));
+        bendingMomentsProperty.value().forEach(bendingMoment -> positionsForRangeCheck.add(bendingMoment.position().doubleValue()));
+        uniformlyDistributedLoadsProperty.value().forEach(uniformlyDistributedLoad -> {
             positionsForRangeCheck.add(uniformlyDistributedLoad.startPosition().doubleValue());
             positionsForRangeCheck.add(uniformlyDistributedLoad.endPosition().doubleValue());
         });
