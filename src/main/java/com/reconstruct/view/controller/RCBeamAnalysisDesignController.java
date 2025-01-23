@@ -680,7 +680,7 @@ public class RCBeamAnalysisDesignController {
         VBox propertiesVBox = new VBox(15);
         content.setCenter(propertiesVBox);
 
-        AppendableProperty<Double> minCorrosionCoverThickness = new PositiveDoubleAppendableProperty(5d, "Minimal corrosion cover thickness (mm)");
+        AppendableProperty<Double> minCorrosionCoverThickness = new PositiveDoubleAppendableProperty(25d);
         ErrorDoubleTextField minCorrosionCoverThicknessTF = new ErrorDoubleTextField(
                 minCorrosionCoverThickness,
                 new SimpleTextFlowBuilder().addRegularText("Minimal corrosion cover thickness c").addSubscriptText("min").addRegularText(" (mm)").build()
@@ -760,9 +760,19 @@ public class RCBeamAnalysisDesignController {
         );
         propertiesVBox.getChildren().add(corrosionCoverToleranceTF.node());
 
-        AppendableProperty<Double> diameterOfReinforcementBar = new PositiveDoubleAppendableProperty(20d, "Diameter of reinforcement bar (mm)");
-        ErrorDoubleTextField diameterOfReinforcementBarTF = new ErrorDoubleTextField(diameterOfReinforcementBar);
+        AppendableProperty<Double> diameterOfReinforcementBar = new PositiveDoubleAppendableProperty(25d);
+        ErrorDoubleTextField diameterOfReinforcementBarTF = new ErrorDoubleTextField(
+                diameterOfReinforcementBar,
+                new SimpleTextFlowBuilder().addRegularText("Diameter of reinforcement bar Φ (mm)").build()
+        );
         propertiesVBox.getChildren().add(diameterOfReinforcementBarTF.node());
+
+        AppendableProperty<Double> diameterOfReinforcementStirrup = new PositiveDoubleAppendableProperty(8d);
+        ErrorDoubleTextField diameterOfReinforcementStirrupTF = new ErrorDoubleTextField(
+                diameterOfReinforcementStirrup,
+                new SimpleTextFlowBuilder().addRegularText("Diameter of reinforcement stirrup Φ").addSubscriptText("s").addRegularText(" (mm)").build()
+        );
+        propertiesVBox.getChildren().add(diameterOfReinforcementStirrupTF.node());
 
         propertiesVBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
 
@@ -776,15 +786,20 @@ public class RCBeamAnalysisDesignController {
         concreteGradeComboBox.setPrefWidth(Double.MAX_VALUE);
         concreteGradeBP.setCenter(concreteGradeComboBox);
         BorderPane.setAlignment(concreteGradeBP.getCenter(), Pos.CENTER_LEFT);
-
         propertiesVBox.getChildren().add(concreteGradeBP);
 
         List<ReinforcementMaterialGrade> steelGrades = PN02.STEEL_GRADES;
         ComboBox<String> reinforcementSteelGradeComboBox = new ComboBox<>();
-        HBox reinforcementSteelGradeHBox = new HBox(5, new Label("Reinforcement steel grade:"), reinforcementSteelGradeComboBox);
+        BorderPane steelGradeBP = new BorderPane();
+        steelGradeBP.setLeft(new Label("Reinforcement steel grade:"));
+        BorderPane.setAlignment(steelGradeBP.getLeft(), Pos.CENTER_LEFT);
+        BorderPane.setMargin(steelGradeBP.getLeft(), new Insets(0, 5, 0, 0));
         steelGrades.forEach(reinforcementMaterialGrade -> reinforcementSteelGradeComboBox.getItems().add(reinforcementMaterialGrade.name()));
-        propertiesVBox.getChildren().add(reinforcementSteelGradeHBox);
-        reinforcementSteelGradeHBox.setAlignment(Pos.CENTER_LEFT);
+        reinforcementSteelGradeComboBox.setPrefWidth(Double.MAX_VALUE);
+        steelGradeBP.setCenter(reinforcementSteelGradeComboBox);
+        BorderPane.setAlignment(steelGradeBP.getCenter(), Pos.CENTER_LEFT);
+        propertiesVBox.getChildren().add(steelGradeBP);
+
 
         content.setPadding(new Insets(15));
         Stage stage = simpleStage(new Scene(content), "Reinforcement", 580, 520);
