@@ -16,6 +16,7 @@ import com.reconstruct.model.value.PositiveDouble;
 import com.reconstruct.view.component.BeamView;
 import com.reconstruct.view.component.ErrorDoubleTextField;
 import com.reconstruct.view.component.SaveCancelButtonPanel;
+import com.reconstruct.view.component.SimpleTextFlowBuilder;
 import com.reconstruct.view.viewmodel.*;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -32,6 +33,8 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -678,7 +681,10 @@ public class RCBeamAnalysisDesignController {
         content.setCenter(propertiesVBox);
 
         AppendableProperty<Double> minCorrosionCoverThickness = new PositiveDoubleAppendableProperty(5d, "Minimal corrosion cover thickness (mm)");
-        ErrorDoubleTextField minCorrosionCoverThicknessTF = new ErrorDoubleTextField(minCorrosionCoverThickness);
+        ErrorDoubleTextField minCorrosionCoverThicknessTF = new ErrorDoubleTextField(
+                minCorrosionCoverThickness,
+                new SimpleTextFlowBuilder().addRegularText("Minimal corrosion cover thickness c").addSubscriptText("min").addRegularText(" (mm)").build()
+        );
         Button selectMinCorrosionCoverThickness = new Button(". . .");
         selectMinCorrosionCoverThickness.setOnAction(event -> {
             BorderPane localContent = new BorderPane();
@@ -702,7 +708,6 @@ public class RCBeamAnalysisDesignController {
                 }
             });
             listView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-
 
             Map<String, Runnable> standardComboBoxActionMap = new LinkedHashMap<>();
             standardComboBoxActionMap.put("PN-02 - Prestressed steel", () -> listView.setItems(FXCollections.observableList(PN02.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_PRESTRESSED_STEEL_MM.entrySet().stream().toList())));
@@ -743,10 +748,17 @@ public class RCBeamAnalysisDesignController {
             });
             localStage.showAndWait();
         });
-        HBox minCorrosionCoverThicknessHBox = new HBox(15, minCorrosionCoverThicknessTF.node(), selectMinCorrosionCoverThickness);
+        HBox minCorrosionCoverThicknessHBox = new HBox(5, minCorrosionCoverThicknessTF.node(), selectMinCorrosionCoverThickness);
         propertiesVBox.getChildren().add(minCorrosionCoverThicknessHBox);
         HBox.setHgrow(minCorrosionCoverThicknessTF.node(), Priority.ALWAYS);
         minCorrosionCoverThicknessHBox.setAlignment(Pos.BOTTOM_CENTER);
+
+        AppendableProperty<Double> corrosionCoverTolerance = new PositiveDoubleAppendableProperty(5d);
+        ErrorDoubleTextField corrosionCoverToleranceTF = new ErrorDoubleTextField(
+                corrosionCoverTolerance,
+                new SimpleTextFlowBuilder().addRegularText("Corrosion cover tolerance Δc (mm)").build()
+        );
+        propertiesVBox.getChildren().add(corrosionCoverToleranceTF.node());
 
         AppendableProperty<Double> diameterOfReinforcementBar = new PositiveDoubleAppendableProperty(20d, "Diameter of reinforcement bar (mm)");
         ErrorDoubleTextField diameterOfReinforcementBarTF = new ErrorDoubleTextField(diameterOfReinforcementBar);
@@ -756,14 +768,20 @@ public class RCBeamAnalysisDesignController {
 
         List<ConcreteGrade> concreteGrades = PN02.CONCRETE_GRADE;
         ComboBox<String> concreteGradeComboBox = new ComboBox<>();
-        HBox concreteGradeHBox = new HBox(15, new Label("Concrete grade:"), concreteGradeComboBox);
+        BorderPane concreteGradeBP = new BorderPane();
+        concreteGradeBP.setLeft(new Label("Concrete grade:"));
+        BorderPane.setAlignment(concreteGradeBP.getLeft(), Pos.CENTER_LEFT);
+        BorderPane.setMargin(concreteGradeBP.getLeft(), new Insets(0, 5, 0, 0));
         concreteGrades.forEach(concreteGrade -> concreteGradeComboBox.getItems().add(concreteGrade.name()));
-        propertiesVBox.getChildren().add(concreteGradeHBox);
-        concreteGradeHBox.setAlignment(Pos.CENTER_LEFT);
+        concreteGradeComboBox.setPrefWidth(Double.MAX_VALUE);
+        concreteGradeBP.setCenter(concreteGradeComboBox);
+        BorderPane.setAlignment(concreteGradeBP.getCenter(), Pos.CENTER_LEFT);
+
+        propertiesVBox.getChildren().add(concreteGradeBP);
 
         List<ReinforcementMaterialGrade> steelGrades = PN02.STEEL_GRADES;
         ComboBox<String> reinforcementSteelGradeComboBox = new ComboBox<>();
-        HBox reinforcementSteelGradeHBox = new HBox(15, new Label("Reinforcement steel grade:"), reinforcementSteelGradeComboBox);
+        HBox reinforcementSteelGradeHBox = new HBox(5, new Label("Reinforcement steel grade:"), reinforcementSteelGradeComboBox);
         steelGrades.forEach(reinforcementMaterialGrade -> reinforcementSteelGradeComboBox.getItems().add(reinforcementMaterialGrade.name()));
         propertiesVBox.getChildren().add(reinforcementSteelGradeHBox);
         reinforcementSteelGradeHBox.setAlignment(Pos.CENTER_LEFT);

@@ -6,21 +6,27 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 public class ErrorDoubleTextField {
-    private final VBox node = new VBox();
+    private final VBox node = new VBox(5);
     private final AppendableProperty<Double> appendableProperty;
     private final TextField textField;
     private final Label errorMessage;
 
     public ErrorDoubleTextField(AppendableProperty<Double> appendableProperty) {
+        this(appendableProperty, new TextFlow(new Text(appendableProperty.name())));
+    }
+
+    public ErrorDoubleTextField(AppendableProperty<Double> appendableProperty, TextFlow textFlow) {
         this.appendableProperty = appendableProperty;
         this.textField = new TextField(this.appendableProperty.value().toString());
         this.errorMessage = new Label();
 
         errorMessage.setWrapText(true);
         errorMessage.setStyle("-fx-text-fill: red;");
-        node.getChildren().add(new Label(this.appendableProperty.name()));
+        node.getChildren().add(textFlow);
         node.getChildren().add(textField);
         node.getChildren().add(errorMessage);
         errorMessage.setVisible(false);

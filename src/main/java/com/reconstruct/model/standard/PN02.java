@@ -46,50 +46,40 @@ public class PN02 {
 
     public static List<ReinforcementMaterialGrade> STEEL_GRADES = new LinkedList<>();
     static {
-        STEEL_GRADES.add(
-                new ReinforcementMaterialGrade(
+        STEEL_GRADES.add(new ReinforcementMaterialGrade(
                         "A-0",
                         190.0d,
                         0.637,
                         0.673,
                         0.428
-                )
-        );
-        STEEL_GRADES.add(
-                new ReinforcementMaterialGrade(
+        ));
+        STEEL_GRADES.add(new ReinforcementMaterialGrade(
                         "A-I",
                         210.0d,
                         0.622,
                         0.680,
                         0.423
-                )
-        );
-        STEEL_GRADES.add(
-                new ReinforcementMaterialGrade(
+        ));
+        STEEL_GRADES.add(new ReinforcementMaterialGrade(
                         "A-II",
                         310.0d,
                         0.561,
                         0.712,
                         0.399
-                )
-        );
-        STEEL_GRADES.add(
-                new ReinforcementMaterialGrade(
+        ));
+        STEEL_GRADES.add(new ReinforcementMaterialGrade(
                         "A-III",
                         350.0d,
                         0.540,
                         0.772,
                         0.390
-                )
-        );
-        STEEL_GRADES.add(
-                new ReinforcementMaterialGrade(
+        ));
+        STEEL_GRADES.add(new ReinforcementMaterialGrade(
                         "A-IIIN",
                         420.0d,
                         0.505,
                         0.740,
                         0.374
-                )
-        );
+        ));
     }
 }
