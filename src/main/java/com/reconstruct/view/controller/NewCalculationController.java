@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.web.WebView;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.BufferedReader;
@@ -102,7 +103,8 @@ public class NewCalculationController {
             try {
                 new RCWindow(
                         new Scene(new FXMLLoader(ReConstructApp.class.getResource(fxml)).load()),
-                        title
+                        title,
+                        Modality.NONE
                 ).show();
             } catch (IOException e) {
                 throw new RuntimeException(e);
