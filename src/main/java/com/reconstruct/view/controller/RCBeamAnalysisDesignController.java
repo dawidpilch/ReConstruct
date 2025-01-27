@@ -801,6 +801,7 @@ public class RCBeamAnalysisDesignController {
         propertiesVBox.getChildren().add(steelGradeBP);
 
 
+
         content.setPadding(new Insets(15));
         Stage stage = simpleStage(new Scene(content), "Reinforcement", 580, 520);
 

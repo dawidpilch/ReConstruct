@@ -4,7 +4,7 @@ import com.reconstruct.model.value.PositiveDouble;
 
 import java.util.Objects;
 
-public record RectangularSection(PositiveDouble depth, PositiveDouble width) implements Section {
+public record RectangularSection(PositiveDouble width, PositiveDouble depth) implements Section {
     public RectangularSection {
         Objects.requireNonNull(depth);
         Objects.requireNonNull(width);
@@ -12,7 +12,7 @@ public record RectangularSection(PositiveDouble depth, PositiveDouble width) imp
 
     @Override
     public PositiveDouble area() {
-        return new PositiveDouble(depth.doubleValue() * width.doubleValue());
+        return PositiveDouble.of(depth.doubleValue() * width.doubleValue());
     }
 
     @Override

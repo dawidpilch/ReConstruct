@@ -9,7 +9,7 @@ public final class PositiveDouble implements DoubleValue {
 
     private final double value;
 
-    public PositiveDouble(double value) {
+    private PositiveDouble(double value) {
         this.value = value;
     }
 
