@@ -32,10 +32,17 @@ public class BeamReinforcementAnalysis {
         this.reinforcementMaterialGrade = reinforcementMaterialGrade;
     }
 
+    public double verticalCorrosionCoverThickness() {
+        return corrosionCoverThickness + (diameterOfReinforcementBar / 2) + diameterOfReinforcementStirrup;
+    }
+
     public Map<Reinforcement, Collection<BeamReinforcement>> reinforcement(RectangularSection rectangularSection, BendingMomentDiagram bendingMomentDiagram) {
-        double a1_mm = corrosionCoverThickness + (diameterOfReinforcementBar / 2) + diameterOfReinforcementStirrup;
+        double a1_mm = verticalCorrosionCoverThickness();
         double d_m = (rectangularSection.depth().doubleValue() - a1_mm) / 1000;
-        double bendingMomentMax = bendingMomentDiagram.stream().map(positionMagnitudeEntry -> positionMagnitudeEntry.getValue().positive().doubleValue()).max(Double::compareTo).orElseThrow();
+        double bendingMomentMax = bendingMomentDiagram.stream().map(positionMagnitudeEntry -> positionMagnitudeEntry.getValue().positive().doubleValue()).max(Double::compareTo).orElse(0d);
+        if (bendingMomentMax == 0) {
+            return Map.of();
+        }
 
         double mu_mm = (bendingMomentMax / 1000) / ((rectangularSection.width().doubleValue() / 1000) * (d_m * d_m) * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete());
 
@@ -100,7 +107,11 @@ public class BeamReinforcementAnalysis {
         return results;
     }
 
-    public record BeamReinforcement(int numberOfBars, double diameterOfReinforcementBar, double areaOfReinforcementSection) { }
+    public record BeamReinforcement(int numberOfBars, double diameterOfReinforcementBar, double areaOfReinforcementSection) {
+        public static BeamReinforcement empty() {
+            return new BeamReinforcement(0, 0, 0);
+        }
+    }
 
     public enum Reinforcement {
         TENSILE,

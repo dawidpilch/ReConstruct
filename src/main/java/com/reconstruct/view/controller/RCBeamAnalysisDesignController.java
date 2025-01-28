@@ -32,10 +32,12 @@ import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
@@ -680,9 +682,9 @@ public class RCBeamAnalysisDesignController {
         VBox propertiesVBox = new VBox(15);
         content.setCenter(propertiesVBox);
 
-        AppendableProperty<Double> minCorrosionCoverThickness = new PositiveDoubleAppendableProperty(25d);
+        AppendableProperty<Double> minCorrosionCoverThicknessProperty = new PositiveDoubleAppendableProperty(25d);
         ErrorDoubleTextField minCorrosionCoverThicknessTF = new ErrorDoubleTextField(
-                minCorrosionCoverThickness,
+                minCorrosionCoverThicknessProperty,
                 new SimpleTextFlowBuilder().addRegularText("Minimal corrosion cover thickness c").addSubscriptText("min").addRegularText(" (mm)").build()
         );
         Button selectMinCorrosionCoverThickness = new Button(". . .");
@@ -753,23 +755,23 @@ public class RCBeamAnalysisDesignController {
         HBox.setHgrow(minCorrosionCoverThicknessTF.node(), Priority.ALWAYS);
         minCorrosionCoverThicknessHBox.setAlignment(Pos.BOTTOM_CENTER);
 
-        AppendableProperty<Double> corrosionCoverTolerance = new PositiveDoubleAppendableProperty(5d);
+        AppendableProperty<Double> corrosionCoverToleranceProperty = new PositiveDoubleAppendableProperty(5d);
         ErrorDoubleTextField corrosionCoverToleranceTF = new ErrorDoubleTextField(
-                corrosionCoverTolerance,
+                corrosionCoverToleranceProperty,
                 new SimpleTextFlowBuilder().addRegularText("Corrosion cover tolerance Δc (mm)").build()
         );
         propertiesVBox.getChildren().add(corrosionCoverToleranceTF.node());
 
-        AppendableProperty<Double> diameterOfReinforcementBar = new PositiveDoubleAppendableProperty(25d);
+        AppendableProperty<Double> diameterOfReinforcementBarProperty = new PositiveDoubleAppendableProperty(25d);
         ErrorDoubleTextField diameterOfReinforcementBarTF = new ErrorDoubleTextField(
-                diameterOfReinforcementBar,
+                diameterOfReinforcementBarProperty,
                 new SimpleTextFlowBuilder().addRegularText("Diameter of reinforcement bar Φ (mm)").build()
         );
         propertiesVBox.getChildren().add(diameterOfReinforcementBarTF.node());
 
-        AppendableProperty<Double> diameterOfReinforcementStirrup = new PositiveDoubleAppendableProperty(8d);
+        AppendableProperty<Double> diameterOfReinforcementStirrupProperty = new PositiveDoubleAppendableProperty(8d);
         ErrorDoubleTextField diameterOfReinforcementStirrupTF = new ErrorDoubleTextField(
-                diameterOfReinforcementStirrup,
+                diameterOfReinforcementStirrupProperty,
                 new SimpleTextFlowBuilder().addRegularText("Diameter of reinforcement stirrup Φ").addSubscriptText("s").addRegularText(" (mm)").build()
         );
         propertiesVBox.getChildren().add(diameterOfReinforcementStirrupTF.node());
@@ -777,37 +779,158 @@ public class RCBeamAnalysisDesignController {
         propertiesVBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
 
         List<ConcreteGrade> concreteGrades = PN02.CONCRETE_GRADE;
-        ComboBox<String> concreteGradeComboBox = new ComboBox<>();
+        ComboBox<ConcreteGrade> concreteGradeComboBox = new ComboBox<>();
+        concreteGradeComboBox.setCellFactory(new Callback<>() {
+            @Override
+            public ListCell<ConcreteGrade> call(ListView<ConcreteGrade> concreteGradeListView) {
+                return new ListCell<>() {
+                    @Override
+                    protected void updateItem(ConcreteGrade concreteGrade, boolean empty) {
+                        super.updateItem(concreteGrade, empty);
+                        if (concreteGrade == null || empty) {
+                            setText("");
+                        } else {
+                            setText(concreteGrade.name());
+                        }
+                    }
+                };
+            }
+        });
         BorderPane concreteGradeBP = new BorderPane();
         concreteGradeBP.setLeft(new Label("Concrete grade:"));
         BorderPane.setAlignment(concreteGradeBP.getLeft(), Pos.CENTER_LEFT);
         BorderPane.setMargin(concreteGradeBP.getLeft(), new Insets(0, 5, 0, 0));
-        concreteGrades.forEach(concreteGrade -> concreteGradeComboBox.getItems().add(concreteGrade.name()));
+        concreteGrades.forEach(concreteGrade -> concreteGradeComboBox.getItems().add(concreteGrade));
         concreteGradeComboBox.setPrefWidth(Double.MAX_VALUE);
         concreteGradeBP.setCenter(concreteGradeComboBox);
         BorderPane.setAlignment(concreteGradeBP.getCenter(), Pos.CENTER_LEFT);
         propertiesVBox.getChildren().add(concreteGradeBP);
 
         List<ReinforcementMaterialGrade> steelGrades = PN02.STEEL_GRADES;
-        ComboBox<String> reinforcementSteelGradeComboBox = new ComboBox<>();
+        ComboBox<ReinforcementMaterialGrade> reinforcementSteelGradeComboBox = new ComboBox<>();
+        reinforcementSteelGradeComboBox.setCellFactory(new Callback<>() {
+            @Override
+            public ListCell<ReinforcementMaterialGrade> call(ListView<ReinforcementMaterialGrade> reinforcementMaterialGradeListView) {
+                return new ListCell<>() {
+                    @Override
+                    protected void updateItem(ReinforcementMaterialGrade reinforcementMaterialGrade, boolean empty) {
+                        super.updateItem(reinforcementMaterialGrade, empty);
+                        if (reinforcementMaterialGrade == null || empty) {
+                            setText("");
+                        } else {
+                            setText(reinforcementMaterialGrade.name());
+                        }
+                    }
+                };
+            }
+        });
         BorderPane steelGradeBP = new BorderPane();
         steelGradeBP.setLeft(new Label("Reinforcement steel grade:"));
         BorderPane.setAlignment(steelGradeBP.getLeft(), Pos.CENTER_LEFT);
         BorderPane.setMargin(steelGradeBP.getLeft(), new Insets(0, 5, 0, 0));
-        steelGrades.forEach(reinforcementMaterialGrade -> reinforcementSteelGradeComboBox.getItems().add(reinforcementMaterialGrade.name()));
+        steelGrades.forEach(reinforcementMaterialGrade -> reinforcementSteelGradeComboBox.getItems().add(reinforcementMaterialGrade));
         reinforcementSteelGradeComboBox.setPrefWidth(Double.MAX_VALUE);
         steelGradeBP.setCenter(reinforcementSteelGradeComboBox);
         BorderPane.setAlignment(steelGradeBP.getCenter(), Pos.CENTER_LEFT);
         propertiesVBox.getChildren().add(steelGradeBP);
 
-
-
+        double prefButtonWidth = 75d;
+        var nextButton = new Button("Next");
+        nextButton.setPrefWidth(prefButtonWidth);
+        var cancelButton = new Button("Cancel");
+        cancelButton.setPrefWidth(prefButtonWidth);
+        HBox buttons = new HBox(15, nextButton, cancelButton);
+        buttons.setAlignment(Pos.CENTER_RIGHT);
+        content.setBottom(new VBox(15, new Separator(Orientation.HORIZONTAL), buttons));
         content.setPadding(new Insets(15));
+
         Stage stage = simpleStage(new Scene(content), "Reinforcement", 580, 520);
+        cancelButton.setOnAction(event -> stage.close());
+        double corrosionCoverThickness = minCorrosionCoverThicknessProperty.value() + corrosionCoverToleranceProperty.value();
+        nextButton.setOnAction(event -> {
+            BeamReinforcementAnalysis beamReinforcementAnalysis = new BeamReinforcementAnalysis(
+                    corrosionCoverThickness,
+                    diameterOfReinforcementBarProperty.value(),
+                    diameterOfReinforcementStirrupProperty.value(),
+                    concreteGradeComboBox.getValue(),
+                    reinforcementSteelGradeComboBox.getValue()
+            );
+
+            stage.close();
+
+            Map<BeamReinforcementAnalysis.Reinforcement, Collection<BeamReinforcementAnalysis. BeamReinforcement>> reinforcement;
+            try {
+                reinforcement = beamReinforcementAnalysis.reinforcement(
+                    new RectangularSection(PositiveDouble.of(rectangularSectionViewModel.widthProperty.value()), PositiveDouble.of(rectangularSectionViewModel.depthProperty.value())),
+                    new BendingMomentDiagram(Map.of(Position.of(5), Magnitude.of(200)))
+//                    loadingAnalysis().bendingMomentDiagram()
+                );
+
+                BeamReinforcementAnalysis.BeamReinforcement additionalReinforcement = reinforcement.get(BeamReinforcementAnalysis.Reinforcement.COMPRESSIVE).stream().min((o1, o2) -> {
+                    if (o1.numberOfBars() > o2.numberOfBars())
+                        return 1;
+                    else if (o1.numberOfBars() < o2.numberOfBars()) {
+                        return -1;
+                    }
+                    return 0;
+                }).orElse(BeamReinforcementAnalysis.BeamReinforcement.empty());
+
+                BeamReinforcementAnalysis.BeamReinforcement mainReinforcement = reinforcement.get(BeamReinforcementAnalysis.Reinforcement.TENSILE).stream().min((o1, o2) -> {
+                    if (o1.numberOfBars() > o2.numberOfBars())
+                        return 1;
+                    else if (o1.numberOfBars() < o2.numberOfBars()) {
+                        return -1;
+                    }
+                    return 0;
+                }).orElse(BeamReinforcementAnalysis.BeamReinforcement.empty());
+
+                double max = 400;
+                StackPane beamReinforcementVisualization = new StackPane();
+                beamReinforcementVisualization.setMaxSize(max, max);
+                double scaleFactor = Math.min(max / rectangularSectionViewModel.depthProperty.value(), max / rectangularSectionViewModel.widthProperty.value());
+
+                Rectangle beam = new Rectangle();
+                beam.setFill(Color.WHITE);
+                beam.setStroke(Color.BLACK);
+                beam.setHeight(scaleFactor * rectangularSectionViewModel.depthProperty.value());
+                beam.setWidth(scaleFactor * rectangularSectionViewModel.widthProperty.value());
+                beamReinforcementVisualization.getChildren().add(beam);
+                StackPane.setAlignment(beam, Pos.CENTER);
+
+                Rectangle stirrup = new Rectangle();
+                stirrup.setHeight(scaleFactor * (rectangularSectionViewModel.depthProperty.value() - beamReinforcementAnalysis.verticalCorrosionCoverThickness()));
+                stirrup.setWidth(scaleFactor * (rectangularSectionViewModel.widthProperty.value() - corrosionCoverThickness));
+                stirrup.setFill(Color.WHITE);
+                stirrup.setStroke(Color.BLACK);
+                double maxDiameter = Math.max(mainReinforcement.diameterOfReinforcementBar(), additionalReinforcement.diameterOfReinforcementBar());
+                stirrup.setArcHeight(maxDiameter);
+                stirrup.setArcWidth(maxDiameter);
+                beamReinforcementVisualization.getChildren().add(stirrup);
+                StackPane.setAlignment(stirrup, Pos.CENTER);
+
+                for (int i = 0; i < mainReinforcement.numberOfBars(); i++) {
+                    double barDiameter = scaleFactor * mainReinforcement.diameterOfReinforcementBar();
+                    Circle bar = new Circle(barDiameter / 2);
+                    bar.setFill(Color.BLACK);
+                    bar.setStroke(Color.BLACK);
+                    beamReinforcementVisualization.getChildren().add(bar);
+                }
+
+                BorderPane root = new BorderPane(beamReinforcementVisualization);
+                root.setPadding(new Insets(25));
+                Stage beamReinforcementStage = simpleStage(new Scene(root), "", Screen.getPrimary().getBounds().getHeight() / 1.3, Screen.getPrimary().getBounds().getWidth() / 1.3);
+
+                beamReinforcementStage.getScene().setRoot(root);
+                beamReinforcementStage.showAndWait();
+            } catch (Exception e) {
+                stage.getScene().setRoot(new BorderPane(new Label(e.getMessage())));
+            }
+        });
 
         Platform.runLater(() -> {
             concreteGradeComboBox.getSelectionModel().select(concreteGradeComboBox.getItems().getFirst());
             reinforcementSteelGradeComboBox.getSelectionModel().select(reinforcementSteelGradeComboBox.getItems().getFirst());
+            nextButton.requestFocus();
         });
         stage.showAndWait();
     }
