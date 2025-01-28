@@ -7,4 +7,9 @@ public record ReinforcementMaterialGrade(
         double omegaFactorOfTheDeformationLimitValue,
         double zetaFactorOfTheDeformationLimitValue,
         double muFactorOfTheDeformationLimitValue
-) { }
+) {
+    @Override
+    public String toString() {
+        return name();
+    }
+}
