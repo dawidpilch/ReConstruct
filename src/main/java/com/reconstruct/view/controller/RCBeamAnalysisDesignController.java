@@ -43,6 +43,10 @@ import javafx.stage.StageStyle;
 import javafx.util.Callback;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class RCBeamAnalysisDesignController {
     @FXML public BorderPane borderPane;
@@ -860,8 +864,10 @@ public class RCBeamAnalysisDesignController {
 
             Map<BeamReinforcementAnalysis.Reinforcement, Collection<BeamReinforcementAnalysis. BeamReinforcement>> reinforcement;
             try {
+                double width = rectangularSectionViewModel.widthProperty.value();
+                double depth = rectangularSectionViewModel.depthProperty.value();
                 reinforcement = beamReinforcementAnalysis.reinforcement(
-                    new RectangularSection(PositiveDouble.of(rectangularSectionViewModel.widthProperty.value()), PositiveDouble.of(rectangularSectionViewModel.depthProperty.value())),
+                    new RectangularSection(PositiveDouble.of(width), PositiveDouble.of(depth)),
                     new BendingMomentDiagram(Map.of(Position.of(5), Magnitude.of(200)))
 //                    loadingAnalysis().bendingMomentDiagram()
                 );
@@ -887,43 +893,144 @@ public class RCBeamAnalysisDesignController {
                 double max = 400;
                 StackPane beamReinforcementVisualization = new StackPane();
                 beamReinforcementVisualization.setMaxSize(max, max);
-                double scaleFactor = Math.min(max / rectangularSectionViewModel.depthProperty.value(), max / rectangularSectionViewModel.widthProperty.value());
+                double scaleFactor = Math.min(max / depth, max / width);
 
+                Color foregroundColor = Color.DIMGRAY;
                 Rectangle beam = new Rectangle();
-                beam.setFill(Color.WHITE);
-                beam.setStroke(Color.BLACK);
-                beam.setHeight(scaleFactor * rectangularSectionViewModel.depthProperty.value());
-                beam.setWidth(scaleFactor * rectangularSectionViewModel.widthProperty.value());
+                beam.setFill(Color.LIGHTGRAY);
+                beam.setStroke(foregroundColor);
+                beam.setHeight(scaleFactor * depth);
+                beam.setWidth(scaleFactor * width);
                 beamReinforcementVisualization.getChildren().add(beam);
                 StackPane.setAlignment(beam, Pos.CENTER);
 
                 Rectangle stirrup = new Rectangle();
-                stirrup.setHeight(scaleFactor * (rectangularSectionViewModel.depthProperty.value() - beamReinforcementAnalysis.verticalCorrosionCoverThickness()));
-                stirrup.setWidth(scaleFactor * (rectangularSectionViewModel.widthProperty.value() - corrosionCoverThickness));
-                stirrup.setFill(Color.WHITE);
-                stirrup.setStroke(Color.BLACK);
+                double stirrupWidth = scaleFactor * diameterOfReinforcementStirrupProperty.value();
+                stirrup.setHeight(scaleFactor * (depth - beamReinforcementAnalysis.verticalCorrosionCoverThickness()));
+                stirrup.setWidth(scaleFactor * (width - corrosionCoverThickness));
+                stirrup.setFill(Color.LIGHTGRAY);
+                stirrup.setStroke(foregroundColor);
+                stirrup.setStrokeWidth(stirrupWidth);
                 double maxDiameter = Math.max(mainReinforcement.diameterOfReinforcementBar(), additionalReinforcement.diameterOfReinforcementBar());
                 stirrup.setArcHeight(maxDiameter);
                 stirrup.setArcWidth(maxDiameter);
                 beamReinforcementVisualization.getChildren().add(stirrup);
                 StackPane.setAlignment(stirrup, Pos.CENTER);
 
-                for (int i = 0; i < mainReinforcement.numberOfBars(); i++) {
-                    double barDiameter = scaleFactor * mainReinforcement.diameterOfReinforcementBar();
+                StackPane barsPane = new StackPane();
+                barsPane.setPrefSize(stirrup.getWidth(), stirrup.getHeight());
+                barsPane.setMaxSize(stirrup.getWidth(), stirrup.getHeight());
+                barsPane.setMinSize(stirrup.getWidth(), stirrup.getHeight());
+                barsPane.setPadding(new Insets(stirrupWidth/2));
+                beamReinforcementVisualization.getChildren().add(barsPane);
+                StackPane.setAlignment(barsPane, Pos.CENTER);
+
+                Function<BeamReinforcementAnalysis.BeamReinforcement, Circle> barSupplier = (beamReinforcement) -> {
+                    double barDiameter = scaleFactor * beamReinforcement.diameterOfReinforcementBar();
                     Circle bar = new Circle(barDiameter / 2);
-                    bar.setFill(Color.BLACK);
-                    bar.setStroke(Color.BLACK);
-                    beamReinforcementVisualization.getChildren().add(bar);
-                }
+                    bar.setFill(foregroundColor);
+                    bar.setStroke(foregroundColor);
+                    return bar;
+                };
+
+                BiConsumer<BeamReinforcementAnalysis.BeamReinforcement, Boolean> processBarReinforcement = (rc, bottom) -> {
+                    Pos rightPos;
+                    Pos leftPos;
+                    Pos centerPos;
+
+                    if (bottom) {
+                        rightPos = Pos.BOTTOM_RIGHT;
+                        leftPos = Pos.BOTTOM_LEFT;
+                        centerPos = Pos.BOTTOM_CENTER;
+                    } else {
+                        rightPos = Pos.TOP_RIGHT;
+                        leftPos = Pos.TOP_LEFT;
+                        centerPos = Pos.TOP_CENTER;
+                    }
+
+                    double innerWidth = width - (diameterOfReinforcementStirrupProperty.value() * 2) - (corrosionCoverThickness * 2);
+                    double innerWidthCalc = innerWidth;
+                    int barsPerStandardRow = 0;
+                    for (int i = 0; i < rc.numberOfBars(); i++) {
+                        if (innerWidthCalc >= rc.diameterOfReinforcementBar() * 2) {
+                            innerWidthCalc -= rc.diameterOfReinforcementBar() * 2;
+                            barsPerStandardRow++;
+                        } else if (innerWidthCalc + corrosionCoverToleranceProperty.value() >= rc.diameterOfReinforcementBar()) {
+                            innerWidthCalc -= rc.diameterOfReinforcementBar();
+                            barsPerStandardRow++;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // process bars per standard row
+                    if (barsPerStandardRow == 1) {
+                        var bar = barSupplier.apply(rc);
+                        barsPane.getChildren().add(bar);
+                        StackPane.setAlignment(bar, centerPos);
+                    } else if (barsPerStandardRow == 2) {
+                        var leftBar = barSupplier.apply(rc);
+                        barsPane.getChildren().add(leftBar);
+                        StackPane.setAlignment(leftBar, leftPos);
+                        var rightBar = barSupplier.apply(rc);
+                        barsPane.getChildren().add(rightBar);
+                        StackPane.setAlignment(rightBar, rightPos);
+                    } else {
+                        double xTranslate = 0;
+                        double yTranslate = 0;
+                        double scaledBarDiameter = scaleFactor * rc.diameterOfReinforcementBar();
+                        double sparedSpaceInStandardRow = innerWidth - (barsPerStandardRow * rc.diameterOfReinforcementBar());
+                        double standardRowXStep = scaledBarDiameter + (scaledBarDiameter/2) + ((sparedSpaceInStandardRow / (barsPerStandardRow - 1)) * scaleFactor);
+                        for (int i = 0; i < rc.numberOfBars() / barsPerStandardRow; i++) {
+                            for (int j = 0; j < barsPerStandardRow; j++) {
+                                Circle bar = barSupplier.apply(rc);
+                                barsPane.getChildren().add(bar);
+                                StackPane.setAlignment(bar, leftPos);
+                                bar.setTranslateX(xTranslate);
+                                bar.setTranslateY(yTranslate);
+                                xTranslate += standardRowXStep;
+                            }
+                            yTranslate += (scaledBarDiameter + (scaledBarDiameter/2)) * (bottom ? 1 : -1);
+                            xTranslate = 0;
+                        }
+
+                        // process leftover bars
+                        final int barsLeftovers = rc.numberOfBars() % barsPerStandardRow;
+                        if (barsLeftovers == 1) {
+                            var bar = barSupplier.apply(rc);
+                            barsPane.getChildren().add(bar);
+                            StackPane.setAlignment(bar, centerPos);
+                        } else if (barsLeftovers == 2) {
+                            var leftBar = barSupplier.apply(rc);
+                            barsPane.getChildren().add(leftBar);
+                            StackPane.setAlignment(leftBar, leftPos);
+                            var rightBar = barSupplier.apply(rc);
+                            barsPane.getChildren().add(rightBar);
+                            StackPane.setAlignment(rightBar, rightPos);
+                        } else {
+                            double sparedSpaceInLeftoverRow = innerWidth - (barsLeftovers * rc.diameterOfReinforcementBar());
+                            double leftoverRowXStep = scaledBarDiameter + (scaledBarDiameter/2) + ((sparedSpaceInLeftoverRow / (barsLeftovers - 1)) * scaleFactor);
+                            for (int j = 0; j < barsLeftovers; j++) {
+                                Circle bar = barSupplier.apply(rc);
+                                barsPane.getChildren().add(bar);
+                                StackPane.setAlignment(bar, leftPos);
+                                bar.setTranslateX(xTranslate);
+                                bar.setTranslateY(yTranslate);
+                                xTranslate += leftoverRowXStep;
+                            }
+                        }
+                    }
+                };
+
+                processBarReinforcement.accept(mainReinforcement, true);
+                processBarReinforcement.accept(additionalReinforcement, false);
 
                 BorderPane root = new BorderPane(beamReinforcementVisualization);
-                root.setPadding(new Insets(25));
                 Stage beamReinforcementStage = simpleStage(new Scene(root), "", Screen.getPrimary().getBounds().getHeight() / 1.3, Screen.getPrimary().getBounds().getWidth() / 1.3);
-
                 beamReinforcementStage.getScene().setRoot(root);
                 beamReinforcementStage.showAndWait();
             } catch (Exception e) {
-                stage.getScene().setRoot(new BorderPane(new Label(e.getMessage())));
+                new Alert(Alert.AlertType.ERROR, e.toString()).showAndWait();
             }
         });
 
