@@ -367,7 +367,7 @@ public class ReinforcementAnalysisWindow {
 
                     } else {
                         double sparedSpaceInLeftoverRow = innerWidth - (leftoverRow * rc.diameterOfReinforcementBar());
-                        double leftoverRowXStep = scaledBarDiameter + ((sparedSpaceInLeftoverRow * scaleFactor) / (barsPerStandardRow - 1));
+                        double leftoverRowXStep = scaledBarDiameter + ((sparedSpaceInLeftoverRow * scaleFactor) / (leftoverRow - 1));
                         for (int j = 0; j < leftoverRow; j++) {
                             Circle bar = barSupplier.apply(rc);
                             barsPane.getChildren().add(bar);
