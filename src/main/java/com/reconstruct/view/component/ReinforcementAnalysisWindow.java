@@ -444,7 +444,7 @@ public class ReinforcementAnalysisWindow {
                 beamReinforcementStage.initStyle(StageStyle.DECORATED);
                 beamReinforcementStage.setMinWidth(screenWidth / 1.6);
                 beamReinforcementStage.setMinHeight(screenHeight / 1.6);
-                new RCWindow(beamReinforcementStage).showAndWait();
+                new RCWindow(beamReinforcementStage).show();
 
 //                Platform.runLater(() -> beamReinforcementStage.sizeToScene());
             } catch (Exception e) {
