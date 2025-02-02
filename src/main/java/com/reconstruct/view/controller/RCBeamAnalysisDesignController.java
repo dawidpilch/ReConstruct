@@ -157,7 +157,7 @@ public class RCBeamAnalysisDesignController {
         stage.setOnCloseRequest(event -> cancelButton.getOnAction().handle(new ActionEvent()));
 
         Platform.runLater(saveButton::requestFocus);
-        stage.showAndWait();
+        new RCWindow(stage).showAndWait();
     }
 
     public void onLoadingConfiguration(ActionEvent ignored) {
@@ -232,7 +232,7 @@ public class RCBeamAnalysisDesignController {
             BorderPane.setMargin(bottom, new Insets(15));
             BorderPane.setAlignment(bottom, Pos.CENTER_RIGHT);
 
-            stage.showAndWait();
+            new RCWindow(stage).showAndWait();
         });
 
         var removePointLoadButton = new Button("Remove");
@@ -334,7 +334,7 @@ public class RCBeamAnalysisDesignController {
             BorderPane.setMargin(bottom, new Insets(15));
             BorderPane.setAlignment(bottom, Pos.CENTER_RIGHT);
 
-            stage.showAndWait();
+            new RCWindow(stage).showAndWait();
         });
 
         var removeBendingMomentButton = new Button("Remove");
@@ -446,7 +446,7 @@ public class RCBeamAnalysisDesignController {
             BorderPane.setMargin(bottom, new Insets(15));
             BorderPane.setAlignment(bottom, Pos.CENTER_RIGHT);
 
-            stage.showAndWait();
+            new RCWindow(stage).showAndWait();
         });
 
         var removeUDLButton = new Button("Remove");
@@ -533,7 +533,7 @@ public class RCBeamAnalysisDesignController {
         stage.setOnCloseRequest(event -> cancelButton.getOnAction().handle(new ActionEvent()));
 
         Platform.runLater(saveButton::requestFocus);
-        stage.showAndWait();
+        new RCWindow(stage).showAndWait();
     }
 
     private AppendableProperty<Double> magnitudeAppendableValue(String magnitudeUnit) {

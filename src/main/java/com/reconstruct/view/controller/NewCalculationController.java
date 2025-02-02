@@ -105,7 +105,7 @@ public class NewCalculationController {
                         new Scene(new FXMLLoader(ReConstructApp.class.getResource(fxml)).load()),
                         title,
                         Modality.NONE
-                ).show();
+                ).showAndWait();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

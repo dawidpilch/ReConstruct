@@ -8,7 +8,6 @@ import com.reconstruct.model.beam.section.RectangularSection;
 import com.reconstruct.model.beam.value.Position;
 import com.reconstruct.model.standard.PN02;
 import com.reconstruct.model.value.Magnitude;
-import com.reconstruct.model.value.PositiveDouble;
 import com.reconstruct.view.viewmodel.AppendableProperty;
 import com.reconstruct.view.viewmodel.PositiveDoubleAppendableProperty;
 import javafx.application.Platform;
@@ -22,6 +21,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -113,7 +113,7 @@ public class ReinforcementAnalysisWindow {
                 standardComboBox.getSelectionModel().select(standardComboBoxActionMap.keySet().stream().findFirst().get());
                 saveCancelButtonPanel.requestFocus();
             });
-            localStage.showAndWait();
+            new RCWindow(localStage).showAndWait();
         });
         HBox minCorrosionCoverThicknessHBox = new HBox(5, minCorrosionCoverThicknessTF.node(), selectMinCorrosionCoverThickness);
         propertiesVBox.getChildren().add(minCorrosionCoverThicknessHBox);
@@ -213,6 +213,8 @@ public class ReinforcementAnalysisWindow {
         cancelButton.setOnAction(event -> stage.close());
         double corrosionCoverThickness = minCorrosionCoverThicknessProperty.value() + corrosionCoverToleranceProperty.value();
         nextButton.setOnAction(event -> {
+            double screenWidth = Screen.getPrimary().getBounds().getWidth();
+            double screenHeight = Screen.getPrimary().getBounds().getHeight();
             BeamReinforcementAnalysis beamReinforcementAnalysis = new BeamReinforcementAnalysis(
                     corrosionCoverThickness,
                     diameterOfReinforcementBarProperty.value(),
@@ -278,14 +280,6 @@ public class ReinforcementAnalysisWindow {
                 beamReinforcementVisualization.getChildren().add(stirrup);
                 StackPane.setAlignment(stirrup, Pos.CENTER);
 
-                StackPane barsPane = new StackPane();
-                barsPane.setPrefSize(stirrup.getWidth(), stirrup.getHeight());
-                barsPane.setMaxSize(stirrup.getWidth(), stirrup.getHeight());
-                barsPane.setMinSize(stirrup.getWidth(), stirrup.getHeight());
-                barsPane.setPadding(new Insets(stirrupWidth/2));
-                beamReinforcementVisualization.getChildren().add(barsPane);
-                StackPane.setAlignment(barsPane, Pos.CENTER);
-
                 Function<BeamReinforcementAnalysis.BeamReinforcement, Circle> barSupplier = (beamReinforcement) -> {
                     double barDiameter = scaleFactor * beamReinforcement.diameterOfReinforcementBar();
                     Circle bar = new Circle(barDiameter / 2);
@@ -299,16 +293,23 @@ public class ReinforcementAnalysisWindow {
                         return;
                     }
 
+                    String labelText;
                     Pos leftPos;
+                    Pos rightPos;
                     Pos centerPos;
-
                     if (bottom) {
                         leftPos = Pos.BOTTOM_LEFT;
                         centerPos = Pos.BOTTOM_CENTER;
+                        rightPos = Pos.BOTTOM_RIGHT;
+                        labelText = "bottom reinforcement";
                     } else {
-                        leftPos = Pos.TOP_LEFT;
                         centerPos = Pos.TOP_CENTER;
+                        leftPos = Pos.TOP_LEFT;
+                        rightPos = Pos.TOP_RIGHT;
+                        labelText = "top reinforcement";
                     }
+
+                    int yMultiplier = bottom ? -1 : 1;
 
                     double innerWidth = width - (diameterOfReinforcementStirrupProperty.value() * 2) - (corrosionCoverThickness * 2);
                     double innerHeight = depth - (beamReinforcementAnalysis.verticalCorrosionCoverThickness() * 2);
@@ -329,6 +330,10 @@ public class ReinforcementAnalysisWindow {
                     double yTranslate = 0;
                     double scaledBarDiameter = scaleFactor * rc.diameterOfReinforcementBar();
 
+                    if (barsPerStandardRow <= 0) {
+                        throw new RuntimeException("barsPerStandardRow <= 0");
+                    }
+
                     // process bars per standard row
                     final int standardRows = rc.numberOfBars() / barsPerStandardRow;
                     final int leftoverRow = rc.numberOfBars() % barsPerStandardRow;
@@ -336,6 +341,22 @@ public class ReinforcementAnalysisWindow {
                     if (((standardRows + standardRows - 1) + (leftoverRow + leftoverRow - 1) * rc.numberOfBars()) * rc.diameterOfReinforcementBar() > innerWidth * innerHeight ) {
                         throw new RuntimeException("Beam area is too small compared to the required reinforcement. Please, change the beam geometry values or try to adjust the reinforcement parameters.");
                     }
+
+                    StackPane barsPane = new StackPane();
+                    barsPane.setPrefSize(stirrup.getWidth(), stirrup.getHeight());
+                    barsPane.setMaxSize(stirrup.getWidth(), stirrup.getHeight());
+                    barsPane.setMinSize(stirrup.getWidth(), stirrup.getHeight());
+                    barsPane.setPadding(new Insets(stirrupWidth/2));
+                    beamReinforcementVisualization.getChildren().add(barsPane);
+                    StackPane.setAlignment(barsPane, Pos.CENTER);
+
+                    VBox labelVBox = new VBox(new Label(labelText), new Label(rc.numberOfBars() + "Φ" + formattedDouble(rc.diameterOfReinforcementBar())));
+                    labelVBox.setMaxHeight(Font.getDefault().getSize() * labelVBox.getChildren().size());
+                    beamReinforcementVisualization.getChildren().add(labelVBox);
+                    StackPane.setAlignment(labelVBox, leftPos);
+                    labelVBox.setTranslateX((beamMaxSize - beam.getWidth()) + beam.getWidth() + 20);
+                    labelVBox.setTranslateY((beam.getHeight() * 0.1) * yMultiplier);
+
                     for (int i = 0; i < standardRows ; i++) {
                         if (barsPerStandardRow == 1) {
                             var bar = barSupplier.apply(rc);
@@ -352,10 +373,8 @@ public class ReinforcementAnalysisWindow {
                                 bar.setTranslateX(xTranslate);
                                 bar.setTranslateY(yTranslate);
                                 xTranslate += standardRowXStep;
-                            }
-                            xTranslate = 0;
-                        }
-                        yTranslate += (scaledBarDiameter + (scaledBarDiameter/2)) * (bottom ? -1 : 1);
+                            } xTranslate = 0;
+                        } yTranslate += (scaledBarDiameter + (scaledBarDiameter/2)) * yMultiplier;
                     }
 
                     // process leftover bars
@@ -364,7 +383,6 @@ public class ReinforcementAnalysisWindow {
                         barsPane.getChildren().add(bar);
                         StackPane.setAlignment(bar, centerPos);
                         bar.setTranslateY(yTranslate);
-
                     } else {
                         double sparedSpaceInLeftoverRow = innerWidth - (leftoverRow * rc.diameterOfReinforcementBar());
                         double leftoverRowXStep = scaledBarDiameter + ((sparedSpaceInLeftoverRow * scaleFactor) / (leftoverRow - 1));
@@ -377,9 +395,21 @@ public class ReinforcementAnalysisWindow {
                             xTranslate += leftoverRowXStep;
                         }
                     }
+
+//                    barsPane.setBackground(new Background(new BackgroundFill(
+//                            Color.YELLOW,
+//                            new CornerRadii(0),
+//                            new Insets(0)
+//                    )));
                 };
                 processBarReinforcement.accept(mainReinforcement, true);
                 processBarReinforcement.accept(additionalReinforcement, false);
+
+                VBox labelVBox = new VBox(new Label("stirrup"), new Label("Φ" + formattedDouble(diameterOfReinforcementStirrupProperty.value())));
+                labelVBox.setMaxHeight(Font.getDefault().getSize() * labelVBox.getChildren().size());
+                beamReinforcementVisualization.getChildren().add(labelVBox);
+                StackPane.setAlignment(labelVBox, Pos.CENTER_LEFT);
+                labelVBox.setTranslateX((beamMaxSize - beam.getWidth()) + beam.getWidth() + 20);
 
                 // depth dimensional line
                 var depthDimensionalLine = new Rectangle(1d, beam.getHeight(), foregroundColor);
@@ -412,9 +442,11 @@ public class ReinforcementAnalysisWindow {
                 beamReinforcementStage.setTitle(formattedDouble(width) + "x" + formattedDouble(depth) + " Concrete Beam Reinforcement");
                 beamReinforcementStage.initModality(Modality.NONE);
                 beamReinforcementStage.initStyle(StageStyle.DECORATED);
-                beamReinforcementStage.setMinWidth(Screen.getPrimary().getBounds().getWidth() / 1.6);
-                beamReinforcementStage.setMinHeight(Screen.getPrimary().getBounds().getHeight() / 1.6);
-                beamReinforcementStage.showAndWait();
+                beamReinforcementStage.setMinWidth(screenWidth / 1.6);
+                beamReinforcementStage.setMinHeight(screenHeight / 1.6);
+                new RCWindow(beamReinforcementStage).showAndWait();
+
+//                Platform.runLater(() -> beamReinforcementStage.sizeToScene());
             } catch (Exception e) {
                 new Alert(Alert.AlertType.ERROR, e.toString()).showAndWait();
             }
@@ -425,10 +457,11 @@ public class ReinforcementAnalysisWindow {
             reinforcementSteelGradeComboBox.getSelectionModel().select(reinforcementSteelGradeComboBox.getItems().getFirst());
             nextButton.requestFocus();
         });
-        stage.showAndWait();
+        new RCWindow(stage).showAndWait();
     }
 
     private static String formattedDouble(double d) {
-        return String.format("%.2f", d);
+        String formatted = String.format("%.2f", d);
+        return formatted.endsWith(".00") ? formatted.replaceFirst(".00", "") : formatted;
     }
 }

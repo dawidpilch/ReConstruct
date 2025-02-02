@@ -1,44 +1,68 @@
 package com.reconstruct.view.component;
 
+import com.reconstruct.ReConstructApp;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-/**
- * Standardized popup application modal window for ReConstruct app
- */
+import java.util.Objects;
+import java.util.function.Supplier;
+
 public class RCWindow {
-    private final Scene scene;
-    private final String title;
-    private final Modality modality;
+    private final Stage stage;
 
     public RCWindow(Scene scene, String title) {
-        this(scene, title, Modality.APPLICATION_MODAL);
+        this(scene, title, Modality.NONE);
     }
 
     public RCWindow(Scene scene, String title, Modality modality) {
-        this.scene = scene;
-        this.title = title;
-        this.modality = modality;
+        this(((Supplier<Stage>) () -> {
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            stage.setHeight(defaultHeight());
+            stage.setWidth(defaultWidth());
+            stage.minHeightProperty().setValue(580);
+            stage.minWidthProperty().setValue(720);
+            stage.setTitle(title);
+            stage.initModality(modality);
+            stage.initStyle(StageStyle.DECORATED);
+            return stage;
+        }).get());
+    }
+
+    public RCWindow(Stage stage) {
+        this.stage = stage;
+        this.stage.getIcons().add(new Image((Objects.requireNonNull(ReConstructApp.class.getResourceAsStream("icon.png")))));
+    }
+
+    private static double defaultWidth() {
+        return Screen.getPrimary().getBounds().getWidth() / 1.2;
+    }
+
+    private static double defaultHeight() {
+        return Screen.getPrimary().getBounds().getHeight() / 1.2;
+    }
+
+    public void showAndWait() {
+        stage.showAndWait();
+    }
+
+    public void showAndWait(double initWidth, double initHeight) {
+        stage.setHeight(initHeight);
+        stage.setWidth(initWidth);
+        stage.showAndWait();
     }
 
     public void show() {
-        show(Screen.getPrimary().getBounds().getHeight() / 1.2, Screen.getPrimary().getBounds().getWidth() / 1.2);
+        stage.show();
     }
 
-
-    public void show(double height, double width) {
-        Stage stage = new Stage();
-        stage.setScene(scene);
-        stage.setHeight(height);
-        stage.setWidth(width);
-        stage.minHeightProperty().setValue(580);
-        stage.minWidthProperty().setValue(720);
-        stage.setTitle(title);
-        stage.initModality(modality);
-        stage.initStyle(StageStyle.DECORATED);
-        stage.showAndWait();
+    public void show(double initWidth, double initHeight) {
+        stage.setHeight(initHeight);
+        stage.setWidth(initWidth);
+        stage.show();
     }
 }

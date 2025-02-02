@@ -21,6 +21,6 @@ public class HomeController {
         new RCWindow(
                 new Scene(new FXMLLoader(ReConstructApp.class.getResource("fxml/new-calculation-view.fxml")).load()),
                 "Select Calculation"
-        ).show();
+        ).showAndWait();
     }
 }
