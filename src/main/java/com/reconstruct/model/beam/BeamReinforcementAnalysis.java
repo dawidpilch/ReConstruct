@@ -9,7 +9,7 @@ import java.util.*;
 public class BeamReinforcementAnalysis {
     private final double corrosionCoverThickness;
     private final double diameterOfReinforcementBar;
-    private final double diameterOfReinforcementStirrup;
+    private final double diameterOfMainReinforcementStirrup;
     private final ConcreteGrade concreteGrade;
     private final ReinforcementMaterialGrade reinforcementMaterialGrade;
 
@@ -22,21 +22,21 @@ public class BeamReinforcementAnalysis {
 
     public BeamReinforcementAnalysis(double corrosionCoverThickness,
                                      double diameterOfReinforcementBar,
-                                     double diameterOfReinforcementStirrup,
+                                     double diameterOfMainReinforcementStirrup,
                                      ConcreteGrade concreteGrade,
                                      ReinforcementMaterialGrade reinforcementMaterialGrade) {
         this.corrosionCoverThickness = corrosionCoverThickness;
         this.diameterOfReinforcementBar = diameterOfReinforcementBar;
-        this.diameterOfReinforcementStirrup = diameterOfReinforcementStirrup;
+        this.diameterOfMainReinforcementStirrup = diameterOfMainReinforcementStirrup;
         this.concreteGrade = concreteGrade;
         this.reinforcementMaterialGrade = reinforcementMaterialGrade;
     }
 
     public double verticalCorrosionCoverThickness() {
-        return corrosionCoverThickness + (diameterOfReinforcementBar / 2) + diameterOfReinforcementStirrup;
+        return corrosionCoverThickness + (diameterOfReinforcementBar / 2) + diameterOfMainReinforcementStirrup;
     }
 
-    public Map<Reinforcement, Collection<BeamReinforcement>> reinforcement(RectangularSection rectangularSection, BendingMomentDiagram bendingMomentDiagram) {
+    public Map<ReinforcementType, Collection<BeamReinforcement>> reinforcement(RectangularSection rectangularSection, BendingMomentDiagram bendingMomentDiagram) {
         double a1_mm = verticalCorrosionCoverThickness();
         double d_m = (rectangularSection.depth().doubleValue() - a1_mm) / 1000;
         double bendingMomentMax = bendingMomentDiagram.stream().map(positionMagnitudeEntry -> positionMagnitudeEntry.getValue().positive().doubleValue()).max(Double::compareTo).orElse(0d);
@@ -47,11 +47,11 @@ public class BeamReinforcementAnalysis {
         double mu_mm = (bendingMomentMax / 1000) / ((rectangularSection.width().doubleValue() / 1000) * (d_m * d_m) * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete());
 
         boolean doublyReinforcedRequired = mu_mm > reinforcementMaterialGrade.muFactorOfTheDeformationLimitValue();
-        Map<Reinforcement, Collection<BeamReinforcement>> results = new HashMap<>();
+        Map<ReinforcementType, Collection<BeamReinforcement>> results = new HashMap<>();
         if (!doublyReinforcedRequired) {
             double areaOfRequiredTensileReinforcement_cm2 = (reinforcementMaterialGrade.omegaFactorOfTheDeformationLimitValue() * d_m * (rectangularSection.width().doubleValue() / 1000) * (concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete() / reinforcementMaterialGrade.yieldStrengthCalculationMPaValue())) * 10000;
             var numberOfBarsToProvidedAreaOfReinforcementSection = beamReinforcementMatches(areaOfRequiredTensileReinforcement_cm2, 3);
-            results.put(Reinforcement.TENSILE, numberOfBarsToProvidedAreaOfReinforcementSection);
+            results.put(ReinforcementType.BOTTOM, numberOfBarsToProvidedAreaOfReinforcementSection);
         } else {
             double MRd_lim = reinforcementMaterialGrade.muFactorOfTheDeformationLimitValue() * (d_m * d_m) * (rectangularSection.width().doubleValue() / 1000) * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete();
             double areaOfRequiredTensileReinforcement_cm2 = 17d/21d * (reinforcementMaterialGrade.xiFactorOfTheDeformationLimitValue() * rectangularSection.width().doubleValue()/1000d * d_m * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete() / reinforcementMaterialGrade.yieldStrengthCalculationMPaValue());
@@ -61,8 +61,8 @@ public class BeamReinforcementAnalysis {
             double areaOfRequiredCompressiveReinforcement_cm2 = (deltaMSd / (reinforcementMaterialGrade.yieldStrengthCalculationMPaValue() * (d_m - (a1_mm / 1000)))) * 10000;
             areaOfRequiredTensileReinforcement_cm2 += areaOfRequiredCompressiveReinforcement_cm2;
 
-            results.put(Reinforcement.TENSILE, beamReinforcementMatches(areaOfRequiredTensileReinforcement_cm2, 3));
-            results.put(Reinforcement.COMPRESSIVE, beamReinforcementMatches(areaOfRequiredCompressiveReinforcement_cm2, 3));
+            results.put(ReinforcementType.BOTTOM, beamReinforcementMatches(areaOfRequiredTensileReinforcement_cm2, 3));
+            results.put(ReinforcementType.TOP, beamReinforcementMatches(areaOfRequiredCompressiveReinforcement_cm2, 3));
         }
 
         return results;
@@ -107,14 +107,52 @@ public class BeamReinforcementAnalysis {
         return results;
     }
 
-    public record BeamReinforcement(int numberOfBars, double diameterOfReinforcementBar, double areaOfReinforcementSection) {
+    public static class BeamReinforcement {
+        private final int numberOfBars;
+        private final double diameterOfReinforcementBar;
+        private final double areaOfReinforcementSection;
+
         public static BeamReinforcement empty() {
             return new BeamReinforcement(0, 0, 0);
         }
+
+        private BeamReinforcement(int numberOfBars, double diameterOfReinforcementBar, double areaOfReinforcementSection) {
+            this.numberOfBars = numberOfBars;
+            this.diameterOfReinforcementBar = diameterOfReinforcementBar;
+            this.areaOfReinforcementSection = areaOfReinforcementSection;
+        }
+
+        public int numberOfBars() {
+            return numberOfBars;
+        }
+
+        public double diameterOfReinforcementBar() {
+            return diameterOfReinforcementBar;
+        }
+
+        public double areaOfReinforcementSection() {
+            return areaOfReinforcementSection;
+        }
     }
 
-    public enum Reinforcement {
-        TENSILE,
-        COMPRESSIVE
+    public enum ReinforcementType {
+        BOTTOM("As1") {
+            @Override
+            public String toString() {
+                return "Bottom reinforcement";
+            }
+        },
+        TOP("As2") {
+            @Override
+            public String toString() {
+                return "Top reinforcement";
+            }
+        };
+
+        public final String areaOfReinforcementSectionSymbol;
+
+        ReinforcementType(String areaOfReinforcementSectionSymbol) {
+            this.areaOfReinforcementSectionSymbol = areaOfReinforcementSectionSymbol;
+        }
     }
 }

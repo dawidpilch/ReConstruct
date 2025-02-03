@@ -22,6 +22,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -225,7 +227,7 @@ public class ReinforcementAnalysisWindow {
 
             stage.close();
 
-            Map<BeamReinforcementAnalysis.Reinforcement, Collection<BeamReinforcementAnalysis. BeamReinforcement>> reinforcement;
+            Map<BeamReinforcementAnalysis.ReinforcementType, Collection<BeamReinforcementAnalysis. BeamReinforcement>> reinforcement;
             try {
                 double width = rectangularSection.width().doubleValue();
                 double depth = rectangularSection.depth().doubleValue();
@@ -235,7 +237,7 @@ public class ReinforcementAnalysisWindow {
 //                    loadingAnalysis().bendingMomentDiagram()
                 );
 
-                BeamReinforcementAnalysis.BeamReinforcement additionalReinforcement = reinforcement.getOrDefault(BeamReinforcementAnalysis.Reinforcement.COMPRESSIVE, List.of()).stream().min((o1, o2) -> {
+                BeamReinforcementAnalysis.BeamReinforcement additionalReinforcement = reinforcement.getOrDefault(BeamReinforcementAnalysis.ReinforcementType.TOP, List.of()).stream().min((o1, o2) -> {
                     if (o1.numberOfBars() > o2.numberOfBars())
                         return 1;
                     else if (o1.numberOfBars() < o2.numberOfBars()) {
@@ -244,7 +246,7 @@ public class ReinforcementAnalysisWindow {
                     return 0;
                 }).orElse(BeamReinforcementAnalysis.BeamReinforcement.empty());
 
-                BeamReinforcementAnalysis.BeamReinforcement mainReinforcement = reinforcement.getOrDefault(BeamReinforcementAnalysis.Reinforcement.TENSILE, List.of()).stream().min((o1, o2) -> {
+                BeamReinforcementAnalysis.BeamReinforcement mainReinforcement = reinforcement.getOrDefault(BeamReinforcementAnalysis.ReinforcementType.BOTTOM, List.of()).stream().min((o1, o2) -> {
                     if (o1.numberOfBars() > o2.numberOfBars())
                         return 1;
                     else if (o1.numberOfBars() < o2.numberOfBars()) {
@@ -277,8 +279,10 @@ public class ReinforcementAnalysisWindow {
                 double maxDiameter = Math.max(mainReinforcement.diameterOfReinforcementBar(), additionalReinforcement.diameterOfReinforcementBar());
                 stirrup.setArcHeight(maxDiameter);
                 stirrup.setArcWidth(maxDiameter);
-                beamReinforcementVisualization.getChildren().add(stirrup);
-                StackPane.setAlignment(stirrup, Pos.CENTER);
+                if (!(mainReinforcement.numberOfBars() <= 0 && additionalReinforcement.numberOfBars() <= 0)) {
+                    beamReinforcementVisualization.getChildren().add(stirrup);
+                    StackPane.setAlignment(stirrup, Pos.CENTER);
+                }
 
                 Function<BeamReinforcementAnalysis.BeamReinforcement, Circle> barSupplier = (beamReinforcement) -> {
                     double barDiameter = scaleFactor * beamReinforcement.diameterOfReinforcementBar();
@@ -293,7 +297,7 @@ public class ReinforcementAnalysisWindow {
                         return;
                     }
 
-                    String labelText;
+                    BeamReinforcementAnalysis.ReinforcementType reinforcementType;
                     Pos leftPos;
                     Pos rightPos;
                     Pos centerPos;
@@ -301,12 +305,12 @@ public class ReinforcementAnalysisWindow {
                         leftPos = Pos.BOTTOM_LEFT;
                         centerPos = Pos.BOTTOM_CENTER;
                         rightPos = Pos.BOTTOM_RIGHT;
-                        labelText = "bottom reinforcement";
+                        reinforcementType = BeamReinforcementAnalysis.ReinforcementType.BOTTOM;
                     } else {
                         centerPos = Pos.TOP_CENTER;
                         leftPos = Pos.TOP_LEFT;
                         rightPos = Pos.TOP_RIGHT;
-                        labelText = "top reinforcement";
+                        reinforcementType = BeamReinforcementAnalysis.ReinforcementType.TOP;
                     }
 
                     int yMultiplier = bottom ? -1 : 1;
@@ -350,8 +354,11 @@ public class ReinforcementAnalysisWindow {
                     beamReinforcementVisualization.getChildren().add(barsPane);
                     StackPane.setAlignment(barsPane, Pos.CENTER);
 
-                    VBox labelVBox = new VBox(new Label(labelText), new Label(rc.numberOfBars() + "Φ" + formattedDouble(rc.diameterOfReinforcementBar())));
-                    labelVBox.setMaxHeight(Font.getDefault().getSize() * labelVBox.getChildren().size());
+                    VBox labelVBox = textFlowVBox(
+                            new TextFlow(new Text(reinforcementType.toString())),
+                            new SimpleTextFlowBuilder().addRegularText("Area of reinforcement cross section " + reinforcementType.areaOfReinforcementSectionSymbol + ": " + rc.areaOfReinforcementSection() + "cm").addSuperscriptText("2").build(),
+                            new TextFlow(new Text("Steel bars: " + rc.numberOfBars() + "Φ" + formattedDouble(rc.diameterOfReinforcementBar())))
+                    );
                     beamReinforcementVisualization.getChildren().add(labelVBox);
                     StackPane.setAlignment(labelVBox, leftPos);
                     labelVBox.setTranslateX((beamMaxSize - beam.getWidth()) + beam.getWidth() + 20);
@@ -405,8 +412,10 @@ public class ReinforcementAnalysisWindow {
                 processBarReinforcement.accept(mainReinforcement, true);
                 processBarReinforcement.accept(additionalReinforcement, false);
 
-                VBox labelVBox = new VBox(new Label("stirrup"), new Label("Φ" + formattedDouble(diameterOfReinforcementStirrupProperty.value())));
-                labelVBox.setMaxHeight(Font.getDefault().getSize() * labelVBox.getChildren().size());
+                VBox labelVBox = textFlowVBox(
+                        new TextFlow(new Text("Stirrup")),
+                        new TextFlow(new Text("Φ" + formattedDouble(diameterOfReinforcementStirrupProperty.value())))
+                );
                 beamReinforcementVisualization.getChildren().add(labelVBox);
                 StackPane.setAlignment(labelVBox, Pos.CENTER_LEFT);
                 labelVBox.setTranslateX((beamMaxSize - beam.getWidth()) + beam.getWidth() + 20);
@@ -463,5 +472,14 @@ public class ReinforcementAnalysisWindow {
     private static String formattedDouble(double d) {
         String formatted = String.format("%.2f", d);
         return formatted.endsWith(".00") ? formatted.replaceFirst(".00", "") : formatted;
+    }
+
+    private static VBox textFlowVBox(TextFlow... textFlows) {
+        VBox labelVBox = new VBox();
+        for (var textFlow : textFlows) {
+            labelVBox.getChildren().add(textFlow);
+        }
+        labelVBox.setMaxHeight(Font.getDefault().getSize() * labelVBox.getChildren().size());
+        return labelVBox;
     }
 }
