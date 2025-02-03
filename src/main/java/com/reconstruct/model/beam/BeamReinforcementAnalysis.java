@@ -1,7 +1,7 @@
 package com.reconstruct.model.beam;
 
 import com.reconstruct.model.beam.section.RectangularSection;
-import com.reconstruct.model.standard.PN02;
+import com.reconstruct.model.standard.EN1992Eurocode2;
 import org.apache.commons.math3.util.Pair;
 
 import java.util.*;
@@ -70,7 +70,7 @@ public class BeamReinforcementAnalysis {
 
     private List<BeamReinforcement> beamReinforcementMatches(double requiredAreaOfReinforcementSection, int matches) {
         Map<Double, Pair<Integer, Double>> barDiameterToPairOfBarsCountToSectionArea = new LinkedHashMap<>();
-        for (var diameterOfReinforcementBar : PN02.CROSS_SECTION_AREAS.entrySet()) {
+        for (var diameterOfReinforcementBar : EN1992Eurocode2.CROSS_SECTION_AREAS.entrySet()) {
             Optional<Double> optionalMin = Arrays.stream(diameterOfReinforcementBar.getValue())
                     .filter(aDouble -> aDouble > requiredAreaOfReinforcementSection)
                     .min(Double::compareTo);

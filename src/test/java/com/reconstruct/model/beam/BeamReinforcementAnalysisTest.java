@@ -2,7 +2,7 @@ package com.reconstruct.model.beam;
 
 import com.reconstruct.model.beam.section.RectangularSection;
 import com.reconstruct.model.beam.value.Position;
-import com.reconstruct.model.standard.PN02;
+import com.reconstruct.model.standard.EN1992Eurocode2;
 import com.reconstruct.model.value.Magnitude;
 import com.reconstruct.model.value.PositiveDouble;
 import org.junit.jupiter.api.Test;
@@ -16,8 +16,8 @@ class BeamReinforcementAnalysisTest {
                 30,
                 25,
                 8,
-                PN02.CONCRETE_GRADE.get(1),
-                PN02.STEEL_GRADES.get(3)
+                EN1992Eurocode2.CONCRETE_GRADE.get(1),
+                EN1992Eurocode2.STEEL_GRADES.get(3)
         );
 
         var reinforcement = beamReinforcementAnalysis.reinforcement(

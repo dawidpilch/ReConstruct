@@ -5,8 +5,8 @@ import com.reconstruct.model.beam.ReinforcementMaterialGrade;
 
 import java.util.*;
 
-public class PN02 {
-    private PN02() { }
+public class EN1992Eurocode2 {
+    private EN1992Eurocode2() { }
 
     public static Map<String, Double> MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_STANDARD_STEEL_MM = new LinkedHashMap<>();
     static {
@@ -30,15 +30,15 @@ public class PN02 {
 
     public static List<ConcreteGrade> CONCRETE_GRADE = new LinkedList<>();
     static {
-        CONCRETE_GRADE.add(new ConcreteGrade("B15", 8.0d));
-        CONCRETE_GRADE.add(new ConcreteGrade("B20", 10.6d));
-        CONCRETE_GRADE.add(new ConcreteGrade("B25", 13.3d));
-        CONCRETE_GRADE.add(new ConcreteGrade("B30", 16.7d));
-        CONCRETE_GRADE.add(new ConcreteGrade("B37", 20.0d));
-        CONCRETE_GRADE.add(new ConcreteGrade("B45", 23.3d));
-        CONCRETE_GRADE.add(new ConcreteGrade("B50", 26.7d));
-        CONCRETE_GRADE.add(new ConcreteGrade("B55", 30.0d));
-        CONCRETE_GRADE.add(new ConcreteGrade("B60", 33.3d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C12/15", 08.57d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C16/20", 11.43d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C20/25", 14.29d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C25/30", 17.86d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C30/37", 21.43d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C35/45", 25.00d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C40/50", 28.57d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C35/55", 32.14d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C50/60", 35.71d));
     }
 
     public static List<ReinforcementMaterialGrade> STEEL_GRADES = new LinkedList<>();

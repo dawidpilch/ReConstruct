@@ -6,7 +6,7 @@ import com.reconstruct.model.beam.ConcreteGrade;
 import com.reconstruct.model.beam.ReinforcementMaterialGrade;
 import com.reconstruct.model.beam.section.RectangularSection;
 import com.reconstruct.model.beam.value.Position;
-import com.reconstruct.model.standard.PN02;
+import com.reconstruct.model.standard.EN1992Eurocode2;
 import com.reconstruct.model.value.Magnitude;
 import com.reconstruct.view.viewmodel.AppendableProperty;
 import com.reconstruct.view.viewmodel.PositiveDoubleAppendableProperty;
@@ -77,8 +77,8 @@ public class ReinforcementAnalysisWindow {
             listView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
             Map<String, Runnable> standardComboBoxActionMap = new LinkedHashMap<>();
-            standardComboBoxActionMap.put("PN-02 - Prestressed steel", () -> listView.setItems(FXCollections.observableList(PN02.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_PRESTRESSED_STEEL_MM.entrySet().stream().toList())));
-            standardComboBoxActionMap.put("PN-02 - Standard steel", () -> listView.setItems(FXCollections.observableList(PN02.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_STANDARD_STEEL_MM.entrySet().stream().toList())));
+            standardComboBoxActionMap.put("PN-02 - Prestressed steel", () -> listView.setItems(FXCollections.observableList(EN1992Eurocode2.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_PRESTRESSED_STEEL_MM.entrySet().stream().toList())));
+            standardComboBoxActionMap.put("PN-02 - Standard steel", () -> listView.setItems(FXCollections.observableList(EN1992Eurocode2.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_STANDARD_STEEL_MM.entrySet().stream().toList())));
 
             ComboBox<String> standardComboBox = new ComboBox<>();
             standardComboBox.setPrefWidth(Double.MAX_VALUE);
@@ -143,7 +143,7 @@ public class ReinforcementAnalysisWindow {
 
         propertiesVBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
 
-        List<ConcreteGrade> concreteGrades = PN02.CONCRETE_GRADE;
+        List<ConcreteGrade> concreteGrades = EN1992Eurocode2.CONCRETE_GRADE;
         ComboBox<ConcreteGrade> concreteGradeComboBox = new ComboBox<>();
         concreteGradeComboBox.setCellFactory(new Callback<>() {
             @Override
@@ -171,7 +171,7 @@ public class ReinforcementAnalysisWindow {
         BorderPane.setAlignment(concreteGradeBP.getCenter(), Pos.CENTER_LEFT);
         propertiesVBox.getChildren().add(concreteGradeBP);
 
-        List<ReinforcementMaterialGrade> steelGrades = PN02.STEEL_GRADES;
+        List<ReinforcementMaterialGrade> steelGrades = EN1992Eurocode2.STEEL_GRADES;
         ComboBox<ReinforcementMaterialGrade> reinforcementSteelGradeComboBox = new ComboBox<>();
         reinforcementSteelGradeComboBox.setCellFactory(new Callback<>() {
             @Override
