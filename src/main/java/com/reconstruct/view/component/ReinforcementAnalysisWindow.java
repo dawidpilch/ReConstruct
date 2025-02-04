@@ -7,6 +7,7 @@ import com.reconstruct.model.beam.ReinforcementMaterialGrade;
 import com.reconstruct.model.beam.section.RectangularSection;
 import com.reconstruct.model.beam.value.Position;
 import com.reconstruct.model.standard.EN1992Eurocode2;
+import com.reconstruct.model.value.Length;
 import com.reconstruct.model.value.Magnitude;
 import com.reconstruct.view.viewmodel.AppendableProperty;
 import com.reconstruct.view.viewmodel.PositiveDoubleAppendableProperty;
@@ -40,7 +41,7 @@ import java.util.function.Function;
 public class ReinforcementAnalysisWindow {
     private final RectangularSection rectangularSection;
 
-    public ReinforcementAnalysisWindow(RectangularSection rectangularSection) {
+    public ReinforcementAnalysisWindow(RectangularSection rectangularSection, Length beamLength) {
         this.rectangularSection = rectangularSection;
     }
 
@@ -231,9 +232,10 @@ public class ReinforcementAnalysisWindow {
             try {
                 double width = rectangularSection.width().doubleValue();
                 double depth = rectangularSection.depth().doubleValue();
+                Magnitude maxBendingMomentMagnitude = new BendingMomentDiagram(Map.of(Position.of(5), Magnitude.of(200))).maxMagnitude();
                 reinforcement = beamReinforcementAnalysis.reinforcement(
                         rectangularSection,
-                        new BendingMomentDiagram(Map.of(Position.of(5), Magnitude.of(200)))
+                        maxBendingMomentMagnitude
 //                    loadingAnalysis().bendingMomentDiagram()
                 );
 
@@ -256,8 +258,8 @@ public class ReinforcementAnalysisWindow {
                 }).orElse(BeamReinforcementAnalysis.BeamReinforcement.empty());
 
                 double beamMaxSize = Screen.getPrimary().getBounds().getWidth() / 4.3;
-                StackPane beamReinforcementVisualization = new StackPane();
-                beamReinforcementVisualization.setMaxSize(beamMaxSize, beamMaxSize);
+                StackPane frontBeamReinforcementVisualization = new StackPane();
+                frontBeamReinforcementVisualization.setMaxSize(beamMaxSize, beamMaxSize);
                 double scaleFactor = Math.min(beamMaxSize / depth, beamMaxSize / width);
 
                 Color foregroundColor = Color.DIMGRAY;
@@ -266,7 +268,7 @@ public class ReinforcementAnalysisWindow {
                 beam.setStroke(foregroundColor);
                 beam.setHeight(scaleFactor * depth);
                 beam.setWidth(scaleFactor * width);
-                beamReinforcementVisualization.getChildren().add(beam);
+                frontBeamReinforcementVisualization.getChildren().add(beam);
                 StackPane.setAlignment(beam, Pos.CENTER);
 
                 Rectangle stirrup = new Rectangle();
@@ -280,7 +282,7 @@ public class ReinforcementAnalysisWindow {
                 stirrup.setArcHeight(maxDiameter);
                 stirrup.setArcWidth(maxDiameter);
                 if (!(mainReinforcement.numberOfBars() <= 0 && additionalReinforcement.numberOfBars() <= 0)) {
-                    beamReinforcementVisualization.getChildren().add(stirrup);
+                    frontBeamReinforcementVisualization.getChildren().add(stirrup);
                     StackPane.setAlignment(stirrup, Pos.CENTER);
                 }
 
@@ -351,7 +353,7 @@ public class ReinforcementAnalysisWindow {
                     barsPane.setMaxSize(stirrup.getWidth(), stirrup.getHeight());
                     barsPane.setMinSize(stirrup.getWidth(), stirrup.getHeight());
                     barsPane.setPadding(new Insets(stirrupWidth/2));
-                    beamReinforcementVisualization.getChildren().add(barsPane);
+                    frontBeamReinforcementVisualization.getChildren().add(barsPane);
                     StackPane.setAlignment(barsPane, Pos.CENTER);
 
                     VBox labelVBox = textFlowVBox(
@@ -359,7 +361,7 @@ public class ReinforcementAnalysisWindow {
                             new SimpleTextFlowBuilder().addRegularText("Area of reinforcement cross section " + reinforcementType.areaOfReinforcementSectionSymbol + ": " + rc.areaOfReinforcementSection() + "cm").addSuperscriptText("2").build(),
                             new TextFlow(new Text("Steel bars: " + rc.numberOfBars() + "Φ" + formattedDouble(rc.diameterOfReinforcementBar())))
                     );
-                    beamReinforcementVisualization.getChildren().add(labelVBox);
+                    frontBeamReinforcementVisualization.getChildren().add(labelVBox);
                     StackPane.setAlignment(labelVBox, leftPos);
                     labelVBox.setTranslateX((beamMaxSize - beam.getWidth()) + beam.getWidth() + 20);
                     labelVBox.setTranslateY((beam.getHeight() * 0.1) * yMultiplier);
@@ -402,60 +404,87 @@ public class ReinforcementAnalysisWindow {
                             xTranslate += leftoverRowXStep;
                         }
                     }
-
-//                    barsPane.setBackground(new Background(new BackgroundFill(
-//                            Color.YELLOW,
-//                            new CornerRadii(0),
-//                            new Insets(0)
-//                    )));
                 };
                 processBarReinforcement.accept(mainReinforcement, true);
                 processBarReinforcement.accept(additionalReinforcement, false);
 
-                VBox labelVBox = textFlowVBox(
+                VBox stirrupLabel = textFlowVBox(
                         new TextFlow(new Text("Stirrup")),
                         new TextFlow(new Text("Φ" + formattedDouble(diameterOfReinforcementStirrupProperty.value())))
                 );
-                beamReinforcementVisualization.getChildren().add(labelVBox);
-                StackPane.setAlignment(labelVBox, Pos.CENTER_LEFT);
-                labelVBox.setTranslateX((beamMaxSize - beam.getWidth()) + beam.getWidth() + 20);
+                frontBeamReinforcementVisualization.getChildren().add(stirrupLabel);
+                StackPane.setAlignment(stirrupLabel, Pos.CENTER_LEFT);
+                stirrupLabel.setTranslateX((beamMaxSize - beam.getWidth()) + beam.getWidth() + 20);
+
+                ReinforcementMaterialGrade reinforcementMaterialGrade = reinforcementSteelGradeComboBox.getValue();
+                VBox additionalProperties = textFlowVBox(
+                        new TextFlow(new Text("Width: " + formattedDouble(rectangularSection.width().doubleValue()) + " [mm]")),
+                        new TextFlow(new Text("Depth: " + formattedDouble(rectangularSection.depth().doubleValue()) + " [mm]")),
+                        new TextFlow(new Text(" ")),
+                        new SimpleTextFlowBuilder().addRegularText("M").addSubscriptText("Sd").addRegularText(": " + formattedDouble(maxBendingMomentMagnitude.doubleValue()) + " [kNm]").build(),
+                        new SimpleTextFlowBuilder().addRegularText("f").addSubscriptText("cd").addRegularText(": " + formattedDouble(concreteGradeComboBox.getValue().compressionCalculationMPaValueOfReinforcedConcrete()) + " [MPa]").build(),
+                        new SimpleTextFlowBuilder().addRegularText("f").addSubscriptText("yd").addRegularText(": " + formattedDouble(reinforcementMaterialGrade.yieldStrengthCalculationMPaValue()) + " [MPa]").build(),
+                        new SimpleTextFlowBuilder().addRegularText("μ: " + formattedDouble(reinforcementMaterialGrade.omegaFactorOfTheDeformationLimitValue())).build(),
+                        new SimpleTextFlowBuilder().addRegularText("ω: " + formattedDouble(reinforcementMaterialGrade.omegaFactorOfTheDeformationLimitValue())).build(),
+                        new SimpleTextFlowBuilder().addRegularText("ξ: " + formattedDouble(reinforcementMaterialGrade.xiFactorOfTheDeformationLimitValue())).build(),
+                        new TextFlow(new Text(" ")),
+                        new SimpleTextFlowBuilder().addRegularText("Compression reinforcement ").addRegularText(additionalReinforcement.numberOfBars() == 0 ? "not required" : "required").build()
+                );
+
+                frontBeamReinforcementVisualization.getChildren().add(additionalProperties);
+                StackPane.setAlignment(additionalProperties, Pos.CENTER);
+                additionalProperties.setTranslateX(((beamMaxSize - beam.getWidth()) * -1) - 20);
 
                 // depth dimensional line
                 var depthDimensionalLine = new Rectangle(1d, beam.getHeight(), foregroundColor);
                 double depthXTranslate = ((beam.getWidth() / 2) + 50) * -1;
-                beamReinforcementVisualization.getChildren().add(depthDimensionalLine);
+                frontBeamReinforcementVisualization.getChildren().add(depthDimensionalLine);
                 StackPane.setAlignment(depthDimensionalLine, Pos.CENTER);
                 depthDimensionalLine.setTranslateX(depthXTranslate);
                 var depthDimensionalLabel = new Label(formattedDouble(rectangularSection.depth().doubleValue()));
                 depthDimensionalLabel.setMaxHeight(depthDimensionalLabel.getFont().getSize());
                 depthDimensionalLabel.setRotate(-90);
-                beamReinforcementVisualization.getChildren().add(depthDimensionalLabel);
+                frontBeamReinforcementVisualization.getChildren().add(depthDimensionalLabel);
                 StackPane.setAlignment(depthDimensionalLabel, Pos.CENTER);
                 depthDimensionalLabel.setTranslateX(depthXTranslate - (depthDimensionalLabel.getMaxHeight()));
 
                 // width dimensional line
                 var widthDimensionalLine = new Rectangle(beam.getWidth(), 1d, foregroundColor);
                 double widthYTranslate = (beam.getHeight() / 2) + 50;
-                beamReinforcementVisualization.getChildren().add(widthDimensionalLine);
+                frontBeamReinforcementVisualization.getChildren().add(widthDimensionalLine);
                 StackPane.setAlignment(widthDimensionalLine, Pos.CENTER);
                 widthDimensionalLine.setTranslateY(widthYTranslate);
                 var widthDimensionalLabel = new Label(formattedDouble(rectangularSection.width().doubleValue()));
                 widthDimensionalLabel.setMaxHeight(widthDimensionalLabel.getFont().getSize());
-                beamReinforcementVisualization.getChildren().add(widthDimensionalLabel);
+                frontBeamReinforcementVisualization.getChildren().add(widthDimensionalLabel);
                 StackPane.setAlignment(widthDimensionalLabel, Pos.CENTER);
                 widthDimensionalLabel.setTranslateY(widthYTranslate - widthDimensionalLabel.getMaxHeight());
 
-                BorderPane root = new BorderPane(beamReinforcementVisualization);
+
+                // side view of the beam
+                StackPane sideBeamReinforcementVisualization = new StackPane();
+                Rectangle sideViewOfBeam = new Rectangle(screenWidth - (screenWidth * 0.5), screenHeight - (screenHeight * 0.9));
+                sideViewOfBeam.setFill(Color.LIGHTGRAY);
+                sideViewOfBeam.setStroke(Color.BLACK);
+                sideViewOfBeam.setStrokeWidth(1);
+                sideBeamReinforcementVisualization.getChildren().add(sideViewOfBeam);
+                StackPane.setAlignment(sideViewOfBeam, Pos.CENTER);
+                
+
+
+
+
+                VBox rootVBox = new VBox(130, frontBeamReinforcementVisualization, sideBeamReinforcementVisualization);
+                rootVBox.setAlignment(Pos.CENTER);
+                BorderPane root = new BorderPane(rootVBox);
                 Stage beamReinforcementStage = new Stage();
                 beamReinforcementStage.setScene(new Scene(root));
                 beamReinforcementStage.setTitle(formattedDouble(width) + "x" + formattedDouble(depth) + " Concrete Beam Reinforcement");
                 beamReinforcementStage.initModality(Modality.NONE);
                 beamReinforcementStage.initStyle(StageStyle.DECORATED);
-                beamReinforcementStage.setMinWidth(screenWidth / 1.6);
-                beamReinforcementStage.setMinHeight(screenHeight / 1.6);
+                beamReinforcementStage.setMinWidth(screenWidth / 1.5);
+                beamReinforcementStage.setMinHeight(screenHeight / 1.45);
                 new RCWindow(beamReinforcementStage).show();
-
-//                Platform.runLater(() -> beamReinforcementStage.sizeToScene());
             } catch (Exception e) {
                 new Alert(Alert.AlertType.ERROR, e.toString()).showAndWait();
             }
@@ -470,8 +499,8 @@ public class ReinforcementAnalysisWindow {
     }
 
     private static String formattedDouble(double d) {
-        String formatted = String.format("%.2f", d);
-        return formatted.endsWith(".00") ? formatted.replaceFirst(".00", "") : formatted;
+        String formatted = String.format("%.3f", d);
+        return formatted.endsWith(".000") ? formatted.split("\\.000")[0] : formatted;
     }
 
     private static VBox textFlowVBox(TextFlow... textFlows) {

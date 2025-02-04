@@ -22,7 +22,7 @@ class BeamReinforcementAnalysisTest {
 
         var reinforcement = beamReinforcementAnalysis.reinforcement(
                 new RectangularSection(PositiveDouble.of(250), PositiveDouble.of(450)),
-                new BendingMomentDiagram(Map.of(Position.of(5), Magnitude.of(200)))
+                new BendingMomentDiagram(Map.of(Position.of(5), Magnitude.of(200))).maxMagnitude()
         );
     }
 }

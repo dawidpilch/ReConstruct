@@ -653,6 +653,6 @@ public class RCBeamAnalysisDesignController {
         new ReinforcementAnalysisWindow(new RectangularSection(
                 PositiveDouble.of(rectangularSectionViewModel.widthProperty.value()),
                 PositiveDouble.of(rectangularSectionViewModel.depthProperty.value())
-        )).show();
+        ), Length.of(beamViewModel.beamLengthProperty.value())).show();
     }
 }

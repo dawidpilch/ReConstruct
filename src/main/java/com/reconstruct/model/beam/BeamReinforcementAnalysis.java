@@ -2,6 +2,7 @@ package com.reconstruct.model.beam;
 
 import com.reconstruct.model.beam.section.RectangularSection;
 import com.reconstruct.model.standard.EN1992Eurocode2;
+import com.reconstruct.model.value.Magnitude;
 import org.apache.commons.math3.util.Pair;
 
 import java.util.*;
@@ -36,10 +37,10 @@ public class BeamReinforcementAnalysis {
         return corrosionCoverThickness + (diameterOfReinforcementBar / 2) + diameterOfMainReinforcementStirrup;
     }
 
-    public Map<ReinforcementType, Collection<BeamReinforcement>> reinforcement(RectangularSection rectangularSection, BendingMomentDiagram bendingMomentDiagram) {
+    public Map<ReinforcementType, Collection<BeamReinforcement>> reinforcement(RectangularSection rectangularSection, Magnitude bendingMomentMagnitude) {
         double a1_mm = verticalCorrosionCoverThickness();
         double d_m = (rectangularSection.depth().doubleValue() - a1_mm) / 1000;
-        double bendingMomentMax = bendingMomentDiagram.stream().map(positionMagnitudeEntry -> positionMagnitudeEntry.getValue().positive().doubleValue()).max(Double::compareTo).orElse(0d);
+        double bendingMomentMax = bendingMomentMagnitude.doubleValue();
         if (bendingMomentMax == 0) {
             return Map.of();
         }
