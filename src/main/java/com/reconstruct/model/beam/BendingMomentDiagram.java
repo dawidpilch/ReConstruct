@@ -22,4 +22,8 @@ public class BendingMomentDiagram implements Iterable<Map.Entry<Position, Magnit
     public Iterator<Map.Entry<Position, Magnitude>> iterator() {
         return positionMagnitudeMap.entrySet().iterator();
     }
+
+    public Magnitude maxMagnitude() {
+        return Magnitude.of(positionMagnitudeMap.values().stream().map(Magnitude::positive).map(Magnitude::doubleValue).max(Double::compareTo).orElse(0d));
+    }
 }
