@@ -79,8 +79,8 @@ public class ReinforcementAnalysisWindow {
             listView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
             Map<String, Runnable> standardComboBoxActionMap = new LinkedHashMap<>();
-            standardComboBoxActionMap.put("PN-02 - Prestressed steel", () -> listView.setItems(FXCollections.observableList(EN1992Eurocode2.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_PRESTRESSED_STEEL_MM.entrySet().stream().toList())));
-            standardComboBoxActionMap.put("PN-02 - Standard steel", () -> listView.setItems(FXCollections.observableList(EN1992Eurocode2.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_STANDARD_STEEL_MM.entrySet().stream().toList())));
+            standardComboBoxActionMap.put("EN1992 - Prestressed steel", () -> listView.setItems(FXCollections.observableList(EN1992Eurocode2.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_PRESTRESSED_STEEL_MM.entrySet().stream().toList())));
+            standardComboBoxActionMap.put("EN1992 - Standard steel", () -> listView.setItems(FXCollections.observableList(EN1992Eurocode2.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_STANDARD_STEEL_MM.entrySet().stream().toList())));
 
             ComboBox<String> standardComboBox = new ComboBox<>();
             standardComboBox.setPrefWidth(Double.MAX_VALUE);
