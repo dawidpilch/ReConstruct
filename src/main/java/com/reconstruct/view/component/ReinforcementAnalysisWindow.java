@@ -294,6 +294,18 @@ public class ReinforcementAnalysisWindow {
                     return bar;
                 };
 
+                // side view of the beam
+                StackPane sideBeamReinforcementVisualization = new StackPane();
+                Rectangle sideViewOfBeam = new Rectangle(screenWidth - (screenWidth * 0.5), screenHeight - (screenHeight * 0.9));
+                sideBeamReinforcementVisualization.setPrefSize(sideViewOfBeam.getWidth(), sideViewOfBeam.getHeight());
+                sideBeamReinforcementVisualization.setMaxSize(sideViewOfBeam.getWidth(), sideViewOfBeam.getHeight());
+                sideBeamReinforcementVisualization.setMinSize(sideViewOfBeam.getWidth(), sideViewOfBeam.getHeight());
+                sideViewOfBeam.setFill(Color.LIGHTGRAY);
+                sideViewOfBeam.setStroke(Color.BLACK);
+                sideViewOfBeam.setStrokeWidth(1);
+                sideBeamReinforcementVisualization.getChildren().add(sideViewOfBeam);
+                StackPane.setAlignment(sideViewOfBeam, Pos.CENTER);
+
                 BiConsumer<BeamReinforcementAnalysis.BeamReinforcement, Boolean> processBarReinforcement = (rc, bottom) -> {
                     if (rc.numberOfBars() <= 0) {
                         return;
@@ -384,25 +396,36 @@ public class ReinforcementAnalysisWindow {
                                 xTranslate += standardRowXStep;
                             } xTranslate = 0;
                         } yTranslate += (scaledBarDiameter + (scaledBarDiameter/2)) * yMultiplier;
+
+                        Rectangle sideViewBar = new Rectangle(sideViewOfBeam.getWidth() * 0.98, 2);
+                        sideBeamReinforcementVisualization.getChildren().add(sideViewBar);
+                        StackPane.setAlignment(sideViewBar, centerPos);
+                        sideViewBar.setTranslateY((i + 1) * sideViewOfBeam.getHeight() * 0.10 * yMultiplier);
                     }
 
                     // process leftover bars
-                    if (leftoverRow == 1) {
-                        var bar = barSupplier.apply(rc);
-                        barsPane.getChildren().add(bar);
-                        StackPane.setAlignment(bar, centerPos);
-                        bar.setTranslateY(yTranslate);
-                    } else {
-                        double sparedSpaceInLeftoverRow = innerWidth - (leftoverRow * rc.diameterOfReinforcementBar());
-                        double leftoverRowXStep = scaledBarDiameter + ((sparedSpaceInLeftoverRow * scaleFactor) / (leftoverRow - 1));
-                        for (int j = 0; j < leftoverRow; j++) {
-                            Circle bar = barSupplier.apply(rc);
+                    if (leftoverRow > 0 ) {
+                        if (leftoverRow == 1) {
+                            var bar = barSupplier.apply(rc);
                             barsPane.getChildren().add(bar);
-                            StackPane.setAlignment(bar, leftPos);
-                            bar.setTranslateX(xTranslate);
+                            StackPane.setAlignment(bar, centerPos);
                             bar.setTranslateY(yTranslate);
-                            xTranslate += leftoverRowXStep;
+                        } else {
+                            double sparedSpaceInLeftoverRow = innerWidth - (leftoverRow * rc.diameterOfReinforcementBar());
+                            double leftoverRowXStep = scaledBarDiameter + ((sparedSpaceInLeftoverRow * scaleFactor) / (leftoverRow - 1));
+                            for (int j = 0; j < leftoverRow; j++) {
+                                Circle bar = barSupplier.apply(rc);
+                                barsPane.getChildren().add(bar);
+                                StackPane.setAlignment(bar, leftPos);
+                                bar.setTranslateX(xTranslate);
+                                bar.setTranslateY(yTranslate);
+                                xTranslate += leftoverRowXStep;
+                            }
                         }
+                        Rectangle sideViewBar = new Rectangle(sideViewOfBeam.getWidth() * 0.98, 2);
+                        sideBeamReinforcementVisualization.getChildren().add(sideViewBar);
+                        StackPane.setAlignment(sideViewBar, centerPos);
+                        sideViewBar.setTranslateY((standardRows + 1) * sideViewOfBeam.getHeight() * 0.10 * yMultiplier);
                     }
                 };
                 processBarReinforcement.accept(mainReinforcement, true);
@@ -459,20 +482,6 @@ public class ReinforcementAnalysisWindow {
                 frontBeamReinforcementVisualization.getChildren().add(widthDimensionalLabel);
                 StackPane.setAlignment(widthDimensionalLabel, Pos.CENTER);
                 widthDimensionalLabel.setTranslateY(widthYTranslate - widthDimensionalLabel.getMaxHeight());
-
-
-                // side view of the beam
-                StackPane sideBeamReinforcementVisualization = new StackPane();
-                Rectangle sideViewOfBeam = new Rectangle(screenWidth - (screenWidth * 0.5), screenHeight - (screenHeight * 0.9));
-                sideViewOfBeam.setFill(Color.LIGHTGRAY);
-                sideViewOfBeam.setStroke(Color.BLACK);
-                sideViewOfBeam.setStrokeWidth(1);
-                sideBeamReinforcementVisualization.getChildren().add(sideViewOfBeam);
-                StackPane.setAlignment(sideViewOfBeam, Pos.CENTER);
-                
-
-
-
 
                 VBox rootVBox = new VBox(130, frontBeamReinforcementVisualization, sideBeamReinforcementVisualization);
                 rootVBox.setAlignment(Pos.CENTER);
