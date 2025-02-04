@@ -37,16 +37,16 @@ public class BeamReinforcementAnalysis {
         return corrosionCoverThickness + (diameterOfReinforcementBar / 2) + diameterOfMainReinforcementStirrup;
     }
 
-    public Map<ReinforcementType, Collection<BeamReinforcement>> reinforcement(RectangularSection rectangularSection, Magnitude bendingMomentMagnitude) {
+    public Results reinforcement(RectangularSection rectangularSection, Magnitude bendingMomentMagnitude) {
         double a1_mm = verticalCorrosionCoverThickness();
         double d_m = (rectangularSection.depth().doubleValue() - a1_mm) / 1000;
         double bendingMomentMax = bendingMomentMagnitude.doubleValue();
         if (bendingMomentMax == 0) {
-            return Map.of();
+            return new Results(Map.of(), 0d);
         }
 
         double mu_mm = (bendingMomentMax / 1000) / ((rectangularSection.width().doubleValue() / 1000) * (d_m * d_m) * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete());
-
+        double MRd_lim = 0;
         boolean doublyReinforcedRequired = mu_mm > reinforcementMaterialGrade.muFactorOfTheDeformationLimitValue();
         Map<ReinforcementType, Collection<BeamReinforcement>> results = new HashMap<>();
         if (!doublyReinforcedRequired) {
@@ -54,7 +54,7 @@ public class BeamReinforcementAnalysis {
             var numberOfBarsToProvidedAreaOfReinforcementSection = beamReinforcementMatches(areaOfRequiredTensileReinforcement_cm2, 3);
             results.put(ReinforcementType.BOTTOM, numberOfBarsToProvidedAreaOfReinforcementSection);
         } else {
-            double MRd_lim = reinforcementMaterialGrade.muFactorOfTheDeformationLimitValue() * (d_m * d_m) * (rectangularSection.width().doubleValue() / 1000) * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete();
+            MRd_lim = reinforcementMaterialGrade.muFactorOfTheDeformationLimitValue() * (d_m * d_m) * (rectangularSection.width().doubleValue() / 1000) * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete();
             double areaOfRequiredTensileReinforcement_cm2 = 17d/21d * (reinforcementMaterialGrade.xiFactorOfTheDeformationLimitValue() * rectangularSection.width().doubleValue()/1000d * d_m * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete() / reinforcementMaterialGrade.yieldStrengthCalculationMPaValue());
             areaOfRequiredTensileReinforcement_cm2 = areaOfRequiredTensileReinforcement_cm2 * 10000;
 
@@ -66,7 +66,7 @@ public class BeamReinforcementAnalysis {
             results.put(ReinforcementType.TOP, beamReinforcementMatches(areaOfRequiredCompressiveReinforcement_cm2, 3));
         }
 
-        return results;
+        return new Results(results, MRd_lim);
     }
 
     private List<BeamReinforcement> beamReinforcementMatches(double requiredAreaOfReinforcementSection, int matches) {
@@ -107,6 +107,8 @@ public class BeamReinforcementAnalysis {
 
         return results;
     }
+
+    public record Results(Map<ReinforcementType, Collection<BeamReinforcement>> beamReinforcement, double maxSectionCapacityMPa) { }
 
     public static class BeamReinforcement {
         private final int numberOfBars;
