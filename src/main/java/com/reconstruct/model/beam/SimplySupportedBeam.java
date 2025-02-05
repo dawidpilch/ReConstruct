@@ -86,9 +86,9 @@ public class SimplySupportedBeam implements Beam {
     }
 
     public LoadingAnalysis loadingAnalysis(Loading loading) {
-        var supportVerticalReactions = supportVerticalReactions(loading);
+        var supportVerticalReactions = supportVerticalReactions(loading).values().stream().flatMap(Collection::stream).toList();
         List<VerticalPointLoad> verticalPointLoads = new ArrayList<>(loading.verticalPointLoads());
-        verticalPointLoads.addAll(supportVerticalReactions.values().stream().flatMap(Collection::stream).toList());
+        verticalPointLoads.addAll(supportVerticalReactions);
         if (verticalPointLoads.size() < 2)
             throw new RuntimeException("At least two Vertical Loads expected (Support reactions missing)");
 
@@ -171,6 +171,7 @@ public class SimplySupportedBeam implements Beam {
         }
 
         return new LoadingAnalysis(
+                supportVerticalReactions,
                 new BendingMomentDiagram(bendingMomentDiagram),
                 new SheerForceDiagram(sheerForceDiagram)
         );
