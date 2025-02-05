@@ -31,6 +31,7 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.util.*;
+import java.util.function.Supplier;
 
 public class RCBeamAnalysisDesignController {
     @FXML public BorderPane borderPane;
@@ -50,7 +51,7 @@ public class RCBeamAnalysisDesignController {
         beamView.refreshGeometry();
     }
 
-    private LoadingAnalysis loadingAnalysis() {
+    private Supplier<LoadingAnalysis> loadingAnalysisSupplier = () -> {
         Loading loading = new Loading(
                 beamViewModel.verticalPointLoadsProperty.value(),
                 beamViewModel.horizontalPointLoadsProperty.value(),
@@ -73,7 +74,7 @@ public class RCBeamAnalysisDesignController {
         );
 
         return simplySupportedBeam.loadingAnalysis(loading);
-    }
+    };
 
     public void onGeometryConfiguration(ActionEvent ignored) {
         var beamLengthProperty = beamViewModel.beamLengthProperty;
@@ -587,7 +588,7 @@ public class RCBeamAnalysisDesignController {
         borderPane.setRight(pane);
         StackPane.setAlignment(pane, Pos.CENTER_RIGHT);
 
-        LoadingAnalysis loadingAnalysis = loadingAnalysis();
+        LoadingAnalysis loadingAnalysis = loadingAnalysisSupplier.get();
         BendingMomentDiagram bendingMomentDiagram = loadingAnalysis.bendingMomentDiagram();
         SheerForceDiagram sheerForceDiagram = loadingAnalysis.sheerForceDiagram();
 
@@ -619,7 +620,7 @@ public class RCBeamAnalysisDesignController {
         loadingVisibleCheckbox.setSelected(true);
         loadingVisibleCheckbox.setOnAction(event -> {
             if (loadingVisibleCheckbox.isSelected()) {
-                beamView.displayLoading();
+                beamView.displayLoading(loadingAnalysis);
             } else {
                 beamView.hideLoading();
             }
@@ -643,6 +644,7 @@ public class RCBeamAnalysisDesignController {
         vBox.getChildren().addAll(content);
         menuBar.setDisable(true);
 
+        beamView.displayLoading(loadingAnalysis);
         Platform.runLater(() -> {
             internalForcesComboBox.getSelectionModel().select(internalForcesToActionMap.keySet().stream().findFirst().get());
             endPreviewButton.requestFocus();
@@ -653,6 +655,6 @@ public class RCBeamAnalysisDesignController {
         new ReinforcementAnalysisWindow(new RectangularSection(
                 PositiveDouble.of(rectangularSectionViewModel.widthProperty.value()),
                 PositiveDouble.of(rectangularSectionViewModel.depthProperty.value())
-        ), Length.of(beamViewModel.beamLengthProperty.value())).show();
+        ), Length.of(beamViewModel.beamLengthProperty.value())).show(loadingAnalysisSupplier);
     }
 }

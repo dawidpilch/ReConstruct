@@ -1,9 +1,6 @@
 package com.reconstruct.view.component;
 
-import com.reconstruct.model.beam.BeamReinforcementAnalysis;
-import com.reconstruct.model.beam.BendingMomentDiagram;
-import com.reconstruct.model.beam.ConcreteGrade;
-import com.reconstruct.model.beam.ReinforcementMaterialGrade;
+import com.reconstruct.model.beam.*;
 import com.reconstruct.model.beam.section.RectangularSection;
 import com.reconstruct.model.beam.value.Position;
 import com.reconstruct.model.standard.EN1992Eurocode2;
@@ -37,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ReinforcementAnalysisWindow {
     private final RectangularSection rectangularSection;
@@ -47,7 +45,7 @@ public class ReinforcementAnalysisWindow {
         this.beamLength = beamLength;
     }
 
-    public void show() {
+    public void show(Supplier<LoadingAnalysis> loadingAnalysisSupplier) {
         BorderPane content = new BorderPane();
         VBox propertiesVBox = new VBox(15);
         content.setCenter(propertiesVBox);
@@ -235,11 +233,10 @@ public class ReinforcementAnalysisWindow {
             try {
                 double width = rectangularSection.width().doubleValue();
                 double depth = rectangularSection.depth().doubleValue();
-                Magnitude maxBendingMomentMagnitude = new BendingMomentDiagram(Map.of(Position.of(5), Magnitude.of(200))).maxMagnitude();
+                Magnitude maxBendingMomentMagnitude = loadingAnalysisSupplier.get().bendingMomentDiagram().maxMagnitude();
                 reinforcementResults = beamReinforcementAnalysis.reinforcement(
                         rectangularSection,
                         maxBendingMomentMagnitude
-//                    loadingAnalysis().bendingMomentDiagram()
                 );
                 reinforcement = reinforcementResults.beamReinforcement();
 
@@ -408,7 +405,7 @@ public class ReinforcementAnalysisWindow {
                             bar.setTranslateY(yTranslate);
                         } else {
                             double sparedSpaceInStandardRow = innerWidth - (barsPerStandardRow * rc.diameterOfReinforcementBar());
-                            double standardRowXStep = scaledBarDiameter + ((sparedSpaceInStandardRow * scaleFactor) / (barsPerStandardRow - 1));
+                            double standardRowXStep = (scaledBarDiameter) + ((sparedSpaceInStandardRow * scaleFactor) / (barsPerStandardRow - 1));
                             for (int j = 0; j < barsPerStandardRow; j++) {
                                 Circle bar = barSupplier.apply(rc);
                                 barsPane.getChildren().add(bar);
@@ -417,7 +414,7 @@ public class ReinforcementAnalysisWindow {
                                 bar.setTranslateY(yTranslate);
                                 xTranslate += standardRowXStep;
                             } xTranslate = 0;
-                        } yTranslate += (scaledBarDiameter + (scaledBarDiameter/2)) * yMultiplier;
+                        } yTranslate += (scaledBarDiameter + (scaledBarDiameter)) * yMultiplier;
 
                         Rectangle sideViewBar = new Rectangle(sideViewOfBeam.getWidth() * 0.98, 2);
                         sideViewBar.setStroke(foregroundColor);

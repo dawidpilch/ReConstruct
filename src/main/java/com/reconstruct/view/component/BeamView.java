@@ -1,5 +1,6 @@
 package com.reconstruct.view.component;
 
+import com.reconstruct.model.beam.LoadingAnalysis;
 import com.reconstruct.model.beam.loading.moment.BendingMoment;
 import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
 import com.reconstruct.view.viewmodel.AppendableProperty;
@@ -145,8 +146,18 @@ public class BeamView {
     }
 
     public void displayLoading() {
+        displayLoading(LoadingAnalysis.empty());
+    }
+
+    public void displayLoading(LoadingAnalysis loadingAnalysis) {
         loadingPane.setVisible(true);
         loadingPane.getChildren().clear();
+
+        for (VerticalPointLoad verticalPointLoad : loadingAnalysis.verticalSupportReactions()) {
+            Node pointArrow = pointArrow(verticalPointLoad.magnitude().doubleValue(), verticalPointLoad.position().doubleValue(), verticalPointLoad.isDirectedUpwards(), Color.STEELBLUE);
+            loadingPane.getChildren().add(pointArrow);
+            pointArrow.toFront();
+        }
 
         for (VerticalPointLoad verticalPointLoad : beamViewModel.verticalPointLoadsProperty.value()) {
             Node pointArrow = pointArrow(verticalPointLoad.magnitude().doubleValue(), verticalPointLoad.position().doubleValue(), verticalPointLoad.isDirectedUpwards(), Paint.valueOf("red"));
