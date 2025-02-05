@@ -159,12 +159,6 @@ public class BeamView {
             pointArrow.toFront();
         }
 
-        for (VerticalPointLoad verticalPointLoad : beamViewModel.verticalPointLoadsProperty.value()) {
-            Node pointArrow = pointArrow(verticalPointLoad.magnitude().doubleValue(), verticalPointLoad.position().doubleValue(), verticalPointLoad.isDirectedUpwards(), Paint.valueOf("red"));
-            loadingPane.getChildren().add(pointArrow);
-            pointArrow.toFront();
-        }
-
         for (BendingMoment bendingMoment : beamViewModel.bendingMomentsProperty.value()) {
             SVGPath svgPath = new SVGPath();
             double svgHeight = 107;
@@ -230,6 +224,12 @@ public class BeamView {
 
             loadingPane.getChildren().add(wrapper);
             wrapper.toFront();
+        }
+
+        for (VerticalPointLoad verticalPointLoad : beamViewModel.verticalPointLoadsProperty.value()) {
+            Node pointArrow = pointArrow(verticalPointLoad.magnitude().doubleValue(), verticalPointLoad.position().doubleValue(), verticalPointLoad.isDirectedUpwards(), Paint.valueOf("red"));
+            loadingPane.getChildren().add(pointArrow);
+            pointArrow.toFront();
         }
     }
 
