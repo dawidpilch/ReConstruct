@@ -2,7 +2,6 @@ package com.reconstruct.view.component;
 
 import com.reconstruct.model.beam.*;
 import com.reconstruct.model.beam.section.RectangularSection;
-import com.reconstruct.model.beam.value.Position;
 import com.reconstruct.model.standard.EN1992Eurocode2;
 import com.reconstruct.model.value.Length;
 import com.reconstruct.model.value.Magnitude;
@@ -389,7 +388,7 @@ public class ReinforcementAnalysisWindow {
 
                     VBox labelVBox = textFlowVBox(
                             new TextFlow(new Text(reinforcementType.toString())),
-                            new SimpleTextFlowBuilder().addRegularText("Area of reinforcement cross section " + reinforcementType.areaOfReinforcementSectionSymbol + ": " + rc.areaOfReinforcementSection() + " [cm").addSuperscriptText("2").addSuperscriptText("]").build(),
+                            new SimpleTextFlowBuilder().addRegularText(reinforcementType.areaOfReinforcementSectionSymbol).addSubscriptText("prov").addRegularText(": " + rc.providedAreaOfReinforcementSection() + " [cm").addSuperscriptText("2").addSuperscriptText("]").build(),
                             new TextFlow(new Text("Steel bars: " + rc.numberOfBars() + "Φ" + formattedDouble(rc.diameterOfReinforcementBar())))
                     );
                     frontBeamReinforcementVisualization.getChildren().add(labelVBox);
@@ -463,20 +462,23 @@ public class ReinforcementAnalysisWindow {
                 stirrupLabel.setTranslateX((beamMaxSize - beam.getWidth()) + beam.getWidth() + 20);
 
                 ReinforcementMaterialGrade reinforcementMaterialGrade = reinforcementSteelGradeComboBox.getValue();
+                boolean topReinforcementRequired = reinforcement.containsKey(BeamReinforcementAnalysis.ReinforcementType.TOP);
                 VBox additionalProperties = textFlowVBox(
                         new TextFlow(new Text("Width: " + formattedDouble(rectangularSection.width().doubleValue()) + " [mm]")),
                         new TextFlow(new Text("Depth: " + formattedDouble(rectangularSection.depth().doubleValue()) + " [mm]")),
                         new TextFlow(new Text("Length: " + formattedDouble(beamLength.doubleValue() * 1000) + " [mm]")),
                         new TextFlow(new Text(" ")),
                         new SimpleTextFlowBuilder().addRegularText("M").addSubscriptText("Sd").addRegularText(": " + formattedDouble(maxBendingMomentMagnitude.doubleValue()) + " [kNm]").build(),
-                        reinforcement.containsKey(BeamReinforcementAnalysis.ReinforcementType.TOP) ? new SimpleTextFlowBuilder().addRegularText("M").addSubscriptText("Rd,lim").addRegularText(": " + formattedDouble(reinforcementResults.maxSectionCapacityMPa()) + " [MPa]").build() : new TextFlow(),
+                        topReinforcementRequired ? new SimpleTextFlowBuilder().addRegularText("M").addSubscriptText("Rd,lim").addRegularText(": " + formattedDouble(reinforcementResults.maxSectionCapacityMPa()) + " [MPa]").build() : new TextFlow(),
                         new SimpleTextFlowBuilder().addRegularText("f").addSubscriptText("cd").addRegularText(": " + formattedDouble(concreteGradeComboBox.getValue().compressionCalculationMPaValueOfReinforcedConcrete()) + " [MPa]").build(),
                         new SimpleTextFlowBuilder().addRegularText("f").addSubscriptText("yd").addRegularText(": " + formattedDouble(reinforcementMaterialGrade.yieldStrengthCalculationMPaValue()) + " [MPa]").build(),
                         new SimpleTextFlowBuilder().addRegularText("μ: " + formattedDouble(reinforcementMaterialGrade.omegaFactorOfTheDeformationLimitValue())).build(),
                         new SimpleTextFlowBuilder().addRegularText("ω: " + formattedDouble(reinforcementMaterialGrade.omegaFactorOfTheDeformationLimitValue())).build(),
                         new SimpleTextFlowBuilder().addRegularText("ξ: " + formattedDouble(reinforcementMaterialGrade.xiFactorOfTheDeformationLimitValue())).build(),
                         new TextFlow(new Text(" ")),
-                        new SimpleTextFlowBuilder().addRegularText("Compression reinforcement ").addRegularText(additionalReinforcement.numberOfBars() == 0 ? "not required" : "required").build()
+                        new SimpleTextFlowBuilder().addRegularText("Compression reinforcement ").addRegularText(additionalReinforcement.numberOfBars() == 0 ? "not required" : "required").build(),
+                        new SimpleTextFlowBuilder().addRegularText(BeamReinforcementAnalysis.ReinforcementType.BOTTOM.areaOfReinforcementSectionSymbol).addSubscriptText("req").addRegularText(" : " + formattedDouble(mainReinforcement.requiredAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addSuperscriptText("]").build(),
+                        new SimpleTextFlowBuilder().addRegularText(BeamReinforcementAnalysis.ReinforcementType.TOP.areaOfReinforcementSectionSymbol).addSubscriptText("req").addRegularText(" : " + formattedDouble(additionalReinforcement.requiredAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addSuperscriptText("]").build()
                 );
 
                 frontBeamReinforcementVisualization.getChildren().add(additionalProperties);

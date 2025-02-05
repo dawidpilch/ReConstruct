@@ -102,7 +102,8 @@ public class BeamReinforcementAnalysis {
                 }).limit(matches).forEachOrdered(match -> results.add(new BeamReinforcement(
                         match.getValue().getKey(),
                         match.getKey(),
-                        match.getValue().getValue()
+                        match.getValue().getValue(),
+                        requiredAreaOfReinforcementSection
                 )));
 
         return results;
@@ -113,16 +114,18 @@ public class BeamReinforcementAnalysis {
     public static class BeamReinforcement {
         private final int numberOfBars;
         private final double diameterOfReinforcementBar;
-        private final double areaOfReinforcementSection;
+        private final double providedAreaOfReinforcementSection;
+        private final double requiredAreaOfReinforcementSection;
 
         public static BeamReinforcement empty() {
-            return new BeamReinforcement(0, 0, 0);
+            return new BeamReinforcement(0, 0, 0, 0);
         }
 
-        private BeamReinforcement(int numberOfBars, double diameterOfReinforcementBar, double areaOfReinforcementSection) {
+        private BeamReinforcement(int numberOfBars, double diameterOfReinforcementBar, double providedAreaOfReinforcementSection,double requiredAreaOfReinforcementSection ) {
             this.numberOfBars = numberOfBars;
             this.diameterOfReinforcementBar = diameterOfReinforcementBar;
-            this.areaOfReinforcementSection = areaOfReinforcementSection;
+            this.providedAreaOfReinforcementSection = providedAreaOfReinforcementSection;
+            this.requiredAreaOfReinforcementSection = requiredAreaOfReinforcementSection;
         }
 
         public int numberOfBars() {
@@ -133,8 +136,12 @@ public class BeamReinforcementAnalysis {
             return diameterOfReinforcementBar;
         }
 
-        public double areaOfReinforcementSection() {
-            return areaOfReinforcementSection;
+        public double providedAreaOfReinforcementSection() {
+            return providedAreaOfReinforcementSection;
+        }
+
+        public double requiredAreaOfReinforcementSection() {
+            return requiredAreaOfReinforcementSection;
         }
     }
 
