@@ -2,13 +2,10 @@ package com.reconstruct.view.component;
 
 import com.reconstruct.ReConstructApp;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-
-import java.util.Objects;
 import java.util.function.Supplier;
 
 public class RCWindow {
@@ -35,7 +32,7 @@ public class RCWindow {
 
     public RCWindow(Stage stage) {
         this.stage = stage;
-        this.stage.getIcons().add(new Image((Objects.requireNonNull(ReConstructApp.class.getResourceAsStream("icon.png")))));
+        this.stage.getIcons().add(ReConstructApp.APP_ICON);
     }
 
     private static double defaultWidth() {
