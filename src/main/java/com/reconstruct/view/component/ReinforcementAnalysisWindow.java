@@ -281,10 +281,9 @@ public class ReinforcementAnalysisWindow {
                 double maxDiameter = Math.max(mainReinforcement.diameterOfReinforcementBar(), additionalReinforcement.diameterOfReinforcementBar());
                 stirrup.setArcHeight(maxDiameter);
                 stirrup.setArcWidth(maxDiameter);
-                if (!(mainReinforcement.numberOfBars() <= 0 && additionalReinforcement.numberOfBars() <= 0)) {
-                    frontBeamReinforcementVisualization.getChildren().add(stirrup);
-                    StackPane.setAlignment(stirrup, Pos.CENTER);
-                }
+                frontBeamReinforcementVisualization.getChildren().add(stirrup);
+                StackPane.setAlignment(stirrup, Pos.CENTER);
+
 
                 Function<BeamReinforcementAnalysis.BeamReinforcement, Circle> barSupplier = (beamReinforcement) -> {
                     double barDiameter = scaleFactor * beamReinforcement.diameterOfReinforcementBar();
@@ -386,9 +385,13 @@ public class ReinforcementAnalysisWindow {
                     frontBeamReinforcementVisualization.getChildren().add(barsPane);
                     StackPane.setAlignment(barsPane, Pos.CENTER);
 
+                    String minReinforcementConditionsPassed = reinforcementResults.minReinforcementConditionsPassed(rc) ? "passed" : "failed";
+
                     VBox labelVBox = textFlowVBox(
                             new TextFlow(new Text(reinforcementType.toString())),
-                            new SimpleTextFlowBuilder().addRegularText(reinforcementType.areaOfReinforcementSectionSymbol).addSubscriptText("prov").addRegularText(": " + rc.providedAreaOfReinforcementSection() + " [cm").addSuperscriptText("2").addSuperscriptText("]").build(),
+                            new SimpleTextFlowBuilder().addRegularText(reinforcementType.areaOfReinforcementSectionSymbol).addSubscriptText("req").addRegularText(": " + formattedDouble(rc.requiredAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addRegularText("]").build(),
+                            new SimpleTextFlowBuilder().addRegularText(reinforcementType.areaOfReinforcementSectionSymbol).addSubscriptText("prov").addRegularText(": " + formattedDouble(rc.providedAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addRegularText("]").build(),
+                            reinforcementType == BeamReinforcementAnalysis.ReinforcementType.BOTTOM ? new SimpleTextFlowBuilder().addRegularText("Min reinforcement test: " + minReinforcementConditionsPassed).build() : new TextFlow(),
                             new TextFlow(new Text("Steel bars: " + rc.numberOfBars() + "Φ" + formattedDouble(rc.diameterOfReinforcementBar())))
                     );
                     frontBeamReinforcementVisualization.getChildren().add(labelVBox);
@@ -468,23 +471,28 @@ public class ReinforcementAnalysisWindow {
                         new TextFlow(new Text("Depth: " + formattedDouble(rectangularSection.depth().doubleValue()) + " [mm]")),
                         new TextFlow(new Text("Length: " + formattedDouble(beamLength.doubleValue() * 1000) + " [mm]")),
                         new TextFlow(new Text(" ")),
+                        new TextFlow(new Text("Concrete grade: " + concreteGradeComboBox.getValue())),
+                        new TextFlow(new Text("Steel grade: " + reinforcementMaterialGrade.name())),
+                        new SimpleTextFlowBuilder().addRegularText("c").addSubscriptText("min").addRegularText(": " + formattedDouble(minCorrosionCoverThicknessProperty.value()) + " [mm]").build(),
+                        new TextFlow(new Text("Δc: " + formattedDouble(corrosionCoverToleranceProperty.value()) + " [mm]")),
+                        new TextFlow(new Text(" ")),
                         new SimpleTextFlowBuilder().addRegularText("M").addSubscriptText("Sd").addRegularText(": " + formattedDouble(maxBendingMomentMagnitude.doubleValue()) + " [kNm]").build(),
                         topReinforcementRequired ? new SimpleTextFlowBuilder().addRegularText("M").addSubscriptText("Rd,lim").addRegularText(": " + formattedDouble(reinforcementResults.maxSectionCapacityMPa()) + " [MPa]").build() : new TextFlow(),
                         new SimpleTextFlowBuilder().addRegularText("f").addSubscriptText("cd").addRegularText(": " + formattedDouble(concreteGradeComboBox.getValue().compressionCalculationMPaValueOfReinforcedConcrete()) + " [MPa]").build(),
                         new SimpleTextFlowBuilder().addRegularText("f").addSubscriptText("yd").addRegularText(": " + formattedDouble(reinforcementMaterialGrade.yieldStrengthCalculationMPaValue()) + " [MPa]").build(),
-                        new SimpleTextFlowBuilder().addRegularText("μ: " + formattedDouble(reinforcementMaterialGrade.muFactorOfTheDeformationLimitValue())).build(),
-                        new SimpleTextFlowBuilder().addRegularText("ω: " + formattedDouble(reinforcementMaterialGrade.omegaFactorOfTheDeformationLimitValue())).build(),
-                        new SimpleTextFlowBuilder().addRegularText("ξ: " + formattedDouble(reinforcementMaterialGrade.xiFactorOfTheDeformationLimitValue())).build(),
-                        new SimpleTextFlowBuilder().addRegularText("ζ: " + formattedDouble(reinforcementMaterialGrade.zetaFactorOfTheDeformationLimitValue())).build(),
+                        new SimpleTextFlowBuilder().addRegularText("μ: " + formattedDouble(reinforcementMaterialGrade.muFactorOfTheDeformationLimitValue()) + " [-]").build(),
+                        new SimpleTextFlowBuilder().addRegularText("ω: " + formattedDouble(reinforcementMaterialGrade.omegaFactorOfTheDeformationLimitValue()) + " [-]").build(),
+                        new SimpleTextFlowBuilder().addRegularText("ξ: " + formattedDouble(reinforcementMaterialGrade.xiFactorOfTheDeformationLimitValue()) + " [-]").build(),
+                        new SimpleTextFlowBuilder().addRegularText("ζ: " + formattedDouble(reinforcementMaterialGrade.zetaFactorOfTheDeformationLimitValue()) + " [-]").build(),
                         new TextFlow(new Text(" ")),
                         new SimpleTextFlowBuilder().addRegularText("Compression reinforcement ").addRegularText(additionalReinforcement.numberOfBars() == 0 ? "not required" : "required").build(),
-                        new SimpleTextFlowBuilder().addRegularText(BeamReinforcementAnalysis.ReinforcementType.BOTTOM.areaOfReinforcementSectionSymbol).addSubscriptText("req").addRegularText(" : " + formattedDouble(mainReinforcement.requiredAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addSuperscriptText("]").build(),
-                        new SimpleTextFlowBuilder().addRegularText(BeamReinforcementAnalysis.ReinforcementType.TOP.areaOfReinforcementSectionSymbol).addSubscriptText("req").addRegularText(" : " + formattedDouble(additionalReinforcement.requiredAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addSuperscriptText("]").build()
+                        new SimpleTextFlowBuilder().addRegularText(BeamReinforcementAnalysis.ReinforcementType.BOTTOM.areaOfReinforcementSectionSymbol).addSubscriptText("req").addRegularText(" : " + formattedDouble(mainReinforcement.requiredAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addRegularText("]").build(),
+                        new SimpleTextFlowBuilder().addRegularText(BeamReinforcementAnalysis.ReinforcementType.TOP.areaOfReinforcementSectionSymbol).addSubscriptText("req").addRegularText(" : " + formattedDouble(additionalReinforcement.requiredAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addRegularText("]").build()
                 );
 
                 frontBeamReinforcementVisualization.getChildren().add(additionalProperties);
                 StackPane.setAlignment(additionalProperties, Pos.CENTER);
-                additionalProperties.setTranslateX(((beamMaxSize - beam.getWidth()) * -1) - 20);
+                additionalProperties.setTranslateX(((beam.getWidth() / 2) * -1) - 80);
 
                 // depth dimensional line
                 var depthDimensionalLine = new Rectangle(1d, beam.getHeight(), foregroundColor);
@@ -541,7 +549,7 @@ public class ReinforcementAnalysisWindow {
     }
 
     private static VBox textFlowVBox(TextFlow... textFlows) {
-        VBox labelVBox = new VBox();
+        VBox labelVBox = new VBox(5);
         for (var textFlow : textFlows) {
             labelVBox.getChildren().add(textFlow);
         }

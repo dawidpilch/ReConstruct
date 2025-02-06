@@ -42,20 +42,26 @@ public class BeamReinforcementAnalysis {
         double d_m = (rectangularSection.depth().doubleValue() - a1_mm) / 1000;
         double bendingMomentMax = bendingMomentMagnitude.doubleValue();
         if (bendingMomentMax == 0) {
-            return new Results(Map.of(), 0d);
+            return new Results(Map.of(), 0d) {
+                @Override
+                public boolean minReinforcementConditionsPassed(BeamReinforcement beamReinforcement) {
+                    return true;
+                }
+            };
         }
 
-        double mu_mm = (bendingMomentMax / 1000) / ((rectangularSection.width().doubleValue() / 1000) * (d_m * d_m) * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete());
+        double width_m = rectangularSection.width().doubleValue() / 1000;
+        double mu_mm = (bendingMomentMax / 1000) / ((width_m) * (d_m * d_m) * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete());
         double MRd_lim = 0;
         boolean doublyReinforcedRequired = mu_mm > reinforcementMaterialGrade.muFactorOfTheDeformationLimitValue();
         Map<ReinforcementType, Collection<BeamReinforcement>> results = new HashMap<>();
         if (!doublyReinforcedRequired) {
-            double areaOfRequiredTensileReinforcement_cm2 = (reinforcementMaterialGrade.omegaFactorOfTheDeformationLimitValue() * d_m * (rectangularSection.width().doubleValue() / 1000) * (concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete() / reinforcementMaterialGrade.yieldStrengthCalculationMPaValue())) * 10000;
+            double areaOfRequiredTensileReinforcement_cm2 = (reinforcementMaterialGrade.omegaFactorOfTheDeformationLimitValue() * d_m * (width_m) * (concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete() / reinforcementMaterialGrade.yieldStrengthCalculationMPaValue())) * 10000;
             var numberOfBarsToProvidedAreaOfReinforcementSection = beamReinforcementMatches(areaOfRequiredTensileReinforcement_cm2, 3);
             results.put(ReinforcementType.BOTTOM, numberOfBarsToProvidedAreaOfReinforcementSection);
         } else {
-            MRd_lim = reinforcementMaterialGrade.muFactorOfTheDeformationLimitValue() * (d_m * d_m) * (rectangularSection.width().doubleValue() / 1000) * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete();
-            double areaOfRequiredTensileReinforcement_cm2 = 17d/21d * (reinforcementMaterialGrade.xiFactorOfTheDeformationLimitValue() * rectangularSection.width().doubleValue()/1000d * d_m * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete() / reinforcementMaterialGrade.yieldStrengthCalculationMPaValue());
+            MRd_lim = reinforcementMaterialGrade.muFactorOfTheDeformationLimitValue() * (d_m * d_m) * (width_m) * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete();
+            double areaOfRequiredTensileReinforcement_cm2 = 17d/21d * (reinforcementMaterialGrade.xiFactorOfTheDeformationLimitValue() * rectangularSection.width().doubleValue() / 1000d * d_m * concreteGrade.compressionCalculationMPaValueOfReinforcedConcrete() / reinforcementMaterialGrade.yieldStrengthCalculationMPaValue());
             areaOfRequiredTensileReinforcement_cm2 = areaOfRequiredTensileReinforcement_cm2 * 10000;
 
             double deltaMSd = (bendingMomentMax / 1000) - MRd_lim;
@@ -66,7 +72,15 @@ public class BeamReinforcementAnalysis {
             results.put(ReinforcementType.TOP, beamReinforcementMatches(areaOfRequiredCompressiveReinforcement_cm2, 3));
         }
 
-        return new Results(results, MRd_lim);
+
+        return new Results(results, MRd_lim) {
+            @Override
+            public boolean minReinforcementConditionsPassed(BeamReinforcement beamReinforcement) {
+                boolean condition1 = beamReinforcement.providedAreaOfReinforcementSection >= 0.26 * (concreteGrade.averageTensileStrengthMPaValue() / reinforcementMaterialGrade.yieldStrengthCalculationMPaValue()) * width_m * d_m;
+                boolean condition2 = beamReinforcement.providedAreaOfReinforcementSection >= 0.0013 * width_m * d_m;
+                return condition1 && condition2;
+            }
+        };
     }
 
     private List<BeamReinforcement> beamReinforcementMatches(double requiredAreaOfReinforcementSection, int matches) {
@@ -109,7 +123,25 @@ public class BeamReinforcementAnalysis {
         return results;
     }
 
-    public record Results(Map<ReinforcementType, Collection<BeamReinforcement>> beamReinforcement, double maxSectionCapacityMPa) { }
+    public abstract static class Results {
+        private final Map<ReinforcementType, Collection<BeamReinforcement>> beamReinforcement;
+        private final double maxSectionCapacityMPa;
+
+        public Results(Map<ReinforcementType, Collection<BeamReinforcement>> beamReinforcement, double maxSectionCapacityMPa) {
+            this.beamReinforcement = beamReinforcement;
+            this.maxSectionCapacityMPa = maxSectionCapacityMPa;
+        }
+
+        public Map<ReinforcementType, Collection<BeamReinforcement>> beamReinforcement() {
+            return beamReinforcement;
+        }
+
+        public double maxSectionCapacityMPa() {
+            return maxSectionCapacityMPa;
+        }
+
+        public abstract boolean minReinforcementConditionsPassed(BeamReinforcement beamReinforcement);
+    }
 
     public static class BeamReinforcement {
         private final int numberOfBars;
