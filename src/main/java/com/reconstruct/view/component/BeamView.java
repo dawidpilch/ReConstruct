@@ -323,8 +323,8 @@ public class BeamView {
         areaChart.setMinSize(componentWidth + NODE_WIDTH  + offset, componentHeight - 100);
         areaChart.setMaxSize(componentWidth + NODE_WIDTH  + offset, componentHeight - 100);
         areaChart.setLegendVisible(false);
-//        areaChart.getXAxis().setOpacity(0);
-//        areaChart.getYAxis().setOpacity(0);
+        areaChart.getXAxis().setOpacity(0);
+        areaChart.getYAxis().setOpacity(0);
 
         adjustXAxisForLength();
         yAxis.setAutoRanging(false);
