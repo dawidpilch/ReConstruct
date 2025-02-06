@@ -94,8 +94,8 @@ public class RCBeamAnalysisDesignController {
         var beamLengthPropertyMemento = beamLengthProperty.value();
         var pinnedSupportPositionPropertyMemento = pinnedSupportPositionProperty.value();
         var rollerSupportPositionPropertyMemento = rollerSupportPositionProperty.value();
-        var sectionDepthPropertyMemento = rollerSupportPositionProperty.value();
-        var sectionWidthPropertyMemento = rollerSupportPositionProperty.value();
+        var sectionDepthPropertyMemento = sectionDepthProperty.value();
+        var sectionWidthPropertyMemento = sectionWidthProperty.value();
 
         var beamLengthTF = new ErrorDoubleTextField(beamLengthProperty);
         var pinnedSuppTF = new ErrorDoubleTextField(pinnedSupportPositionProperty);
