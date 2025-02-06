@@ -367,7 +367,7 @@ public class ReinforcementAnalysisWindow {
                     double scaledBarDiameter = scaleFactor * rc.diameterOfReinforcementBar();
 
                     if (barsPerStandardRow <= 0) {
-                        throw new RuntimeException("barsPerStandardRow <= 0");
+                        throw new RuntimeException("Beam cross section area is too small to contain the required reinforcement. Please, adjust the beam geometry.");
                     }
 
                     // process bars per standard row
@@ -523,7 +523,7 @@ public class ReinforcementAnalysisWindow {
                 beamReinforcementStage.setMinHeight(screenHeight / 1.35);
                 new RCWindow(beamReinforcementStage).show();
             } catch (Exception e) {
-                new Alert(Alert.AlertType.ERROR, e.toString()).showAndWait();
+                new Alert(Alert.AlertType.WARNING, e.toString()).showAndWait();
             }
         });
 
