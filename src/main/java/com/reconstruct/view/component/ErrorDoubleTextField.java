@@ -21,7 +21,7 @@ public class ErrorDoubleTextField {
 
     public ErrorDoubleTextField(AppendableProperty<Double> appendableProperty, TextFlow textFlow) {
         this.appendableProperty = appendableProperty;
-        this.textField = new TextField(this.appendableProperty.value().toString());
+        this.textField = new TextField(formattedDouble(this.appendableProperty.value()));
         this.errorMessage = new Label();
 
         errorMessage.setWrapText(true);
@@ -80,5 +80,10 @@ public class ErrorDoubleTextField {
 
     public void setText(String text) {
         this.textField.textProperty().setValue(text);
+    }
+
+    private static String formattedDouble(double d) {
+        String formatted = String.format("%.3f", d);
+        return formatted.endsWith(".000") ? formatted.split("\\.000")[0] : formatted;
     }
 }
