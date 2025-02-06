@@ -26,11 +26,19 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 import java.util.*;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class RCBeamAnalysisDesignController {
@@ -116,18 +124,39 @@ public class RCBeamAnalysisDesignController {
         propertiesVBox.setMaxWidth(300);
 
         var sectionVBox = new VBox(15, sectionDepthTF.node(), sectionWidthTF.node());
+        var sectionHBox = new HBox(45);
+        StackPane sectionStackPane = new StackPane();
+        sectionStackPane.setMaxSize(120, 200);
+        sectionStackPane.setMinSize(120, 200);
+        sectionStackPane.setPrefSize(120, 200);
+        Rectangle sectionRectangle = new Rectangle(120, 200);
+        sectionRectangle.setFill(Color.LIGHTGRAY);
+        sectionRectangle.setStroke(Color.BLACK);
+        Label widthLabel = new Label("width");
+        Label depthLabel = new Label("depth");
+
+        sectionStackPane.getChildren().addAll(sectionRectangle, widthLabel, depthLabel);
+        StackPane.setAlignment(sectionRectangle, Pos.CENTER);
+        StackPane.setAlignment(widthLabel, Pos.BOTTOM_CENTER);
+        StackPane.setAlignment(depthLabel, Pos.CENTER_LEFT);
+
+        depthLabel.setTranslateX(-15 - depthLabel.getFont().getSize());
+        depthLabel.setRotate(-90);
+        widthLabel.setTranslateY(15 + widthLabel.getFont().getSize() / 2);
+
+        sectionHBox.getChildren().addAll(sectionVBox, sectionStackPane);
 
         HBox buttons = new HBox(15, saveButton, cancelButton);
         buttons.setAlignment(Pos.CENTER_RIGHT);
 
         BorderPane content = new BorderPane();
-        content.setCenter(new HBox(15, propertiesVBox, new Separator(Orientation.VERTICAL), sectionVBox));
+        content.setCenter(new HBox(15, propertiesVBox, new Separator(Orientation.VERTICAL), sectionHBox));
         content.setBottom(new VBox(15, new Separator(Orientation.HORIZONTAL), buttons));
         content.setPadding(new Insets(15));
 
         BorderPane.setAlignment(propertiesVBox, Pos.TOP_LEFT);
         BorderPane.setAlignment(buttons, Pos.CENTER_RIGHT);
-        Stage stage = new FixedSizeStage(new Scene(content), "Geometry configuration", 380, 540, Modality.APPLICATION_MODAL);
+        Stage stage = new FixedSizeStage(new Scene(content), "Geometry configuration", 380, 580, Modality.APPLICATION_MODAL);
 
         Runnable commonOnCloseAction = () -> {
             beamLengthProperty.removeOnTryAppendValueListener(listener);
