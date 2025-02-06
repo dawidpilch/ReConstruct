@@ -30,15 +30,15 @@ public class EN1992Eurocode2 {
 
     public static List<ConcreteGrade> CONCRETE_GRADE = new LinkedList<>();
     static {
-        CONCRETE_GRADE.add(new ConcreteGrade("C12/15", 08.57d, 00.79d));
-        CONCRETE_GRADE.add(new ConcreteGrade("C16/20", 11.43d, 00.93d));
-        CONCRETE_GRADE.add(new ConcreteGrade("C20/25", 14.29d, 01.07d));
-        CONCRETE_GRADE.add(new ConcreteGrade("C25/30", 17.86d, 01.29d));
-        CONCRETE_GRADE.add(new ConcreteGrade("C30/37", 21.43d, 01.43d));
-        CONCRETE_GRADE.add(new ConcreteGrade("C35/45", 25.00d, 01.57d));
-        CONCRETE_GRADE.add(new ConcreteGrade("C40/50", 28.57d, 01.76d));
-        CONCRETE_GRADE.add(new ConcreteGrade("C35/55", 32.14d, 01.93d));
-        CONCRETE_GRADE.add(new ConcreteGrade("C50/60", 35.71d, 02.07d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C12/15", 08.57d, 00.79d, 01.60d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C16/20", 11.43d, 00.93d, 01.90d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C20/25", 14.29d, 01.07d, 02.20d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C25/30", 17.86d, 01.29d, 02.60d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C30/37", 21.43d, 01.43d, 02.90d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C35/45", 25.00d, 01.57d, 03.20d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C40/50", 28.57d, 01.76d, 03.50d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C35/55", 32.14d, 01.93d, 03.80d));
+        CONCRETE_GRADE.add(new ConcreteGrade("C50/60", 35.71d, 02.07d, 04.1d));
     }
 
     public static List<ReinforcementMaterialGrade> STEEL_GRADES = new LinkedList<>();
