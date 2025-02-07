@@ -294,9 +294,9 @@ public class BeamView {
 
                 if ((previousY > currentY && nextY > currentY) || (previousY < currentY && nextY < currentY)) {
                     shouldLabelCurrent = true;
-                } else if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i + 1).getXValue().doubleValue(), 0.000001)) {
+                } else if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i + 1).getXValue().doubleValue(), 0.0001)) {
                     shouldLabelCurrent = true;
-                } else if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i - 1).getXValue().doubleValue(), 0.000001)) {
+                } else if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i - 1).getXValue().doubleValue(), 0.0001)) {
                     shouldLabelCurrent = true;
                 }
             }
