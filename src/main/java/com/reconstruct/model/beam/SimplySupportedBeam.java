@@ -95,19 +95,20 @@ public class SimplySupportedBeam implements Beam {
         Map<Position, Magnitude> bendingMomentDiagram = new LinkedHashMap<>();
         Map<Position, Magnitude> sheerForceDiagram = new LinkedHashMap<>();
 
-        Set<Position> positionsSet = new TreeSet<>(Comparator.comparingDouble(Position::doubleValue));
-        verticalPointLoads.forEach(verticalPointLoad -> positionsSet.add(verticalPointLoad.position()));
-        loading.bendingMoments().forEach(bendingMoment -> positionsSet.add(bendingMoment.position()));
+        Set<Position> characteristicPointsSet = new TreeSet<>(Comparator.comparingDouble(Position::doubleValue));
+        verticalPointLoads.forEach(verticalPointLoad -> characteristicPointsSet.add(verticalPointLoad.position()));
+        loading.bendingMoments().forEach(bendingMoment -> characteristicPointsSet.add(bendingMoment.position()));
         loading.uniformlyDistributedLoads().forEach(uniformlyDistributedLoad -> {
-            positionsSet.add(uniformlyDistributedLoad.startPosition());
-            positionsSet.add(uniformlyDistributedLoad.endPosition());
+            characteristicPointsSet.add(uniformlyDistributedLoad.startPosition());
+            characteristicPointsSet.add(uniformlyDistributedLoad.endPosition());
+            characteristicPointsSet.add(uniformlyDistributedLoad.resultantPosition());
         });
 
-        Position[] characteristicPoints = positionsSet.toArray(Position[]::new);
-        int size = characteristicPoints.length;
+        Position[] characteristicPointsArray = characteristicPointsSet.toArray(Position[]::new);
+        int size = characteristicPointsArray.length;
         for (int i = 1; i < size; i++) {
-            Position currentEndPosition = characteristicPoints[i];
-            Position previousEndPosition = characteristicPoints[i - 1];
+            Position currentEndPosition = characteristicPointsArray[i];
+            Position previousEndPosition = characteristicPointsArray[i - 1];
 
             List<VerticalPointLoad> verticalLoadsInSegment = new ArrayList<>(verticalPointLoads.stream()
                     .filter(verticalPointLoad -> verticalPointLoad.position().isToTheLeftOf(currentEndPosition))
@@ -136,8 +137,8 @@ public class SimplySupportedBeam implements Beam {
 
 
             for (double doublePosition : positionsPerSpan) {
-                Position position = Position.of(doublePosition);
-                if (bendingMomentDiagram.containsKey(position)) {
+                Position currentPosition = Position.of(doublePosition);
+                if (bendingMomentDiagram.containsKey(currentPosition)) {
                     continue;
                 }
 
