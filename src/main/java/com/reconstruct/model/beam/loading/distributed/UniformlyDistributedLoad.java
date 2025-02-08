@@ -25,12 +25,15 @@ public class UniformlyDistributedLoad {
     }
 
     public VerticalPointLoad resultantForce() {
+        Position resultantPosition = resultantPosition();
+        Magnitude resultantMagnitude = Magnitude.of(magnitude.doubleValue() * length().doubleValue());
+        return VerticalPointLoad.of(resultantPosition, resultantMagnitude);
+    }
+
+    public Position resultantPosition() {
         double x = length().doubleValue();
         double position = (x / 2) + startPosition.doubleValue();
-
-        Position resultantPosition = Position.of(position);
-        Magnitude resultantMagnitude = Magnitude.of(magnitude.doubleValue() * x);
-        return VerticalPointLoad.of(resultantPosition, resultantMagnitude);
+        return Position.of(position);
     }
 
     public boolean isDirectedUpwards() {
