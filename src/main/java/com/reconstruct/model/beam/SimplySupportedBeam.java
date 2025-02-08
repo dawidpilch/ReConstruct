@@ -61,8 +61,7 @@ public class SimplySupportedBeam implements Beam {
         this.rollerPosition = rollerPosition;
     }
 
-    @Override
-    public Map<Position, List<VerticalPointLoad>> supportVerticalReactions(Loading loading) {
+    protected Map<Position, List<VerticalPointLoad>> supportVerticalReactions(Loading loading) {
         SummationOfMoments summationOfMoments = new SummationOfMoments(loading);
         VerticalPointLoad vPinned = verticalReaction(summationOfMoments, rollerPosition, pinnedPosition);
         VerticalPointLoad vRoller = verticalReaction(summationOfMoments, pinnedPosition, rollerPosition);
@@ -73,15 +72,13 @@ public class SimplySupportedBeam implements Beam {
         );
     }
 
-    @Override
-    public Map<Position, List<HorizontalPointLoad>> supportHorizontalReactions(Loading loading) {
+    protected Map<Position, List<HorizontalPointLoad>> supportHorizontalReactions(Loading loading) {
         SummationOfHorizontalForces summationOfHorizontalForces = new SummationOfHorizontalForces(loading.horizontalPointLoads());
         HorizontalPointLoad hPinned = horizontalReaction(summationOfHorizontalForces, pinnedPosition);
         return Map.of(pinnedPosition, List.of(hPinned));
     }
 
-    @Override
-    public Map<Position, List<BendingMoment>> supportBendingMomentReactions(Loading loading) {
+    protected Map<Position, List<BendingMoment>> supportBendingMomentReactions(Loading loading) {
         return Map.of();
     }
 

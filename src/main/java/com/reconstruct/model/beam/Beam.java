@@ -10,7 +10,5 @@ import java.util.List;
 import java.util.Map;
 
 public interface Beam {
-    Map<Position, List<VerticalPointLoad>> supportVerticalReactions(Loading loading);
-    Map<Position, List<HorizontalPointLoad>> supportHorizontalReactions(Loading loading);
-    Map<Position, List<BendingMoment>> supportBendingMomentReactions(Loading loading);
+    LoadingAnalysis loadingAnalysis(Loading loading);
 }
