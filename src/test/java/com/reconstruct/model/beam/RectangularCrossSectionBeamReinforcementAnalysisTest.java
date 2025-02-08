@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-class BeamReinforcementAnalysisTest {
+class RectangularCrossSectionBeamReinforcementAnalysisTest {
     @Test
     public void reinforcementTest() {
-        BeamReinforcementAnalysis beamReinforcementAnalysis = new BeamReinforcementAnalysis(
+        RectangularCrossSectionBeamReinforcementAnalysis rectangularCrossSectionBeamReinforcementAnalysis = new RectangularCrossSectionBeamReinforcementAnalysis(
                 30,
                 25,
                 8,
@@ -20,7 +20,7 @@ class BeamReinforcementAnalysisTest {
                 EN1992Eurocode2.STEEL_GRADES.get(3)
         );
 
-        var reinforcement = beamReinforcementAnalysis.reinforcement(
+        var reinforcement = rectangularCrossSectionBeamReinforcementAnalysis.reinforcement(
                 new RectangularSection(PositiveDouble.of(250), PositiveDouble.of(450)),
                 new BendingMomentDiagram(Map.of(Position.of(5), Magnitude.of(200))).maxMagnitude()
         );

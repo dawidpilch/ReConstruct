@@ -7,25 +7,25 @@ import org.apache.commons.math3.util.Pair;
 
 import java.util.*;
 
-public class BeamReinforcementAnalysis {
+public class RectangularCrossSectionBeamReinforcementAnalysis {
     private final double corrosionCoverThickness;
     private final double diameterOfReinforcementBar;
     private final double diameterOfMainReinforcementStirrup;
     private final ConcreteGrade concreteGrade;
     private final ReinforcementMaterialGrade reinforcementMaterialGrade;
 
-    public BeamReinforcementAnalysis(double corrosionCoverThickness,
-                                     double diameterOfReinforcementBar,
-                                     ConcreteGrade concreteGrade,
-                                     ReinforcementMaterialGrade reinforcementMaterialGrade) {
+    public RectangularCrossSectionBeamReinforcementAnalysis(double corrosionCoverThickness,
+                                                            double diameterOfReinforcementBar,
+                                                            ConcreteGrade concreteGrade,
+                                                            ReinforcementMaterialGrade reinforcementMaterialGrade) {
         this(corrosionCoverThickness, diameterOfReinforcementBar, 0, concreteGrade, reinforcementMaterialGrade);
     }
 
-    public BeamReinforcementAnalysis(double corrosionCoverThickness,
-                                     double diameterOfReinforcementBar,
-                                     double diameterOfMainReinforcementStirrup,
-                                     ConcreteGrade concreteGrade,
-                                     ReinforcementMaterialGrade reinforcementMaterialGrade) {
+    public RectangularCrossSectionBeamReinforcementAnalysis(double corrosionCoverThickness,
+                                                            double diameterOfReinforcementBar,
+                                                            double diameterOfMainReinforcementStirrup,
+                                                            ConcreteGrade concreteGrade,
+                                                            ReinforcementMaterialGrade reinforcementMaterialGrade) {
         this.corrosionCoverThickness = corrosionCoverThickness;
         this.diameterOfReinforcementBar = diameterOfReinforcementBar;
         this.diameterOfMainReinforcementStirrup = diameterOfMainReinforcementStirrup;

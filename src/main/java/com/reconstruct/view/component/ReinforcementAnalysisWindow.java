@@ -217,7 +217,7 @@ public class ReinforcementAnalysisWindow {
         nextButton.setOnAction(event -> {
             double screenWidth = Screen.getPrimary().getBounds().getWidth();
             double screenHeight = Screen.getPrimary().getBounds().getHeight();
-            BeamReinforcementAnalysis beamReinforcementAnalysis = new BeamReinforcementAnalysis(
+            RectangularCrossSectionBeamReinforcementAnalysis rectangularCrossSectionBeamReinforcementAnalysis = new RectangularCrossSectionBeamReinforcementAnalysis(
                     corrosionCoverThickness,
                     diameterOfReinforcementBarProperty.value(),
                     diameterOfReinforcementStirrupProperty.value(),
@@ -227,35 +227,35 @@ public class ReinforcementAnalysisWindow {
 
             stage.close();
 
-            BeamReinforcementAnalysis.Results reinforcementResults;
-            Map<BeamReinforcementAnalysis.ReinforcementType, Collection<BeamReinforcementAnalysis.BeamReinforcement>> reinforcement;
+            RectangularCrossSectionBeamReinforcementAnalysis.Results reinforcementResults;
+            Map<RectangularCrossSectionBeamReinforcementAnalysis.ReinforcementType, Collection<RectangularCrossSectionBeamReinforcementAnalysis.BeamReinforcement>> reinforcement;
             try {
                 double width = rectangularSection.width().doubleValue();
                 double depth = rectangularSection.depth().doubleValue();
                 Magnitude maxBendingMomentMagnitude = loadingAnalysisSupplier.get().bendingMomentDiagram().maxMagnitude();
-                reinforcementResults = beamReinforcementAnalysis.reinforcement(
+                reinforcementResults = rectangularCrossSectionBeamReinforcementAnalysis.reinforcement(
                         rectangularSection,
                         maxBendingMomentMagnitude
                 );
                 reinforcement = reinforcementResults.beamReinforcement();
 
-                BeamReinforcementAnalysis.BeamReinforcement additionalReinforcement = reinforcement.getOrDefault(BeamReinforcementAnalysis.ReinforcementType.TOP, List.of()).stream().min((o1, o2) -> {
+                RectangularCrossSectionBeamReinforcementAnalysis.BeamReinforcement additionalReinforcement = reinforcement.getOrDefault(RectangularCrossSectionBeamReinforcementAnalysis.ReinforcementType.TOP, List.of()).stream().min((o1, o2) -> {
                     if (o1.numberOfBars() > o2.numberOfBars())
                         return 1;
                     else if (o1.numberOfBars() < o2.numberOfBars()) {
                         return -1;
                     }
                     return 0;
-                }).orElse(BeamReinforcementAnalysis.BeamReinforcement.empty());
+                }).orElse(RectangularCrossSectionBeamReinforcementAnalysis.BeamReinforcement.empty());
 
-                BeamReinforcementAnalysis.BeamReinforcement mainReinforcement = reinforcement.getOrDefault(BeamReinforcementAnalysis.ReinforcementType.BOTTOM, List.of()).stream().min((o1, o2) -> {
+                RectangularCrossSectionBeamReinforcementAnalysis.BeamReinforcement mainReinforcement = reinforcement.getOrDefault(RectangularCrossSectionBeamReinforcementAnalysis.ReinforcementType.BOTTOM, List.of()).stream().min((o1, o2) -> {
                     if (o1.numberOfBars() > o2.numberOfBars())
                         return 1;
                     else if (o1.numberOfBars() < o2.numberOfBars()) {
                         return -1;
                     }
                     return 0;
-                }).orElse(BeamReinforcementAnalysis.BeamReinforcement.empty());
+                }).orElse(RectangularCrossSectionBeamReinforcementAnalysis.BeamReinforcement.empty());
 
                 double beamMaxSize = Screen.getPrimary().getBounds().getWidth() / 4.8;
                 StackPane frontBeamReinforcementVisualization = new StackPane();
@@ -273,7 +273,7 @@ public class ReinforcementAnalysisWindow {
 
                 Rectangle stirrup = new Rectangle();
                 double stirrupWidth = scaleFactor * diameterOfReinforcementStirrupProperty.value();
-                stirrup.setHeight(scaleFactor * (depth - beamReinforcementAnalysis.verticalCorrosionCoverThickness()));
+                stirrup.setHeight(scaleFactor * (depth - rectangularCrossSectionBeamReinforcementAnalysis.verticalCorrosionCoverThickness()));
                 stirrup.setWidth(scaleFactor * (width - (corrosionCoverThickness * 2) - stirrupWidth));
                 stirrup.setFill(Color.LIGHTGRAY);
                 stirrup.setStroke(foregroundColor);
@@ -285,7 +285,7 @@ public class ReinforcementAnalysisWindow {
                 StackPane.setAlignment(stirrup, Pos.CENTER);
 
 
-                Function<BeamReinforcementAnalysis.BeamReinforcement, Circle> barSupplier = (beamReinforcement) -> {
+                Function<RectangularCrossSectionBeamReinforcementAnalysis.BeamReinforcement, Circle> barSupplier = (beamReinforcement) -> {
                     double barDiameter = scaleFactor * beamReinforcement.diameterOfReinforcementBar();
                     Circle bar = new Circle(barDiameter / 2);
                     bar.setFill(foregroundColor);
@@ -323,12 +323,12 @@ public class ReinforcementAnalysisWindow {
                 sideDepthLabel.setTranslateX(((sideViewOfBeam.getWidth() / 2)* -1) - 30 - sideDepthLabel.getFont().getSize());
 
 
-                BiConsumer<BeamReinforcementAnalysis.BeamReinforcement, Boolean> processBarReinforcement = (rc, bottom) -> {
+                BiConsumer<RectangularCrossSectionBeamReinforcementAnalysis.BeamReinforcement, Boolean> processBarReinforcement = (rc, bottom) -> {
                     if (rc.numberOfBars() <= 0) {
                         return;
                     }
 
-                    BeamReinforcementAnalysis.ReinforcementType reinforcementType;
+                    RectangularCrossSectionBeamReinforcementAnalysis.ReinforcementType reinforcementType;
                     Pos leftPos;
                     Pos rightPos;
                     Pos centerPos;
@@ -336,18 +336,18 @@ public class ReinforcementAnalysisWindow {
                         leftPos = Pos.BOTTOM_LEFT;
                         centerPos = Pos.BOTTOM_CENTER;
                         rightPos = Pos.BOTTOM_RIGHT;
-                        reinforcementType = BeamReinforcementAnalysis.ReinforcementType.BOTTOM;
+                        reinforcementType = RectangularCrossSectionBeamReinforcementAnalysis.ReinforcementType.BOTTOM;
                     } else {
                         centerPos = Pos.TOP_CENTER;
                         leftPos = Pos.TOP_LEFT;
                         rightPos = Pos.TOP_RIGHT;
-                        reinforcementType = BeamReinforcementAnalysis.ReinforcementType.TOP;
+                        reinforcementType = RectangularCrossSectionBeamReinforcementAnalysis.ReinforcementType.TOP;
                     }
 
                     int yMultiplier = bottom ? -1 : 1;
 
                     double innerWidth = width - (diameterOfReinforcementStirrupProperty.value() * 2) - (corrosionCoverThickness * 2);
-                    double innerHeight = depth - (beamReinforcementAnalysis.verticalCorrosionCoverThickness() * 2);
+                    double innerHeight = depth - (rectangularCrossSectionBeamReinforcementAnalysis.verticalCorrosionCoverThickness() * 2);
                     double innerWidthCalc = innerWidth;
                     int barsPerStandardRow = 0;
                     for (int i = 0; i < rc.numberOfBars(); i++) {
@@ -391,7 +391,7 @@ public class ReinforcementAnalysisWindow {
                             new TextFlow(new Text(reinforcementType.toString())),
                             new SimpleTextFlowBuilder().addRegularText(reinforcementType.areaOfReinforcementSectionSymbol).addSubscriptText("req").addRegularText(": " + formattedDouble(rc.requiredAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addRegularText("]").build(),
                             new SimpleTextFlowBuilder().addRegularText(reinforcementType.areaOfReinforcementSectionSymbol).addSubscriptText("prov").addRegularText(": " + formattedDouble(rc.providedAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addRegularText("]").build(),
-                            reinforcementType == BeamReinforcementAnalysis.ReinforcementType.BOTTOM ? new SimpleTextFlowBuilder().addRegularText("Min reinforcement test: " + minReinforcementConditionsPassed).build() : new TextFlow(),
+                            reinforcementType == RectangularCrossSectionBeamReinforcementAnalysis.ReinforcementType.BOTTOM ? new SimpleTextFlowBuilder().addRegularText("Min reinforcement test: " + minReinforcementConditionsPassed).build() : new TextFlow(),
                             new TextFlow(new Text("Steel bars: " + rc.numberOfBars() + "Φ" + formattedDouble(rc.diameterOfReinforcementBar())))
                     );
                     frontBeamReinforcementVisualization.getChildren().add(labelVBox);
@@ -465,7 +465,7 @@ public class ReinforcementAnalysisWindow {
                 stirrupLabel.setTranslateX((beamMaxSize - beam.getWidth()) + beam.getWidth() + 20);
 
                 ReinforcementMaterialGrade reinforcementMaterialGrade = reinforcementSteelGradeComboBox.getValue();
-                boolean topReinforcementRequired = reinforcement.containsKey(BeamReinforcementAnalysis.ReinforcementType.TOP);
+                boolean topReinforcementRequired = reinforcement.containsKey(RectangularCrossSectionBeamReinforcementAnalysis.ReinforcementType.TOP);
                 VBox additionalProperties = textFlowVBox(
                         new TextFlow(new Text("Width: " + formattedDouble(rectangularSection.width().doubleValue()) + " [mm]")),
                         new TextFlow(new Text("Depth: " + formattedDouble(rectangularSection.depth().doubleValue()) + " [mm]")),
@@ -486,8 +486,8 @@ public class ReinforcementAnalysisWindow {
                         new SimpleTextFlowBuilder().addRegularText("ζ: " + formattedDouble(reinforcementMaterialGrade.zetaFactorOfTheDeformationLimitValue()) + " [-]").build(),
                         new TextFlow(new Text(" ")),
                         new SimpleTextFlowBuilder().addRegularText("Compression reinforcement ").addRegularText(additionalReinforcement.numberOfBars() == 0 ? "not required" : "required").build(),
-                        new SimpleTextFlowBuilder().addRegularText(BeamReinforcementAnalysis.ReinforcementType.BOTTOM.areaOfReinforcementSectionSymbol).addSubscriptText("req").addRegularText(" : " + formattedDouble(mainReinforcement.requiredAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addRegularText("]").build(),
-                        new SimpleTextFlowBuilder().addRegularText(BeamReinforcementAnalysis.ReinforcementType.TOP.areaOfReinforcementSectionSymbol).addSubscriptText("req").addRegularText(" : " + formattedDouble(additionalReinforcement.requiredAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addRegularText("]").build()
+                        new SimpleTextFlowBuilder().addRegularText(RectangularCrossSectionBeamReinforcementAnalysis.ReinforcementType.BOTTOM.areaOfReinforcementSectionSymbol).addSubscriptText("req").addRegularText(" : " + formattedDouble(mainReinforcement.requiredAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addRegularText("]").build(),
+                        new SimpleTextFlowBuilder().addRegularText(RectangularCrossSectionBeamReinforcementAnalysis.ReinforcementType.TOP.areaOfReinforcementSectionSymbol).addSubscriptText("req").addRegularText(" : " + formattedDouble(additionalReinforcement.requiredAreaOfReinforcementSection()) + " [cm").addSuperscriptText("2").addRegularText("]").build()
                 );
 
                 frontBeamReinforcementVisualization.getChildren().add(additionalProperties);
