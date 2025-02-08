@@ -653,7 +653,11 @@ public class RCBeamAnalysisDesignController {
         loadingVisibleCheckbox.setOnAction(event -> {
             if (loadingVisibleCheckbox.isSelected()) {
                 content.getChildren().add(1, supportReactionsVisibleCheckbox);
-                beamView.displayLoading(loadingAnalysis);
+                if (supportReactionsVisibleCheckbox.isSelected()) {
+                    beamView.displayLoading(loadingAnalysis);
+                } else {
+                    beamView.displayLoading();
+                }
             } else {
                 content.getChildren().remove(supportReactionsVisibleCheckbox);
                 beamView.hideLoading();
