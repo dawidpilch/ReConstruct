@@ -645,13 +645,30 @@ public class RCBeamAnalysisDesignController {
             ).run();
         });
 
+        CheckBox supportReactionsVisibleCheckbox = new CheckBox("Support reactions visible");
         CheckBox loadingVisibleCheckbox = new CheckBox("Loading visible");
+        VBox content = new VBox(10, loadingVisibleCheckbox, supportReactionsVisibleCheckbox, internalForcesComboBox);
+
         loadingVisibleCheckbox.setSelected(true);
         loadingVisibleCheckbox.setOnAction(event -> {
             if (loadingVisibleCheckbox.isSelected()) {
+                content.getChildren().add(1, supportReactionsVisibleCheckbox);
                 beamView.displayLoading(loadingAnalysis);
             } else {
+                content.getChildren().remove(supportReactionsVisibleCheckbox);
                 beamView.hideLoading();
+            }
+        });
+
+        supportReactionsVisibleCheckbox.setSelected(true);
+        supportReactionsVisibleCheckbox.setOnAction(event -> {
+            if (!loadingVisibleCheckbox.isSelected()) {
+                return;
+            }
+            if (supportReactionsVisibleCheckbox.isSelected()) {
+                beamView.displayLoading(loadingAnalysis);
+            } else {
+                beamView.displayLoading();
             }
         });
 
@@ -667,7 +684,6 @@ public class RCBeamAnalysisDesignController {
         BorderPane.setAlignment(endPreviewButton, Pos.CENTER);
         endPreviewButton.setMinWidth(200);
 
-        VBox content = new VBox(10, loadingVisibleCheckbox, internalForcesComboBox);
         VBox.setMargin(content, new Insets(0, 0 , 0 , 15));
 
         vBox.getChildren().addAll(content);
