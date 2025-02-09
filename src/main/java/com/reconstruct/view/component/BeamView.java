@@ -1,11 +1,14 @@
 package com.reconstruct.view.component;
 
 import com.reconstruct.model.beam.LoadingAnalysis;
+import com.reconstruct.model.beam.loading.Loading;
 import com.reconstruct.model.beam.loading.moment.BendingMoment;
 import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
+import com.reconstruct.model.beam.value.Position;
 import com.reconstruct.view.viewmodel.AppendableProperty;
 import com.reconstruct.view.viewmodel.SimplySupportedBeamViewModel;
 import javafx.beans.property.ReadOnlyListWrapper;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
 import javafx.scene.Node;
@@ -17,13 +20,13 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Scale;
 import org.apache.commons.math3.util.Precision;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class BeamView {
     private final SimplySupportedBeamViewModel beamViewModel;
@@ -32,6 +35,7 @@ public class BeamView {
     private final StackPane contentPane = new StackPane();
     private final StackPane chartPane = new StackPane();
     private final StackPane loadingPane = new StackPane();
+    private final StackPane characteristicPointsPane = new StackPane();
     private final AreaChart<Number, Number> areaChart;
     private final NumberAxis xAxis;
     private final NumberAxis yAxis;
@@ -88,9 +92,11 @@ public class BeamView {
         areaChart.toFront();
         displayDiagram(new XYChart.Series<>(new ReadOnlyListWrapper<>()));
 
-        chartPane.setPrefSize(componentWidth, componentHeight);
-        chartPane.setMaxSize(componentWidth, componentHeight);
-        chartPane.setMinSize(componentWidth, componentHeight);
+        double chartPadding = 100;
+        double chartHeight = componentHeight - chartPadding;
+        chartPane.setPrefSize(componentWidth, chartHeight);
+        chartPane.setMaxSize(componentWidth, chartHeight);
+        chartPane.setMinSize(componentWidth, chartHeight);
         contentPane.getChildren().add(chartPane);
         StackPane.setAlignment(chartPane, Pos.CENTER);
 
@@ -99,6 +105,13 @@ public class BeamView {
         loadingPane.setMinSize(contentPane.getMinWidth(), contentPane.getMinHeight());
         contentPane.getChildren().add(loadingPane);
         StackPane.setAlignment(loadingPane, Pos.CENTER);
+
+        characteristicPointsPane.setPrefSize(componentWidth, chartPadding);
+        characteristicPointsPane.setMaxSize(componentWidth, chartPadding);
+        characteristicPointsPane.setMinSize(componentWidth, chartPadding);
+        contentPane.getChildren().add(characteristicPointsPane);
+        StackPane.setAlignment(characteristicPointsPane, Pos.BOTTOM_CENTER);
+        refreshCharacteristicPoints();
 
         Node pinnedSupportNode = pinnedSupport();
         contentPane.getChildren().add(pinnedSupportNode);
@@ -231,6 +244,8 @@ public class BeamView {
             loadingPane.getChildren().add(pointArrow);
             pointArrow.toFront();
         }
+
+        refreshCharacteristicPoints();
     }
 
     private Node pointArrow(double magnitude, double absolutePositionOnBeam, boolean directedUpwards, Paint paint) {
@@ -341,6 +356,77 @@ public class BeamView {
         adjustXAxisForLength();
         for (var entry : supportPositionsToNodeMap.entrySet()) {
             translateXNodesAbsPosition(entry.getValue(), entry.getKey().value());
+        }
+
+        refreshCharacteristicPoints();
+    }
+
+    public void refreshCharacteristicPoints() {
+        Set<Position> characteristicPoints = new TreeSet<>(Comparator.comparingDouble(Position::doubleValue));
+        beamViewModel.verticalPointLoadsProperty.value().forEach(verticalPointLoad -> characteristicPoints.add(verticalPointLoad.position()));
+        beamViewModel.bendingMomentsProperty.value().forEach(bendingMoment -> characteristicPoints.add(bendingMoment.position()));
+        beamViewModel.uniformlyDistributedLoadsProperty.value().forEach(uniformlyDistributedLoad -> {
+            characteristicPoints.add(uniformlyDistributedLoad.startPosition());
+            characteristicPoints.add(uniformlyDistributedLoad.endPosition());
+        });
+
+        characteristicPoints.add(Position.of(beamViewModel.pinnedSupportPositionProperty.value()));
+        characteristicPoints.add(Position.of(beamViewModel.rollerSupportPositionProperty.value()));
+
+        Rectangle beamSketch = new Rectangle(999, 3);
+        beamSketch.setFill(Color.DIMGRAY);
+        beamSketch.setStrokeWidth(0);
+        characteristicPointsPane.getChildren().clear();
+
+        characteristicPointsPane.getChildren().add(beamSketch);
+        StackPane.setAlignment(beamSketch, Pos.CENTER);
+
+        BiConsumer<String, Double> addLabel = (text, absPosition) -> {
+            Label l = new Label(text);
+            l.setTextAlignment(TextAlignment.CENTER);
+            l.setBackground(new Background(new BackgroundFill(Color.WHITESMOKE, new CornerRadii(0), new Insets(-5))));
+            l.setStyle("-fx-text-fill: #696969;");
+            translateXNodesAbsPosition(l, absPosition);
+            characteristicPointsPane.getChildren().add(l);
+            StackPane.setAlignment(l, Pos.CENTER_LEFT);
+        };
+
+        Consumer<Double> addCharacteristicPoint = (absPosition) -> {
+            Rectangle r = new Rectangle(2, 15);
+            r.setFill(Color.DIMGRAY);
+            r.setStrokeWidth(0);
+            translateXNodesAbsPosition(r, absPosition);
+            characteristicPointsPane.getChildren().add(r);
+            StackPane.setAlignment(r, Pos.CENTER_LEFT);
+        };
+
+        if (characteristicPoints.isEmpty()) {
+            addLabel.accept(new FormattedStringDouble(beamViewModel.beamLengthProperty.value()).toString(), beamViewModel.beamLengthProperty.value() / 2d);
+            return;
+        }
+
+        Position[] characteristicPointsArray = characteristicPoints.toArray(Position[]::new);
+        String meterString = " [m]";
+        for (int i = 0; i < characteristicPoints.size(); i++) {
+            boolean isLast = i == characteristicPoints.size() - 1;
+            Position current = characteristicPointsArray[i];
+
+            if (i == 0 && !current.equals(Position.of(0))) {
+                addCharacteristicPoint.accept(0d);
+                addLabel.accept(new FormattedStringDouble(current.doubleValue()) + meterString, current.doubleValue() / 2);
+            }
+
+            if (isLast && !current.equals(Position.of(beamViewModel.beamLengthProperty.value()))) {
+                addCharacteristicPoint.accept(beamViewModel.beamLengthProperty.value());
+                addLabel.accept(new FormattedStringDouble(beamViewModel.beamLengthProperty.value() - current.doubleValue()) + meterString, ((beamViewModel.beamLengthProperty.value() - current.doubleValue()) / 2) + current.doubleValue());
+            }
+
+            if (i > 0) {
+                Position previous = characteristicPointsArray[i - 1];
+                addLabel.accept(new FormattedStringDouble(current.doubleValue() - previous.doubleValue()) + meterString, ((current.doubleValue() - previous.doubleValue()) / 2) + previous.doubleValue());
+            }
+
+            addCharacteristicPoint.accept(current.doubleValue());
         }
     }
 
