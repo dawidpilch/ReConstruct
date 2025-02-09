@@ -83,7 +83,6 @@ public class ErrorDoubleTextField {
     }
 
     private static String formattedDouble(double d) {
-        String formatted = String.format("%.3f", d);
-        return formatted.endsWith(".000") ? formatted.split("\\.000")[0] : formatted;
+        return new FormattedStringDouble(d).toString();
     }
 }
