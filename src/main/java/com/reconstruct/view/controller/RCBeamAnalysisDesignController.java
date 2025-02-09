@@ -52,7 +52,7 @@ public class RCBeamAnalysisDesignController {
 
     @FXML
     public void initialize() {
-        beamView = new BeamView(1000, 500, beamViewModel);
+        beamView = new BeamView(1000, 600, beamViewModel);
         Node beamViewNode = beamView.node();
         centerPane.getChildren().add(beamViewNode);
         StackPane.setAlignment(beamViewNode, Pos.CENTER);
