@@ -33,6 +33,9 @@ public abstract sealed class VerticalPointLoad extends PointLoad {
     public abstract Magnitude magnitude(Position pointOfRotation);
     public abstract boolean isDirectedUpwards();
     public abstract boolean isDirectedDownwards();
+    public final String unit() {
+        return "kN";
+    }
 
     private static final class VerticalPointLoadDirectedDownwards extends VerticalPointLoad {
         public VerticalPointLoadDirectedDownwards(Position position, Magnitude magnitude) {
