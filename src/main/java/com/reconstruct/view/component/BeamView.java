@@ -1,7 +1,7 @@
 package com.reconstruct.view.component;
 
 import com.reconstruct.model.beam.LoadingAnalysis;
-import com.reconstruct.model.beam.loading.Loading;
+import com.reconstruct.model.beam.loading.distributed.UniformlyDistributedLoad;
 import com.reconstruct.model.beam.loading.moment.BendingMoment;
 import com.reconstruct.model.beam.loading.point.VerticalPointLoad;
 import com.reconstruct.model.beam.value.Position;
@@ -87,10 +87,10 @@ public class BeamView {
         areaChart.setTranslateY(10);
         areaChart.setTranslateX(-10);
 
-        displayDiagram(new XYChart.Series<>());
+        displayDiagram(new XYChart.Series<>(), "");
 
         areaChart.toFront();
-        displayDiagram(new XYChart.Series<>(new ReadOnlyListWrapper<>()));
+        displayDiagram(new XYChart.Series<>(new ReadOnlyListWrapper<>()), "");
 
         double chartPadding = 100;
         double chartHeight = componentHeight - chartPadding;
@@ -167,7 +167,7 @@ public class BeamView {
         loadingPane.getChildren().clear();
 
         for (VerticalPointLoad verticalPointLoad : loadingAnalysis.verticalSupportReactions()) {
-            Node pointArrow = pointArrow(verticalPointLoad.magnitude().doubleValue(), verticalPointLoad.position().doubleValue(), verticalPointLoad.isDirectedUpwards(), Color.STEELBLUE);
+            Node pointArrow = pointArrow(verticalPointLoad.magnitude().doubleValue(), verticalPointLoad.position().doubleValue(), verticalPointLoad.isDirectedUpwards(), verticalPointLoad.unit(), Color.STEELBLUE);
             loadingPane.getChildren().add(pointArrow);
             pointArrow.toFront();
         }
@@ -188,7 +188,7 @@ public class BeamView {
             loadingPane.getChildren().add(wrapper);
             StackPane.setAlignment(wrapper, Pos.CENTER_LEFT);
 
-            Label label = numericLabel(Math.abs(bendingMoment.magnitude().doubleValue()));
+            Label label = unitLabel(Math.abs(bendingMoment.magnitude().doubleValue()), bendingMoment.unit());
             label.setStyle("-fx-font-size: 14;");
             label.setTextFill(colorFill);
             wrapper.getChildren().add(label);
@@ -208,12 +208,12 @@ public class BeamView {
             wrapper.toFront();
         }
 
-        for (var udl : beamViewModel.uniformlyDistributedLoadsProperty.value()) {
+        for (UniformlyDistributedLoad udl : beamViewModel.uniformlyDistributedLoadsProperty.value()) {
             Paint strokePaint = Color.rgb(74, 215, 104);
             Paint fillPaint = Color.rgb(74, 215, 104, 0.3);
 
-            Node startArrow = pointArrow(udl.magnitude().doubleValue(), udl.startPosition().doubleValue(), udl.isDirectedUpwards(), strokePaint);
-            Node endArrow = pointArrow(udl.magnitude().doubleValue(), udl.endPosition().doubleValue(), udl.isDirectedUpwards(), strokePaint);
+            Node startArrow = pointArrow(udl.magnitude().doubleValue(), udl.startPosition().doubleValue(), udl.isDirectedUpwards(), "[kN]",  strokePaint);
+            Node endArrow = pointArrow(udl.magnitude().doubleValue(), udl.endPosition().doubleValue(), udl.isDirectedUpwards(), "[kN]", strokePaint);
 
             double rectangleHeight = 162;
             Rectangle rectangle = new Rectangle(endArrow.getTranslateX() - startArrow.getTranslateX(), rectangleHeight);
@@ -240,7 +240,7 @@ public class BeamView {
         }
 
         for (VerticalPointLoad verticalPointLoad : beamViewModel.verticalPointLoadsProperty.value()) {
-            Node pointArrow = pointArrow(verticalPointLoad.magnitude().doubleValue(), verticalPointLoad.position().doubleValue(), verticalPointLoad.isDirectedUpwards(), Paint.valueOf("red"));
+            Node pointArrow = pointArrow(verticalPointLoad.magnitude().doubleValue(), verticalPointLoad.position().doubleValue(), verticalPointLoad.isDirectedUpwards(), verticalPointLoad.unit(), Paint.valueOf("red"));
             loadingPane.getChildren().add(pointArrow);
             pointArrow.toFront();
         }
@@ -248,7 +248,7 @@ public class BeamView {
         refreshCharacteristicPoints();
     }
 
-    private Node pointArrow(double magnitude, double absolutePositionOnBeam, boolean directedUpwards, Paint paint) {
+    private Node pointArrow(double magnitude, double absolutePositionOnBeam, boolean directedUpwards, String unit, Paint paint) {
         SVGPath svgPath = new SVGPath();
         double svgHeight = 162;
         double wrapperHeight = 30 + svgHeight;
@@ -262,7 +262,7 @@ public class BeamView {
 
         StackPane.setAlignment(wrapper, Pos.CENTER_LEFT);
 
-        Label label = numericLabel(Math.abs(magnitude));
+        Label label = unitLabel(Math.abs(magnitude), unit);
         label.setStyle("-fx-font-size: 14;");
         label.setTextFill(paint);
         wrapper.getChildren().add(label);
@@ -286,7 +286,7 @@ public class BeamView {
         loadingPane.getChildren().clear();
     }
 
-    public void displayDiagram(XYChart.Series<Number, Number> series) {
+    public void displayDiagram(XYChart.Series<Number, Number> series, String unit) {
         chartPane.getChildren().clear();
         areaChart.getData().clear();
 
@@ -307,12 +307,15 @@ public class BeamView {
                 var currentY = dataList.get(i).getYValue().doubleValue();
                 var nextY = dataList.get(i + 1).getYValue().doubleValue();
 
-                if ((previousY > currentY && nextY > currentY) || (previousY < currentY && nextY < currentY)) {
+                double epsilon = 0.0001;
+                if ((Precision.compareTo(previousY, currentY, epsilon) == 1 && Precision.compareTo(nextY, currentY, epsilon) == 1) || (Precision.compareTo(previousY, currentY, epsilon) == 0 && Precision.compareTo(nextY, currentY, epsilon) == 0)) {
                     shouldLabelCurrent = true;
-                } else if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i + 1).getXValue().doubleValue(), 0.0001)) {
-                    shouldLabelCurrent = true;
-                } else if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i - 1).getXValue().doubleValue(), 0.0001)) {
-                    shouldLabelCurrent = true;
+                }  else {
+                    if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i + 1).getXValue().doubleValue(), epsilon)) {
+                        shouldLabelCurrent = true;
+                    } else if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i - 1).getXValue().doubleValue(), epsilon)) {
+                        shouldLabelCurrent = true;
+                    }
                 }
             }
 
@@ -320,7 +323,7 @@ public class BeamView {
                 continue;
             }
 
-            Label label = numericLabel(Math.abs(dataList.get(i).getYValue().doubleValue()));
+            Label label = unitLabel(Math.abs(dataList.get(i).getYValue().doubleValue()), unit);
             label.setStyle("-fx-font-size: 14; -fx-text-fill: black;");
             translateXNodesAbsPosition(label, dataList.get(i).getXValue().doubleValue());
             label.setTranslateX(label.getTranslateX() - 150);
@@ -440,8 +443,8 @@ public class BeamView {
         xAxis.setLowerBound(0d);
     }
 
-    private Label numericLabel(double value) {
-        Label label = new Label(String.format("%.2f", value));
+    private Label unitLabel(double value, String unit) {
+        Label label = new Label(new FormattedStringDouble(value) + " " + unit);
         label.setMinWidth(300);
         label.setWrapText(true);
         label.setAlignment(Pos.CENTER);
