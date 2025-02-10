@@ -41,4 +41,8 @@ public class BendingMoment {
     public Magnitude magnitude() {
         return magnitude;
     }
+
+    public String unit() {
+        return "[kN/m]";
+    }
 }
