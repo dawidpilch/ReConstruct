@@ -433,8 +433,8 @@ public class RCBeamAnalysisDesignController {
 
             Stage stage = new FixedSizeStage(new Scene(sceneRoot) , "Add Bending Moment",380, 520, Modality.APPLICATION_MODAL);
 
-            AppendableProperty<Double> startPositionValue = positionAppendableValue();
-            AppendableProperty<Double> endPositionValue = positionAppendableValue(beamViewModel.beamLengthProperty.value());
+            AppendableProperty<Double> startPositionValue = positionAppendableValue(0, "Start position (m)");
+            AppendableProperty<Double> endPositionValue = positionAppendableValue(beamViewModel.beamLengthProperty.value(), "End position (m)");
             AppendableProperty<Double> magnitudeValue = magnitudeAppendableValue("kN/m");
 
             ErrorDoubleTextField startPositionTF = new ErrorDoubleTextField(startPositionValue);
@@ -575,8 +575,8 @@ public class RCBeamAnalysisDesignController {
         };
     }
 
-    private AppendableProperty<Double> positionAppendableValue(double defaultValue) {
-        return new AppendableProperty<>(defaultValue, "Position (m)") {
+    private AppendableProperty<Double> positionAppendableValue(double defaultValue, String name) {
+        return new AppendableProperty<>(defaultValue, name) {
             @Override
             protected PropertyErrors validateNewValue(Double newValue) {
                 List<String> errors = new ArrayList<>(2);
@@ -589,7 +589,7 @@ public class RCBeamAnalysisDesignController {
     }
 
     private AppendableProperty<Double> positionAppendableValue() {
-        return positionAppendableValue(0d);
+        return positionAppendableValue(0d, "Position (m)");
     }
 
     public void onResultsInternalForces(ActionEvent ignored) {
@@ -633,8 +633,8 @@ public class RCBeamAnalysisDesignController {
         }
 
         Map<String, Runnable> internalForcesToActionMap = new LinkedHashMap<>();
-        internalForcesToActionMap.put("Sheer forces", () -> beamView.displayDiagram(sheerForceSeries));
-        internalForcesToActionMap.put("Bending moments", () -> beamView.displayDiagram(bendingMomentSeries));
+        internalForcesToActionMap.put("Sheer forces", () -> beamView.displayDiagram(sheerForceSeries, "kN"));
+        internalForcesToActionMap.put("Bending moments", () -> beamView.displayDiagram(bendingMomentSeries, "kNm"));
 
         ComboBox<String> internalForcesComboBox = new ComboBox<>();
         internalForcesComboBox.getItems().addAll(internalForcesToActionMap.keySet());
