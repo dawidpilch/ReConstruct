@@ -212,8 +212,8 @@ public class BeamView {
             Paint strokePaint = Color.rgb(74, 215, 104);
             Paint fillPaint = Color.rgb(74, 215, 104, 0.3);
 
-            Node startArrow = pointArrow(udl.magnitude().doubleValue(), udl.startPosition().doubleValue(), udl.isDirectedUpwards(), "[kN]",  strokePaint);
-            Node endArrow = pointArrow(udl.magnitude().doubleValue(), udl.endPosition().doubleValue(), udl.isDirectedUpwards(), "[kN]", strokePaint);
+            Node startArrow = pointArrow(udl.magnitude().doubleValue(), udl.startPosition().doubleValue(), udl.isDirectedUpwards(), udl.unit(),  strokePaint);
+            Node endArrow = pointArrow(udl.magnitude().doubleValue(), udl.endPosition().doubleValue(), udl.isDirectedUpwards(), udl.unit(), strokePaint);
 
             double rectangleHeight = 162;
             Rectangle rectangle = new Rectangle(endArrow.getTranslateX() - startArrow.getTranslateX(), rectangleHeight);
@@ -308,7 +308,7 @@ public class BeamView {
                 var nextY = dataList.get(i + 1).getYValue().doubleValue();
 
                 double epsilon = 0.0001;
-                if ((Precision.compareTo(previousY, currentY, epsilon) == 1 && Precision.compareTo(nextY, currentY, epsilon) == 1) || (Precision.compareTo(previousY, currentY, epsilon) == 0 && Precision.compareTo(nextY, currentY, epsilon) == 0)) {
+                if ((previousY > currentY && nextY > currentY) || (previousY < currentY && nextY < currentY)) {
                     shouldLabelCurrent = true;
                 }  else {
                     if (Precision.equals(dataList.get(i).getXValue().doubleValue(), dataList.get(i + 1).getXValue().doubleValue(), epsilon)) {
