@@ -59,4 +59,8 @@ public class UniformlyDistributedLoad {
     public Length length() {
         return Length.of(endPosition.doubleValue() - startPosition.doubleValue());
     }
+
+    public String unit() {
+        return "[kN/m]";
+    }
 }
