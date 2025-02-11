@@ -43,6 +43,6 @@ public class BendingMoment {
     }
 
     public String unit() {
-        return "[kN/m]";
+        return "[kNm]";
     }
 }
