@@ -210,9 +210,9 @@ public class RCBeamAnalysisDesignController {
 
         beamViewModel.verticalPointLoadsProperty.value().forEach(verticalPointLoad -> pointLoadsTableView.getItems().add(verticalPointLoad));
         beamViewModel.verticalPointLoadsProperty.addOnTryAppendValueListener(fillPointLoadsTableWithDataListener);
-        TableColumn<VerticalPointLoad, Number> positionColumn = new TableColumn<>("Position (m)");
+        TableColumn<VerticalPointLoad, Number> positionColumn = new TableColumn<>("Position [m]");
         positionColumn.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().position().doubleValue()));
-        TableColumn<VerticalPointLoad, Number> magnitudeColumn = new TableColumn<>("Magnitude (kN)");
+        TableColumn<VerticalPointLoad, Number> magnitudeColumn = new TableColumn<>("Magnitude [kN]");
         magnitudeColumn.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().magnitude().doubleValue()));
         pointLoadsTableView.getColumns().add(positionColumn);
         pointLoadsTableView.getColumns().add(magnitudeColumn);
@@ -312,9 +312,9 @@ public class RCBeamAnalysisDesignController {
 
         beamViewModel.bendingMomentsProperty.value().forEach(bendingMoment -> bendingMomentsTableView.getItems().add(bendingMoment));
         beamViewModel.bendingMomentsProperty.addOnTryAppendValueListener(fillBendingMomentsTableWithDataListener);
-        TableColumn<BendingMoment, Number> positionColumnBM = new TableColumn<>("Position (m)");
+        TableColumn<BendingMoment, Number> positionColumnBM = new TableColumn<>("Position [m]");
         positionColumnBM.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().position().doubleValue()));
-        TableColumn<BendingMoment, Number> magnitudeColumnBM = new TableColumn<>("Magnitude (kN/m)");
+        TableColumn<BendingMoment, Number> magnitudeColumnBM = new TableColumn<>("Magnitude [kNm]");
         magnitudeColumnBM.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().magnitude().doubleValue()));
         bendingMomentsTableView.getColumns().add(positionColumnBM);
         bendingMomentsTableView.getColumns().add(magnitudeColumnBM);
@@ -329,7 +329,7 @@ public class RCBeamAnalysisDesignController {
             Stage stage = new FixedSizeStage(new Scene(sceneRoot) , "Add Bending Moment",380, 520, Modality.APPLICATION_MODAL);
 
             AppendableProperty<Double> positionValue = positionAppendableValue();
-            AppendableProperty<Double> magnitudeValue = magnitudeAppendableValue("kN/m");
+            AppendableProperty<Double> magnitudeValue = magnitudeAppendableValue("kNm");
 
             ErrorDoubleTextField positionTF = new ErrorDoubleTextField(positionValue);
             ErrorDoubleTextField magnitudeTF = new ErrorDoubleTextField(magnitudeValue);
@@ -414,11 +414,11 @@ public class RCBeamAnalysisDesignController {
 
         beamViewModel.uniformlyDistributedLoadsProperty.value().forEach(udl -> udlTableView.getItems().add(udl));
         beamViewModel.uniformlyDistributedLoadsProperty.addOnTryAppendValueListener(fillUDLTableWithDataListener);
-        TableColumn<UniformlyDistributedLoad, Number> startPositionColumnUDL = new TableColumn<>("Start position (m)");
+        TableColumn<UniformlyDistributedLoad, Number> startPositionColumnUDL = new TableColumn<>("Start position [m]");
         startPositionColumnUDL.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().startPosition().doubleValue()));
-        TableColumn<UniformlyDistributedLoad, Number> endPositionColumnUDL = new TableColumn<>("End position (m)");
+        TableColumn<UniformlyDistributedLoad, Number> endPositionColumnUDL = new TableColumn<>("End position [m]");
         endPositionColumnUDL.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().endPosition().doubleValue()));
-        TableColumn<UniformlyDistributedLoad, Number> magnitudeColumnUDL = new TableColumn<>("Magnitude (kN/m)");
+        TableColumn<UniformlyDistributedLoad, Number> magnitudeColumnUDL = new TableColumn<>("Magnitude [kN/m]");
         magnitudeColumnUDL.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().magnitude().doubleValue()));
         udlTableView.getColumns().add(startPositionColumnUDL);
         udlTableView.getColumns().add(endPositionColumnUDL);
@@ -431,10 +431,10 @@ public class RCBeamAnalysisDesignController {
             sceneRoot.setCenter(center);
             BorderPane.setMargin(center, new Insets(15));
 
-            Stage stage = new FixedSizeStage(new Scene(sceneRoot) , "Add Bending Moment",380, 520, Modality.APPLICATION_MODAL);
+            Stage stage = new FixedSizeStage(new Scene(sceneRoot) , "Add Uniformly Distributed Load",380, 520, Modality.APPLICATION_MODAL);
 
-            AppendableProperty<Double> startPositionValue = positionAppendableValue(0, "Start position (m)");
-            AppendableProperty<Double> endPositionValue = positionAppendableValue(beamViewModel.beamLengthProperty.value(), "End position (m)");
+            AppendableProperty<Double> startPositionValue = positionAppendableValue(0, "Start position [m]");
+            AppendableProperty<Double> endPositionValue = positionAppendableValue(beamViewModel.beamLengthProperty.value(), "End position [m]");
             AppendableProperty<Double> magnitudeValue = magnitudeAppendableValue("kN/m");
 
             ErrorDoubleTextField startPositionTF = new ErrorDoubleTextField(startPositionValue);
@@ -567,7 +567,7 @@ public class RCBeamAnalysisDesignController {
     }
 
     private AppendableProperty<Double> magnitudeAppendableValue(String magnitudeUnit) {
-        return new AppendableProperty<>(0d, String.format("Magnitude (%s)", magnitudeUnit)) {
+        return new AppendableProperty<>(0d, String.format("Magnitude [%s]", magnitudeUnit)) {
             @Override
             protected PropertyErrors validateNewValue(Double newValue) {
                 return PropertyErrors.empty();
@@ -589,7 +589,7 @@ public class RCBeamAnalysisDesignController {
     }
 
     private AppendableProperty<Double> positionAppendableValue() {
-        return positionAppendableValue(0d, "Position (m)");
+        return positionAppendableValue(0d, "Position [m]");
     }
 
     public void onResultsInternalForces(ActionEvent ignored) {
