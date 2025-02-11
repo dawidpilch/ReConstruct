@@ -17,7 +17,7 @@ public class SimplySupportedBeamViewModel {
     public final AppendableProperty<Collection<UniformlyDistributedLoad>> uniformlyDistributedLoadsProperty;
 
     public SimplySupportedBeamViewModel() {
-        this.beamLengthProperty = new AppendableProperty<>(10d, "Beam Length (m)") {
+        this.beamLengthProperty = new AppendableProperty<>(10d, "Beam Length [m]") {
             @Override
             public PropertyErrors validateNewValue(Double newValue) {
                 List<String> errors = new ArrayList<>();
@@ -83,14 +83,14 @@ public class SimplySupportedBeamViewModel {
             }
         };
 
-        this.pinnedSupportPositionProperty = new AppendableProperty<>(0d, "Pinned support position (m)") {
+        this.pinnedSupportPositionProperty = new AppendableProperty<>(0d, "Pinned support position [m]") {
             @Override
             public PropertyErrors validateNewValue(Double newValue) {
                 return positionValueErrorsFunc.apply(newValue);
             }
         };
 
-        this.rollerSupportPositionProperty = new AppendableProperty<>(10d, "Roller support position (m)") {
+        this.rollerSupportPositionProperty = new AppendableProperty<>(10d, "Roller support position [m]") {
             @Override
             public PropertyErrors validateNewValue(Double newValue) {
                 return positionValueErrorsFunc.apply(newValue);
