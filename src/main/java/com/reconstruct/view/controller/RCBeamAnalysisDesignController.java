@@ -633,8 +633,8 @@ public class RCBeamAnalysisDesignController {
         }
 
         Map<String, Runnable> internalForcesToActionMap = new LinkedHashMap<>();
-        internalForcesToActionMap.put("Sheer forces", () -> beamView.displayDiagram(sheerForceSeries, "kN"));
-        internalForcesToActionMap.put("Bending moments", () -> beamView.displayDiagram(bendingMomentSeries, "kNm"));
+        internalForcesToActionMap.put("Sheer forces", () -> beamView.displayDiagram(sheerForceSeries, "[kN]"));
+        internalForcesToActionMap.put("Bending moments", () -> beamView.displayDiagram(bendingMomentSeries, "[kNm]"));
 
         ComboBox<String> internalForcesComboBox = new ComboBox<>();
         internalForcesComboBox.getItems().addAll(internalForcesToActionMap.keySet());

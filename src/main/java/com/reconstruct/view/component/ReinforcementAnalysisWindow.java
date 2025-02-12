@@ -3,6 +3,7 @@ package com.reconstruct.view.component;
 import com.reconstruct.model.beam.*;
 import com.reconstruct.model.beam.section.RectangularSection;
 import com.reconstruct.model.standard.EN1992Eurocode2;
+import com.reconstruct.model.standard.PN02;
 import com.reconstruct.model.value.Length;
 import com.reconstruct.model.value.Magnitude;
 import com.reconstruct.view.viewmodel.AppendableProperty;
@@ -27,10 +28,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -52,7 +50,7 @@ public class ReinforcementAnalysisWindow {
         AppendableProperty<Double> minCorrosionCoverThicknessProperty = new PositiveDoubleAppendableProperty(25d);
         ErrorDoubleTextField minCorrosionCoverThicknessTF = new ErrorDoubleTextField(
                 minCorrosionCoverThicknessProperty,
-                new SimpleTextFlowBuilder().addRegularText("Minimal corrosion cover thickness c").addSubscriptText("min").addRegularText(" (mm)").build()
+                new SimpleTextFlowBuilder().addRegularText("Minimal corrosion cover thickness c").addSubscriptText("min").addRegularText(" [mm]").build()
         );
         Button selectMinCorrosionCoverThickness = new Button(". . .");
         selectMinCorrosionCoverThickness.setOnAction(event -> {
@@ -70,7 +68,7 @@ public class ReinforcementAnalysisWindow {
                                 setText(null);
                             } else {
                                 // Format the text as "SomeText - 45"
-                                setText(item.getKey() + " - " + item.getValue().intValue() + " (mm)");
+                                setText(item.getKey() + " - " + item.getValue().intValue() + " [mm]");
                             }
                         }
                     };
@@ -79,8 +77,8 @@ public class ReinforcementAnalysisWindow {
             listView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
             Map<String, Runnable> standardComboBoxActionMap = new LinkedHashMap<>();
-            standardComboBoxActionMap.put("EN1992 - Prestressed steel", () -> listView.setItems(FXCollections.observableList(EN1992Eurocode2.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_PRESTRESSED_STEEL_MM.entrySet().stream().toList())));
-            standardComboBoxActionMap.put("EN1992 - Standard steel", () -> listView.setItems(FXCollections.observableList(EN1992Eurocode2.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_STANDARD_STEEL_MM.entrySet().stream().toList())));
+            standardComboBoxActionMap.put("EN 1992-1-1 - Prestressed steel", () -> listView.setItems(FXCollections.observableList(EN1992Eurocode2.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_PRESTRESSED_STEEL_MM.entrySet().stream().toList())));
+            standardComboBoxActionMap.put("EN 1992-1-1 - Standard steel", () -> listView.setItems(FXCollections.observableList(EN1992Eurocode2.MINIMAL_CORROSION_COVER_THICKNESS_FOR_REINFORCEMENT_STANDARD_STEEL_MM.entrySet().stream().toList())));
 
             ComboBox<String> standardComboBox = new ComboBox<>();
             standardComboBox.setPrefWidth(Double.MAX_VALUE);
@@ -125,27 +123,30 @@ public class ReinforcementAnalysisWindow {
         AppendableProperty<Double> corrosionCoverToleranceProperty = new PositiveDoubleAppendableProperty(5d);
         ErrorDoubleTextField corrosionCoverToleranceTF = new ErrorDoubleTextField(
                 corrosionCoverToleranceProperty,
-                new SimpleTextFlowBuilder().addRegularText("Corrosion cover tolerance Δc (mm)").build()
+                new SimpleTextFlowBuilder().addRegularText("Corrosion cover tolerance Δc [mm]").build()
         );
         propertiesVBox.getChildren().add(corrosionCoverToleranceTF.node());
 
         AppendableProperty<Double> diameterOfReinforcementBarProperty = new PositiveDoubleAppendableProperty(25d);
         ErrorDoubleTextField diameterOfReinforcementBarTF = new ErrorDoubleTextField(
                 diameterOfReinforcementBarProperty,
-                new SimpleTextFlowBuilder().addRegularText("Diameter of reinforcement bar Φ (mm)").build()
+                new SimpleTextFlowBuilder().addRegularText("Diameter of reinforcement bar Φ [mm]").build()
         );
         propertiesVBox.getChildren().add(diameterOfReinforcementBarTF.node());
 
         AppendableProperty<Double> diameterOfReinforcementStirrupProperty = new PositiveDoubleAppendableProperty(8d);
         ErrorDoubleTextField diameterOfReinforcementStirrupTF = new ErrorDoubleTextField(
                 diameterOfReinforcementStirrupProperty,
-                new SimpleTextFlowBuilder().addRegularText("Diameter of reinforcement stirrup Φ").addSubscriptText("s").addRegularText(" (mm)").build()
+                new SimpleTextFlowBuilder().addRegularText("Diameter of reinforcement stirrup Φ").addSubscriptText("s").addRegularText(" [mm]").build()
         );
         propertiesVBox.getChildren().add(diameterOfReinforcementStirrupTF.node());
 
         propertiesVBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
 
-        List<ConcreteGrade> concreteGrades = EN1992Eurocode2.CONCRETE_GRADE;
+        List<ConcreteGrade> concreteGrades = new ArrayList<>();
+        concreteGrades.addAll(EN1992Eurocode2.CONCRETE_GRADES);
+        concreteGrades.addAll(PN02.CONCRETE_GRADES);
+
         ComboBox<ConcreteGrade> concreteGradeComboBox = new ComboBox<>();
         concreteGradeComboBox.setCellFactory(new Callback<>() {
             @Override

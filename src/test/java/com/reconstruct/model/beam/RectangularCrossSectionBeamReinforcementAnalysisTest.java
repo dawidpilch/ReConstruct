@@ -16,7 +16,7 @@ class RectangularCrossSectionBeamReinforcementAnalysisTest {
                 30,
                 25,
                 8,
-                EN1992Eurocode2.CONCRETE_GRADE.get(1),
+                EN1992Eurocode2.CONCRETE_GRADES.get(1),
                 EN1992Eurocode2.STEEL_GRADES.get(3)
         );
 
