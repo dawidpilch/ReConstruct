@@ -34,7 +34,7 @@ public abstract sealed class VerticalPointLoad extends PointLoad {
     public abstract boolean isDirectedUpwards();
     public abstract boolean isDirectedDownwards();
     public final String unit() {
-        return "kN";
+        return "[kN]";
     }
 
     private static final class VerticalPointLoadDirectedDownwards extends VerticalPointLoad {
