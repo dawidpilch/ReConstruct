@@ -43,6 +43,8 @@ public class ReinforcementAnalysisWindow {
     }
 
     public void show(Supplier<LoadingAnalysis> loadingAnalysisSupplier) {
+        Magnitude maxBendingMomentMagnitude = loadingAnalysisSupplier.get().bendingMomentDiagram().maxMagnitude();
+
         BorderPane content = new BorderPane();
         VBox propertiesVBox = new VBox(15);
         content.setCenter(propertiesVBox);
@@ -141,6 +143,23 @@ public class ReinforcementAnalysisWindow {
         );
         propertiesVBox.getChildren().add(diameterOfReinforcementStirrupTF.node());
 
+        CheckBox useModelMaxBendingMomentCheckBox = new CheckBox("Use max bending moment of the defined model");
+        AppendableProperty<Double> maxBendingMomentProperty = new PositiveDoubleAppendableProperty(maxBendingMomentMagnitude.doubleValue());
+        ErrorDoubleTextField maxBendingMomentTF = new ErrorDoubleTextField(
+                maxBendingMomentProperty,
+                new SimpleTextFlowBuilder().addRegularText("Max bending moment M").addSubscriptText("Sd").addRegularText(" [kNm]").build()
+        );
+        maxBendingMomentTF.disable();
+        useModelMaxBendingMomentCheckBox.setOnAction(actionEvent -> {
+            if (useModelMaxBendingMomentCheckBox.isSelected()) {
+                maxBendingMomentTF.setText(formattedDouble(maxBendingMomentMagnitude.doubleValue()));
+                maxBendingMomentTF.disable();
+            } else {
+                maxBendingMomentTF.enable();
+            }
+        });
+        propertiesVBox.getChildren().addAll(useModelMaxBendingMomentCheckBox, maxBendingMomentTF.node());
+
         propertiesVBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
 
         List<ConcreteGrade> concreteGrades = new ArrayList<>();
@@ -233,10 +252,9 @@ public class ReinforcementAnalysisWindow {
             try {
                 double width = rectangularSection.width().doubleValue();
                 double depth = rectangularSection.depth().doubleValue();
-                Magnitude maxBendingMomentMagnitude = loadingAnalysisSupplier.get().bendingMomentDiagram().maxMagnitude();
                 reinforcementResults = rectangularCrossSectionBeamReinforcementAnalysis.reinforcement(
                         rectangularSection,
-                        maxBendingMomentMagnitude
+                        Magnitude.of(maxBendingMomentProperty.value())
                 );
                 reinforcement = reinforcementResults.beamReinforcement();
 
@@ -477,7 +495,7 @@ public class ReinforcementAnalysisWindow {
                         new SimpleTextFlowBuilder().addRegularText("c").addSubscriptText("min").addRegularText(": " + formattedDouble(minCorrosionCoverThicknessProperty.value()) + " [mm]").build(),
                         new TextFlow(new Text("Δc: " + formattedDouble(corrosionCoverToleranceProperty.value()) + " [mm]")),
                         new TextFlow(new Text(" ")),
-                        new SimpleTextFlowBuilder().addRegularText("M").addSubscriptText("Sd").addRegularText(": " + formattedDouble(maxBendingMomentMagnitude.doubleValue()) + " [kNm]").build(),
+                        new SimpleTextFlowBuilder().addRegularText("M").addSubscriptText("Sd").addRegularText(": " + formattedDouble(maxBendingMomentProperty.value()) + " [kNm]").build(),
                         topReinforcementRequired ? new SimpleTextFlowBuilder().addRegularText("M").addSubscriptText("Rd,lim").addRegularText(": " + formattedDouble(reinforcementResults.maxSectionCapacityMPa()) + " [MPa]").build() : new TextFlow(),
                         new SimpleTextFlowBuilder().addRegularText("f").addSubscriptText("cd").addRegularText(": " + formattedDouble(concreteGradeComboBox.getValue().compressionCalculationMPaValueOfReinforcedConcrete()) + " [MPa]").build(),
                         new SimpleTextFlowBuilder().addRegularText("f").addSubscriptText("yd").addRegularText(": " + formattedDouble(reinforcementMaterialGrade.yieldStrengthCalculationMPaValue()) + " [MPa]").build(),
@@ -539,6 +557,7 @@ public class ReinforcementAnalysisWindow {
         Platform.runLater(() -> {
             concreteGradeComboBox.getSelectionModel().select(concreteGradeComboBox.getItems().getFirst());
             reinforcementSteelGradeComboBox.getSelectionModel().select(reinforcementSteelGradeComboBox.getItems().getFirst());
+            useModelMaxBendingMomentCheckBox.setSelected(true);
             nextButton.requestFocus();
         });
         new RCWindow(stage).showAndWait();
