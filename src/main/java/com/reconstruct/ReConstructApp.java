@@ -20,8 +20,4 @@ public class ReConstructApp extends Application {
         Scene scene = new Scene(fxmlLoader.load());
         new RCWindow(scene, "ReConstruct", Modality.NONE).show();
     }
-
-    public static void main(String[] args) {
-        launch();
-    }
 }
