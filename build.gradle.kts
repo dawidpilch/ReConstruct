@@ -7,6 +7,10 @@ plugins {
     id("org.gradlex.extra-java-module-info") version "1.0"
 }
 
+application {
+    mainClass = "com.reconstruct.Main"
+}
+
 extraJavaModuleInfo {
     module("commons-math3-3.6.1.jar", "commons.math3", "3.6.1") {
         exports("org.apache.commons.math3.util")
@@ -18,7 +22,7 @@ java {
 }
 
 group = "com.reconstruct"
-version = "1.0-SNAPSHOT"
+version = "1.0.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -26,7 +30,7 @@ repositories {
 
 javafx {
     version = "23"
-    modules = listOf("javafx.controls", "javafx.fxml", "javafx.web")
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.web", "javafx.graphics")
 }
 
 dependencies {
@@ -54,4 +58,8 @@ jlink {
     launcher {
         name = "app"
     }
+}
+
+tasks.distTar {
+    enabled = false
 }
