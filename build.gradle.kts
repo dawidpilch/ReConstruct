@@ -1,6 +1,7 @@
 plugins {
     id("java")
     id("application")
+    id("net.researchgate.release") version "3.1.0"
     id("org.javamodularity.moduleplugin") version "1.8.12"
     id("org.openjfx.javafxplugin") version "0.0.13"
     id("org.beryx.jlink") version "2.25.0"
