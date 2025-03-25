@@ -496,7 +496,7 @@ public class ReinforcementAnalysisWindow {
                         new TextFlow(new Text("Δc: " + formattedDouble(corrosionCoverToleranceProperty.value()) + " [mm]")),
                         new TextFlow(new Text(" ")),
                         new SimpleTextFlowBuilder().addRegularText("M").addSubscriptText("Sd").addRegularText(": " + formattedDouble(maxBendingMomentProperty.value()) + " [kNm]").build(),
-                        topReinforcementRequired ? new SimpleTextFlowBuilder().addRegularText("M").addSubscriptText("Rd,lim").addRegularText(": " + formattedDouble(reinforcementResults.maxSectionCapacityMPa()) + " [MPa]").build() : new TextFlow(),
+                        topReinforcementRequired ? new SimpleTextFlowBuilder().addRegularText("M").addSubscriptText("Rd,lim").addRegularText(": " + formattedDouble(reinforcementResults.maxSectionCapacityMPa()) + " [MNm]").build() : new TextFlow(),
                         new SimpleTextFlowBuilder().addRegularText("f").addSubscriptText("cd").addRegularText(": " + formattedDouble(concreteGradeComboBox.getValue().compressionCalculationMPaValueOfReinforcedConcrete()) + " [MPa]").build(),
                         new SimpleTextFlowBuilder().addRegularText("f").addSubscriptText("yd").addRegularText(": " + formattedDouble(reinforcementMaterialGrade.yieldStrengthCalculationMPaValue()) + " [MPa]").build(),
                         new SimpleTextFlowBuilder().addRegularText("μ: " + formattedDouble(reinforcementMaterialGrade.muFactorOfTheDeformationLimitValue()) + " [-]").build(),
