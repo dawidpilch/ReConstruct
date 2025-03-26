@@ -22,9 +22,6 @@ java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
-group = "com.reconstruct"
-version = "1.0.0"
-
 repositories {
     mavenCentral()
 }
